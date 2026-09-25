@@ -24,6 +24,8 @@ plain CSS. No build-tool or framework additions beyond this.
 ## Design
 - Design: light theme, white background, blue accents. Use the colour
   variables in index.css for all new components.
+- Ticket priority labels are colour-coded: blue for LOW, amber for MEDIUM,
+  red for HIGH. Use the --priority-* variables in index.css.
 
 ## How to communicate with me
 - After every change, explain in plain language what you did and why, so I can
