@@ -1,0 +1,82 @@
+.employee-details {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+}
+
+.employee-details__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.employee-details__name {
+  margin: 0;
+}
+
+.employee-details__close {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--blue);
+  background: var(--blue-soft);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background 140ms ease;
+}
+
+.employee-details__close:hover {
+  color: var(--text-on-blue);
+  background: var(--blue);
+}
+
+.employee-details__close:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.employee-details__role {
+  margin: 4px 0 18px;
+  font-size: 14px;
+}
+
+.employee-details__fields {
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.employee-details__fields dt {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.employee-details__fields dd {
+  margin: 3px 0 0;
+  font-size: 15px;
+  color: var(--text-strong);
+  overflow-wrap: anywhere;
+}
+
+.employee-details__fields a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.employee-details__fields a:hover {
+  color: var(--blue-hover);
+  text-decoration: underline;
+}

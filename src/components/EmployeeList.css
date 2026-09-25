@@ -1,0 +1,13 @@
+/* auto-fill with a 210px minimum gives 4 cards per row at the page's full
+   1040px width, and fewer as the space shrinks. Because it responds to the
+   container rather than the window, it also drops to 3 on its own when the
+   details panel takes up part of the row. min() keeps a single column from
+   overflowing on very narrow screens. */
+.employee-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr));
+  gap: 16px;
+}
