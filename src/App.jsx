@@ -3,16 +3,18 @@ import employees from './data/employees'
 import EmployeeList from './components/EmployeeList'
 import EmployeeDetails from './components/EmployeeDetails'
 import SearchBox from './components/SearchBox'
-import DepartmentFilter, {
-  ALL_DEPARTMENTS,
-} from './components/DepartmentFilter'
+import DepartmentFilter from './components/DepartmentFilter'
 import TicketBoard from './components/TicketBoard'
 import UsersList from './components/UsersList'
+import {
+  ALL_DEPARTMENTS,
+  getDepartments,
+  filterEmployees,
+} from './utils/employees'
 import './App.css'
 
-// Built from the data itself, so adding a department in employees.js puts it
-// in the dropdown with no change here. Outside the component: it never changes.
-const departments = [...new Set(employees.map((e) => e.department))].sort()
+// Computed once outside the component: the data never changes.
+const departments = getDepartments(employees)
 
 function App() {
   const [selectedEmployee, setSelectedEmployee] = useState(null)
@@ -20,13 +22,7 @@ function App() {
   const [department, setDepartment] = useState(ALL_DEPARTMENTS)
 
   // Derived from state during render, not stored in state of its own.
-  const query = nameQuery.trim().toLowerCase()
-  const visibleEmployees = employees.filter((employee) => {
-    const matchesName = employee.name.toLowerCase().includes(query)
-    const matchesDepartment =
-      department === ALL_DEPARTMENTS || employee.department === department
-    return matchesName && matchesDepartment
-  })
+  const visibleEmployees = filterEmployees(employees, nameQuery, department)
 
   function handleSelect(employee) {
     setSelectedEmployee(employee)
