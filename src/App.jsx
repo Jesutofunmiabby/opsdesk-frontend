@@ -2,11 +2,18 @@ import { useState } from 'react'
 import employees from './data/employees'
 import EmployeeList from './components/EmployeeList'
 import EmployeeDetails from './components/EmployeeDetails'
+import SearchBox from './components/SearchBox'
 import './App.css'
 
 function App() {
-  // Search and the department filter are the remaining items on issue #1.
   const [selectedEmployee, setSelectedEmployee] = useState(null)
+  const [nameQuery, setNameQuery] = useState('')
+
+  // Derived from state during render, not stored in state of its own.
+  const query = nameQuery.trim().toLowerCase()
+  const visibleEmployees = employees.filter((employee) =>
+    employee.name.toLowerCase().includes(query),
+  )
 
   function handleSelect(employee) {
     setSelectedEmployee(employee)
@@ -22,12 +29,25 @@ function App() {
         <h1 className="app__title">OpsDesk</h1>
         <p className="app__subtitle">Employee directory</p>
       </header>
-      <main className={selectedEmployee ? 'app__body app__body--split' : 'app__body'}>
-        <EmployeeList
-          employees={employees}
-          selectedId={selectedEmployee ? selectedEmployee.id : null}
-          onSelect={handleSelect}
-        />
+
+      <div className="app__controls">
+        <SearchBox value={nameQuery} onChange={setNameQuery} />
+      </div>
+
+      <main
+        className={
+          selectedEmployee ? 'app__body app__body--split' : 'app__body'
+        }
+      >
+        {visibleEmployees.length > 0 ? (
+          <EmployeeList
+            employees={visibleEmployees}
+            selectedId={selectedEmployee ? selectedEmployee.id : null}
+            onSelect={handleSelect}
+          />
+        ) : (
+          <p className="app__empty">No employees match</p>
+        )}
         {selectedEmployee && (
           <EmployeeDetails employee={selectedEmployee} onClose={handleClose} />
         )}
