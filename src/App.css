@@ -12,9 +12,14 @@
 }
 
 .app__header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
   max-width: 1040px;
   margin: 0 auto;
-  padding: 18px 24px;
+  padding: 14px 24px;
 }
 
 .app__title {
@@ -28,14 +33,7 @@
   padding: 28px 24px 56px;
 }
 
-/* Separates each section below the first from the one above. */
-.app__section {
-  margin-top: 44px;
-  padding-top: 32px;
-  border-top: 1px solid var(--border);
-}
-
-/* Shared heading style for every page section. */
+/* Shared heading style for every page. */
 .page-title {
   margin-bottom: 16px;
 }

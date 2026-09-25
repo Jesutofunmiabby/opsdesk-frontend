@@ -22,6 +22,8 @@
   --text: #56607a;
   --text-strong: #111827;
   --text-on-blue: #ffffff;
+  /* Hover wash for controls sitting on the blue header. */
+  --on-blue-soft: rgba(255, 255, 255, 0.16);
 
   /* Ticket priority labels. Blue for low, then warm to hot as it rises. */
   --priority-low-bg: #eaf0fd;
