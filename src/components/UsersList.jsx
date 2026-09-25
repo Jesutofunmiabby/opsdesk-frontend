@@ -1,58 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useFetch } from '../hooks/useFetch'
 import UserCard from './UserCard'
 import './UsersList.css'
 
 const USERS_URL = 'https://dummyjson.com/users?limit=12'
 
+// The API answers with an object; the list is inside its users field. Defined
+// at module level so it is the same function on every render, which keeps
+// useFetch from restarting the request.
+function selectUsers(body) {
+  return Array.isArray(body.users) ? body.users : []
+}
+
 function UsersList() {
-  // One of: 'loading' | 'success' | 'empty' | 'error'.
-  const [status, setStatus] = useState('loading')
-  const [users, setUsers] = useState([])
-  // Bumped by Retry. It is a dependency of the effect, so changing it runs
-  // the fetch again.
-  const [attempt, setAttempt] = useState(0)
-
-  useEffect(() => {
-    // Set if this effect is cleaned up before the request finishes, so a
-    // late response cannot set state for a component that has moved on.
-    let ignore = false
-
-    async function loadUsers() {
-      setStatus('loading')
-      try {
-        const response = await fetch(USERS_URL)
-        // fetch only rejects on network failure, so a 404 or 500 arrives here
-        // as a normal response. Without this check it would be treated as
-        // success and then fail on the missing users field.
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`)
-        }
-        const data = await response.json()
-        if (ignore) {
-          return
-        }
-        // The API answers with an object; the list is inside its users field.
-        const list = Array.isArray(data.users) ? data.users : []
-        setUsers(list)
-        setStatus(list.length > 0 ? 'success' : 'empty')
-      } catch {
-        if (ignore) {
-          return
-        }
-        setStatus('error')
-      }
-    }
-
-    loadUsers()
-
-    return () => {
-      ignore = true
-    }
-  }, [attempt])
-
-  function handleRetry() {
-    setAttempt((current) => current + 1)
-  }
+  const { data: users, status, retry } = useFetch(USERS_URL, selectUsers)
 
   if (status === 'loading') {
     return <p className="users-list__message">Loading users…</p>
@@ -64,11 +24,7 @@ function UsersList() {
         <p className="users-list__message">
           Sorry, we could not load the users.
         </p>
-        <button
-          type="button"
-          className="users-list__retry"
-          onClick={handleRetry}
-        >
+        <button type="button" className="users-list__retry" onClick={retry}>
           Retry
         </button>
       </div>
