@@ -1,0 +1,47 @@
+.user-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.user-card__name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 130%;
+  color: var(--text-strong);
+}
+
+.user-card__job {
+  font-size: 13px;
+}
+
+.user-card__email {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.user-card__email a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.user-card__email a:hover {
+  color: var(--blue-hover);
+  text-decoration: underline;
+}
+
+/* Company name sits at the bottom of the card, as a soft blue tag. */
+.user-card__company {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+}
