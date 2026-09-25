@@ -1,30 +1,10 @@
-import { useState } from 'react'
-import initialTickets from '../data/tickets'
 import { STATUS_ORDER, STATUS_LABELS } from '../data/ticketStatuses'
 import Column from '../components/Column'
 import './TicketsPage.css'
 
-function TicketsPage() {
-  // The whole board's data lives here and nowhere else. Columns and cards
-  // receive what they need as props.
-  const [tickets, setTickets] = useState(initialTickets)
-
-  function moveTicket(ticketId) {
-    setTickets((currentTickets) =>
-      currentTickets.map((ticket) => {
-        if (ticket.id !== ticketId) {
-          return ticket
-        }
-        const nextIndex = STATUS_ORDER.indexOf(ticket.status) + 1
-        if (nextIndex >= STATUS_ORDER.length) {
-          return ticket
-        }
-        // A new object rather than editing this one, so React sees a change.
-        return { ...ticket, status: STATUS_ORDER[nextIndex] }
-      }),
-    )
-  }
-
+// The tickets live in App, so the board survives switching pages and the
+// dashboard counts the same array. This page just draws them.
+function TicketsPage({ tickets, onMove }) {
   return (
     <section>
       <h2 className="page-title">Ticket board</h2>
@@ -34,7 +14,7 @@ function TicketsPage() {
             key={status}
             label={STATUS_LABELS[status]}
             tickets={tickets.filter((ticket) => ticket.status === status)}
-            onMove={moveTicket}
+            onMove={onMove}
           />
         ))}
       </div>
