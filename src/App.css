@@ -1,17 +1,43 @@
 .app {
-  padding: 32px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
 }
 
+/* Full-width blue bar; the inner wrapper keeps its contents aligned with
+   the page content below. */
 .app__header {
-  margin-bottom: 24px;
+  background: var(--blue);
+  box-shadow: var(--shadow-header);
+}
+
+.app__header-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 18px 24px;
 }
 
 .app__title {
-  margin: 0 0 4px;
+  color: var(--text-on-blue);
+}
+
+.app__content {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 28px 24px 56px;
 }
 
 .app__subtitle {
+  margin-bottom: 22px;
   font-size: 15px;
+}
+
+.app__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 22px;
 }
 
 .app__body {
@@ -28,16 +54,10 @@
   }
 }
 
-.app__controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 22px;
-}
-
 .app__empty {
-  padding: 28px;
+  padding: 32px;
   text-align: center;
-  border: 1px dashed var(--border);
-  border-radius: 10px;
+  background: var(--surface);
+  border: 1px dashed var(--blue-soft-border);
+  border-radius: var(--radius);
 }
