@@ -18,7 +18,8 @@ npm install     # install dependencies, once
 npm run dev     # start the dev server
 ```
 
-Then open the URL it prints, usually <http://localhost:5173/>.
+After `npm run dev` the app runs at <http://localhost:5173/>. Vite prints the
+URL on start, and picks a different port if 5173 is already in use.
 
 Other commands:
 
