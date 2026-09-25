@@ -100,7 +100,16 @@ the users list talks to a real API.
 
 ## Project conventions
 
-See [CLAUDE.md](CLAUDE.md) for the working rules this project follows —
-including the design rules (light theme, blue accents, colour variables in
-`index.css`) and the git workflow: every change goes through a GitHub issue, a
-feature branch, and a pull request.
+**Design.** Light theme, white surfaces, blue accents. Every colour comes from
+the variables in `src/index.css` — no hard-coded colours in component styles,
+so the whole app can be re-themed from one place. Ticket priority labels are
+colour-coded: blue for LOW, amber for MEDIUM, red for HIGH.
+
+**Dependencies.** No new npm packages without discussing it first. No
+TypeScript and no routing library yet — both come later.
+
+**Git workflow.** Nothing is committed straight to `main`. Every change goes
+through a GitHub issue, then a feature branch, then a pull request. Commits are
+kept small, with messages saying what changed and why.
+
+**Components.** Small and focused, one component per file.
