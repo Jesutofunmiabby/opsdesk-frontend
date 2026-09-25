@@ -6,6 +6,7 @@ import SearchBox from './components/SearchBox'
 import DepartmentFilter, {
   ALL_DEPARTMENTS,
 } from './components/DepartmentFilter'
+import TicketBoard from './components/TicketBoard'
 import './App.css'
 
 // Built from the data itself, so adding a department in employees.js puts it
@@ -75,6 +76,10 @@ function App() {
             />
           )}
         </main>
+
+        <div className="app__board">
+          <TicketBoard />
+        </div>
       </div>
     </div>
   )

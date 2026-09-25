@@ -61,3 +61,10 @@
   border: 1px dashed var(--blue-soft-border);
   border-radius: var(--radius);
 }
+
+/* Separates the ticket board from the employee directory above it. */
+.app__board {
+  margin-top: 44px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
