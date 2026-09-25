@@ -1,6 +1,6 @@
+/* A plain block, so .app__content centres by ordinary block layout rather
+   than by flex cross-axis auto margins. */
 .app {
-  display: flex;
-  flex-direction: column;
   min-height: 100svh;
 }
 
