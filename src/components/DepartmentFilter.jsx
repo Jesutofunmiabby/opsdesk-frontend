@@ -1,8 +1,5 @@
+import { ALL_DEPARTMENTS } from '../utils/employees'
 import './DepartmentFilter.css'
-
-// The value that means "do not filter by department". Exported so App can
-// compare against it without repeating the string.
-export const ALL_DEPARTMENTS = 'all'
 
 function DepartmentFilter({ value, departments, onChange }) {
   return (
