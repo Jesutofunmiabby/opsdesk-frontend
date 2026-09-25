@@ -23,6 +23,14 @@
   --text-strong: #111827;
   --text-on-blue: #ffffff;
 
+  /* Ticket priority labels. Blue for low, then warm to hot as it rises. */
+  --priority-low-bg: #eaf0fd;
+  --priority-low-text: #1d4ed8;
+  --priority-medium-bg: #fdf0d2;
+  --priority-medium-text: #8a5300;
+  --priority-high-bg: #fde3e1;
+  --priority-high-text: #b3261e;
+
   /* Shape and depth */
   --radius: 12px;
   --radius-sm: 8px;
