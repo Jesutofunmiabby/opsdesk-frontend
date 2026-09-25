@@ -1,0 +1,54 @@
+.user-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.user-card__name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 130%;
+  color: var(--text-strong);
+}
+
+.user-card__job {
+  font-size: 13px;
+}
+
+.user-card__email {
+  font-size: 13px;
+  /* Lets the line shrink below its content width so the link can clip. */
+  min-width: 0;
+}
+
+/* One line, cut off with an ellipsis rather than breaking mid-address and
+   stranding a single letter. The full address is in the title attribute. */
+.user-card__email a {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.user-card__email a:hover {
+  color: var(--blue-hover);
+  text-decoration: underline;
+}
+
+/* Company name sits at the bottom of the card, as a soft blue tag. */
+.user-card__company {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+}

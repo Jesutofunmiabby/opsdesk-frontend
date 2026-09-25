@@ -7,6 +7,7 @@ import DepartmentFilter, {
   ALL_DEPARTMENTS,
 } from './components/DepartmentFilter'
 import TicketBoard from './components/TicketBoard'
+import UsersList from './components/UsersList'
 import './App.css'
 
 // Built from the data itself, so adding a department in employees.js puts it
@@ -77,8 +78,13 @@ function App() {
           )}
         </main>
 
-        <div className="app__board">
+        <div className="app__section">
           <TicketBoard />
+        </div>
+
+        <div className="app__section">
+          <h2 className="app__section-title">Users</h2>
+          <UsersList />
         </div>
       </div>
     </div>
