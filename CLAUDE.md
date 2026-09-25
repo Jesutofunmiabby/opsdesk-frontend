@@ -21,6 +21,10 @@ plain CSS. No build-tool or framework additions beyond this.
 - Keep components small and focused.
 - One component per file.
 
+## Design
+- Design: light theme, white background, blue accents. Use the colour
+  variables in index.css for all new components.
+
 ## How to communicate with me
 - After every change, explain in plain language what you did and why, so I can
   explain it to my supervisor.
