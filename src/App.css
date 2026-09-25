@@ -28,9 +28,8 @@
   padding: 28px 24px 56px;
 }
 
-.app__subtitle {
-  margin-bottom: 22px;
-  font-size: 15px;
+.app__section-title {
+  margin-bottom: 16px;
 }
 
 .app__controls {
