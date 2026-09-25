@@ -1,0 +1,28 @@
+.teams-page__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.teams-page__body {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Details sit beside the list when there is room, and below it when there
+   is not. Below this width the single-column default applies. */
+@media (min-width: 860px) {
+  .teams-page__body--split {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+
+.teams-page__empty {
+  padding: 32px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--blue-soft-border);
+  border-radius: var(--radius);
+}
