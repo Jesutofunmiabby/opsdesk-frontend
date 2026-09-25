@@ -1,0 +1,21 @@
+.dashboard-page__group {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text);
+}
+
+.dashboard-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 32px;
+}
+
+/* No gap under the last group. */
+.dashboard-page__grid:last-child {
+  margin-bottom: 0;
+}

@@ -1,18 +1,9 @@
-import { useFetch } from '../hooks/useFetch'
+import { useUsers } from '../hooks/useUsers'
 import UserCard from '../components/UserCard'
 import './UsersPage.css'
 
-const USERS_URL = 'https://dummyjson.com/users?limit=12'
-
-// The API answers with an object; the list is inside its users field. Defined
-// at module level so it is the same function on every render, which keeps
-// useFetch from restarting the request.
-function selectUsers(body) {
-  return Array.isArray(body.users) ? body.users : []
-}
-
 function UsersPage() {
-  const { data: users, status, retry } = useFetch(USERS_URL, selectUsers)
+  const { data: users, status, retry } = useUsers()
 
   return (
     <section>

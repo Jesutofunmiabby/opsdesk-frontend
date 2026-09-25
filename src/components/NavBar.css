@@ -1,0 +1,39 @@
+.nav-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nav-bar__link {
+  padding: 7px 13px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-on-blue);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.nav-bar__link:hover {
+  background: var(--on-blue-soft);
+}
+
+.nav-bar__link:focus-visible {
+  outline: 2px solid var(--text-on-blue);
+  outline-offset: 2px;
+}
+
+/* The current page reads as a solid white tab against the blue bar. */
+.nav-bar__link--current {
+  color: var(--blue);
+  background: var(--surface);
+}
+
+.nav-bar__link--current:hover {
+  background: var(--surface);
+}
