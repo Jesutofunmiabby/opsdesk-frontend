@@ -44,7 +44,7 @@ function App() {
       </header>
 
       <div className="app__content">
-        <p className="app__subtitle">Employee directory</p>
+        <h2 className="app__section-title">Employee directory</h2>
 
         <div className="app__controls">
           <SearchBox value={nameQuery} onChange={setNameQuery} />
