@@ -24,10 +24,17 @@
 
 .user-card__email {
   font-size: 13px;
-  overflow-wrap: anywhere;
+  /* Lets the line shrink below its content width so the link can clip. */
+  min-width: 0;
 }
 
+/* One line, cut off with an ellipsis rather than breaking mid-address and
+   stranding a single letter. The full address is in the title attribute. */
 .user-card__email a {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   color: var(--blue);
   text-decoration: none;
 }
