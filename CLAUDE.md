@@ -13,6 +13,9 @@ plain CSS. No build-tool or framework additions beyond this.
 - Every piece of work goes in this order: GitHub issue → feature branch →
   pull request.
 - Keep commits small, with clear messages that say what changed.
+- Before every push, check that `git remote -v` points to
+  `github.com/Jesutofunmiabby/opsdesk-frontend` and `gh auth status` shows
+  `Jesutofunmiabby`. If not, stop and ask me.
 
 ## Code style
 - Keep components small and focused.
