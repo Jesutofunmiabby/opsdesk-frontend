@@ -23,8 +23,9 @@ function EmployeeCard({ employee, isSelected, onSelect }) {
       </span>
       <span className="employee-card__text">
         <span className="employee-card__name">{employee.name}</span>
-        <span className="employee-card__department">{employee.department}</span>
+        <span className="employee-card__role">{employee.role}</span>
       </span>
+      <span className="employee-card__tag">{employee.department}</span>
     </button>
   )
 }

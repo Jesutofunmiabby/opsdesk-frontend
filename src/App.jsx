@@ -37,37 +37,45 @@ function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1 className="app__title">OpsDesk</h1>
-        <p className="app__subtitle">Employee directory</p>
+        <div className="app__header-inner">
+          <h1 className="app__title">OpsDesk</h1>
+        </div>
       </header>
 
-      <div className="app__controls">
-        <SearchBox value={nameQuery} onChange={setNameQuery} />
-        <DepartmentFilter
-          value={department}
-          departments={departments}
-          onChange={setDepartment}
-        />
-      </div>
+      <div className="app__content">
+        <p className="app__subtitle">Employee directory</p>
 
-      <main
-        className={
-          selectedEmployee ? 'app__body app__body--split' : 'app__body'
-        }
-      >
-        {visibleEmployees.length > 0 ? (
-          <EmployeeList
-            employees={visibleEmployees}
-            selectedId={selectedEmployee ? selectedEmployee.id : null}
-            onSelect={handleSelect}
+        <div className="app__controls">
+          <SearchBox value={nameQuery} onChange={setNameQuery} />
+          <DepartmentFilter
+            value={department}
+            departments={departments}
+            onChange={setDepartment}
           />
-        ) : (
-          <p className="app__empty">No employees match</p>
-        )}
-        {selectedEmployee && (
-          <EmployeeDetails employee={selectedEmployee} onClose={handleClose} />
-        )}
-      </main>
+        </div>
+
+        <main
+          className={
+            selectedEmployee ? 'app__body app__body--split' : 'app__body'
+          }
+        >
+          {visibleEmployees.length > 0 ? (
+            <EmployeeList
+              employees={visibleEmployees}
+              selectedId={selectedEmployee ? selectedEmployee.id : null}
+              onSelect={handleSelect}
+            />
+          ) : (
+            <p className="app__empty">No employees match</p>
+          )}
+          {selectedEmployee && (
+            <EmployeeDetails
+              employee={selectedEmployee}
+              onClose={handleClose}
+            />
+          )}
+        </main>
+      </div>
     </div>
   )
 }
