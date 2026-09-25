@@ -55,3 +55,14 @@
 .employee-card__department {
   font-size: 14px;
 }
+
+.employee-card--selected {
+  color: var(--text-h);
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+.employee-card--selected .employee-card__avatar {
+  color: var(--bg);
+  background: var(--accent);
+}

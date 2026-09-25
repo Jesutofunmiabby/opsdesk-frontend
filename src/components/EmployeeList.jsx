@@ -1,12 +1,16 @@
 import EmployeeCard from './EmployeeCard'
 import './EmployeeList.css'
 
-function EmployeeList({ employees, onSelect }) {
+function EmployeeList({ employees, selectedId, onSelect }) {
   return (
     <ul className="employee-list">
       {employees.map((employee) => (
         <li key={employee.id}>
-          <EmployeeCard employee={employee} onSelect={onSelect} />
+          <EmployeeCard
+            employee={employee}
+            isSelected={employee.id === selectedId}
+            onSelect={onSelect}
+          />
         </li>
       ))}
     </ul>

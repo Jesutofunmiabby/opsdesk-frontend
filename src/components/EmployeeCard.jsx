@@ -8,11 +8,14 @@ function getInitials(name) {
   return (first + last).toUpperCase()
 }
 
-function EmployeeCard({ employee, onSelect }) {
+function EmployeeCard({ employee, isSelected, onSelect }) {
   return (
     <button
       type="button"
-      className="employee-card"
+      className={
+        isSelected ? 'employee-card employee-card--selected' : 'employee-card'
+      }
+      aria-current={isSelected ? 'true' : undefined}
       onClick={() => onSelect(employee)}
     >
       <span className="employee-card__avatar" aria-hidden="true">
