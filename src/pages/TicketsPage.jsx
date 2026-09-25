@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import initialTickets from '../data/tickets'
 import { STATUS_ORDER, STATUS_LABELS } from '../data/ticketStatuses'
-import Column from './Column'
-import './TicketBoard.css'
+import Column from '../components/Column'
+import './TicketsPage.css'
 
-function TicketBoard() {
+function TicketsPage() {
   // The whole board's data lives here and nowhere else. Columns and cards
   // receive what they need as props.
   const [tickets, setTickets] = useState(initialTickets)
@@ -26,9 +26,9 @@ function TicketBoard() {
   }
 
   return (
-    <section className="ticket-board">
-      <h2 className="ticket-board__title">Ticket board</h2>
-      <div className="ticket-board__columns">
+    <section>
+      <h2 className="page-title">Ticket board</h2>
+      <div className="tickets-page__columns">
         {STATUS_ORDER.map((status) => (
           <Column
             key={status}
@@ -42,4 +42,4 @@ function TicketBoard() {
   )
 }
 
-export default TicketBoard
+export default TicketsPage

@@ -1,5 +1,5 @@
 // Mock IT support tickets for the board.
-// No backend yet — this is the starting array that TicketBoard copies into
+// No backend yet — this is the starting array that TicketsPage copies into
 // state. Priority is LOW | MEDIUM | HIGH, status is one of STATUS_ORDER.
 
 const tickets = [
