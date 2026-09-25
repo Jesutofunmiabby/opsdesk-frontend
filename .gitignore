@@ -27,7 +27,3 @@ dist-ssr
 .env
 .env.*
 !.env.example
-
-# Local editor notes and settings, kept on this machine only
-CLAUDE.md
-.claude/settings.local.json
