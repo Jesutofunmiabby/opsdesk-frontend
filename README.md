@@ -1,16 +1,106 @@
-# React + Vite
+# OpsDesk
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An internal operations dashboard for an IT support team, built as a Week 1
+internship project. It brings together three things a support team needs day to
+day — a staff directory, a ticket board, and a list of user accounts — behind
+one set of navigation, with a dashboard summarising all of them.
 
-Currently, two official plugins are available:
+Built with **React + Vite**, plain **JavaScript** and plain **CSS**. No
+routing library, no TypeScript, and no UI framework: everything here is written
+by hand so the underlying React ideas stay visible.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Running it
 
-## React Compiler
+You need [Node.js](https://nodejs.org) (an LTS release; developed on v22).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install     # install dependencies, once
+npm run dev     # start the dev server
+```
 
-## Expanding the Oxlint configuration
+Then open the URL it prints, usually <http://localhost:5173/>.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Other commands:
+
+```bash
+npm run build   # production build into dist/
+npm run lint    # check the code with Oxlint
+npm run preview # serve the production build locally
+```
+
+## The pages
+
+Navigation lives in the blue header. One page shows at a time; the app opens on
+the Dashboard.
+
+### Dashboard
+Summary cards across two groups:
+
+- **Tickets by status** — how many tickets sit in Open, In progress, Resolved
+  and Closed. These are counted from the same array the ticket board edits, so
+  moving a ticket updates the dashboard.
+- **Organisation** — the number of employees, the number of departments, and
+  the number of user accounts. The user count is fetched from an API, so that
+  card shows its own loading and error states, with a Retry button.
+
+### Tickets
+A board of four columns, one per status, with a ticket count in each column
+header. Each ticket shows its title and a colour-coded priority label — blue
+for LOW, amber for MEDIUM, red for HIGH. **Move to next** advances a ticket to
+the following status; tickets already Closed have nowhere to go, so they have
+no button.
+
+### Teams
+The employee directory: a card per employee with their initials, name, role and
+department. Search by name as you type (case-insensitive), filter by
+department, or combine the two. Clicking a card opens a details panel with
+their role, department, email and phone, and highlights the card. A message
+appears when nothing matches.
+
+### Users
+User accounts loaded from the public [DummyJSON](https://dummyjson.com) API,
+shown as cards with a name, job title, email and company. Because the data is
+fetched, this page handles four outcomes: a loading message, the cards on
+success, a friendly message when the list comes back empty, and an error
+message with a Retry button when the request fails.
+
+## Folder structure
+
+```
+src/
+  App.jsx            the shell: header, navigation, and which page is showing
+  main.jsx           entry point
+  index.css          theme: every colour and shape variable lives here
+  App.css            shell layout
+  components/        small reusable pieces; take props, own no state
+  pages/             full screens; own their state and compose components
+  hooks/             reusable logic that uses React state
+  utils/             pure helper functions, no React
+  data/              mock data
+```
+
+The guiding rule is **where state lives**:
+
+- **`utils/`** — plain functions. Given the same input they return the same
+  output, with no React involved: `getInitials`, `filterEmployees`,
+  `countTicketsByStatus`, `moveTicketToNextStatus`.
+- **`hooks/`** — reusable logic that *does* need React state. `useFetch` owns a
+  request and reports one of four statuses; `useUsers` wraps it with this
+  project's endpoint so pages do not repeat the URL.
+- **`components/`** — presentational. A card is handed an employee and draws
+  it; it never reaches outside itself.
+- **`pages/`** — own the state their section needs and pass it down.
+- **`App.jsx`** — owns only what more than one page needs: which page is
+  showing, and the tickets. The tickets sit here rather than in the tickets
+  page because a page unmounts when you navigate away, which would reset the
+  board, and because the dashboard has to count the same array.
+
+`data/` holds mock data, so the directory and board work with no backend. Only
+the users list talks to a real API.
+
+## Project conventions
+
+See [CLAUDE.md](CLAUDE.md) for the working rules this project follows —
+including the design rules (light theme, blue accents, colour variables in
+`index.css`) and the git workflow: every change goes through a GitHub issue, a
+feature branch, and a pull request.
