@@ -1,8 +1,10 @@
+import type { Ticket } from '../types/ticket'
+
 // Mock IT support tickets for the board.
 // No backend yet — this is the starting array that TicketsProvider copies
-// into state. Priority is LOW | MEDIUM | HIGH, status is one of STATUS_ORDER.
-
-const tickets = [
+// into state. The Ticket type checks every entry: a typo in a priority or
+// status, or a missing field, is an error.
+const tickets: Ticket[] = [
   {
     id: 1,
     title: 'Laptop will not connect to the office Wi-Fi',
