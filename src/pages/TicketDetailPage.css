@@ -21,60 +21,6 @@
   text-decoration: underline;
 }
 
-.ticket-detail-page__panel {
-  max-width: 640px;
-  padding: 24px 28px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-}
-
-.ticket-detail-page__id {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-  color: var(--blue);
-}
-
-.ticket-detail-page__title {
-  margin: 6px 0 12px;
-  font-size: 22px;
-  line-height: 130%;
-}
-
-.ticket-detail-page__description {
-  margin-bottom: 20px;
-  font-size: 15px;
-  line-height: 155%;
-  /* Keeps the line breaks someone typed into a description. */
-  white-space: pre-line;
-}
-
-.ticket-detail-page__details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 40px;
-  margin: 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-.ticket-detail-page__details dt {
-  margin-bottom: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-}
-
-.ticket-detail-page__details dd {
-  margin: 0;
-  font-size: 15px;
-  color: var(--text-strong);
-}
-
 .ticket-detail-page__edit {
   padding: 7px 18px;
   font-size: 14px;
