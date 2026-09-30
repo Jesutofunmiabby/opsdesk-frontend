@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useTickets } from '../hooks/useTickets'
+import { useTickets } from '../features/tickets/hooks/useTickets'
 import { findTicketById } from '../features/tickets/utils/tickets'
 import type { TicketFormValues } from '../features/tickets/types'
 import TicketForm from '../components/TicketForm'

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { STATUS_ORDER, STATUS_LABELS } from '../features/tickets/data/ticketStatuses'
-import { useTickets } from '../hooks/useTickets'
+import { useTickets } from '../features/tickets/hooks/useTickets'
 import Column from '../components/Column'
 import './TicketsPage.css'
 

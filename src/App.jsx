@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import TicketsProvider from './context/TicketsProvider'
+import TicketsProvider from './features/tickets/hooks/TicketsProvider'
 import Layout from './layouts/Layout'
 import DashboardPage from './pages/DashboardPage'
 import TicketsPage from './pages/TicketsPage'

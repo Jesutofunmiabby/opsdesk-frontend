@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { STATUS_LABELS } from '../features/tickets/data/ticketStatuses'
-import { useTickets } from '../hooks/useTickets'
+import { useTickets } from '../features/tickets/hooks/useTickets'
 import { findTicketById } from '../features/tickets/utils/tickets'
 import PriorityBadge from '../components/PriorityBadge'
 import TicketNotFound from '../components/TicketNotFound'

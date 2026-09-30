@@ -3,7 +3,7 @@ import { STATUS_ORDER, STATUS_LABELS } from '../features/tickets/data/ticketStat
 import { countTicketsByStatus } from '../features/tickets/utils/tickets'
 import { getDepartments } from '../utils/employees'
 import { useUsers } from '../hooks/useUsers'
-import { useTickets } from '../hooks/useTickets'
+import { useTickets } from '../features/tickets/hooks/useTickets'
 import StatCard from '../components/StatCard'
 import './DashboardPage.css'
 

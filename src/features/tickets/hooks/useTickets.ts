@@ -1,6 +1,6 @@
 import { useContext } from 'react'
-import { TicketsContext } from '../context/TicketsContext'
-import type { TicketsContextValue } from '../context/TicketsContext'
+import { TicketsContext } from './TicketsContext'
+import type { TicketsContextValue } from './TicketsContext'
 
 // Returns { tickets, moveTicket, addTicket, updateTicket } from the nearest
 // TicketsProvider. After the null check, TypeScript knows the value is real.
