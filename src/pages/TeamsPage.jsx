@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import employees from '../data/employees'
-import EmployeeList from '../components/EmployeeList'
-import EmployeeDetails from '../components/EmployeeDetails'
-import SearchBox from '../components/SearchBox'
-import DepartmentFilter from '../components/DepartmentFilter'
+import employees from '../features/employees/data/employees'
+import EmployeeList from '../features/employees/components/EmployeeList'
+import EmployeeDetails from '../features/employees/components/EmployeeDetails'
+import SearchBox from '../features/employees/components/SearchBox'
+import DepartmentFilter from '../features/employees/components/DepartmentFilter'
 import {
   ALL_DEPARTMENTS,
   getDepartments,
   filterEmployees,
-} from '../utils/employees'
+} from '../features/employees/utils/employees'
 import './TeamsPage.css'
 
 // Computed once outside the component: the data never changes.

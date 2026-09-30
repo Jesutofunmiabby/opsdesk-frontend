@@ -1,4 +1,4 @@
-import { getInitials } from '../utils/getInitials'
+import { getInitials } from '../../../utils/getInitials'
 import './EmployeeCard.css'
 
 function EmployeeCard({ employee, isSelected, onSelect }) {
