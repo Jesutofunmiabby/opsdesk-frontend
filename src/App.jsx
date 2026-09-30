@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage'
 import TicketsPage from './pages/TicketsPage'
 import NewTicketPage from './pages/NewTicketPage'
 import TicketDetailPage from './pages/TicketDetailPage'
+import EditTicketPage from './pages/EditTicketPage'
 import ProjectsPage from './pages/ProjectsPage'
 import TeamsPage from './pages/TeamsPage'
 import UsersPage from './pages/UsersPage'
@@ -23,6 +24,7 @@ function App() {
           <Route path="tickets" element={<TicketsPage />} />
           <Route path="tickets/new" element={<NewTicketPage />} />
           <Route path="tickets/:id" element={<TicketDetailPage />} />
+          <Route path="tickets/:id/edit" element={<EditTicketPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="teams" element={<TeamsPage />} />
           <Route path="users" element={<UsersPage />} />

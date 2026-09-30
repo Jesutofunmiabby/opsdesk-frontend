@@ -18,9 +18,17 @@ function TicketDetailPage() {
 
   return (
     <section>
-      <Link to="/tickets" className="ticket-detail-page__back">
-        ← Ticket board
-      </Link>
+      <div className="ticket-detail-page__toolbar">
+        <Link to="/tickets" className="ticket-detail-page__back">
+          ← Ticket board
+        </Link>
+        <Link
+          to={`/tickets/${ticket.id}/edit`}
+          className="ticket-detail-page__edit"
+        >
+          Edit
+        </Link>
+      </div>
 
       <article className="ticket-detail-page__panel">
         <span className="ticket-detail-page__id">Ticket #{ticket.id}</span>
