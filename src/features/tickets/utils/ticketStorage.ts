@@ -1,13 +1,9 @@
-import { STATUS_ORDER } from '../data/ticketStatuses'
+import { isTicketStatus } from '../data/ticketStatuses'
 import { isPriority } from '../data/ticketPriorities'
-import type { Ticket, TicketStatus } from '../types'
+import type { Ticket } from '../types'
 
 // Where the tickets are kept in the browser's localStorage.
 const STORAGE_KEY = 'opsdesk.tickets'
-
-function isTicketStatus(value: unknown): value is TicketStatus {
-  return STATUS_ORDER.some((status) => status === value)
-}
 
 // Checks every field of one saved ticket, since anything could be in storage:
 // an older format, a half-written value, or something edited by hand.
