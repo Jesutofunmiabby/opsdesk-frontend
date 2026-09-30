@@ -1,8 +1,9 @@
-// Mock internal IT projects for the Projects page.
-// No backend yet. Status is one of PROJECT_STATUS_LABELS' keys; dueDate is an
-// ISO date string (YYYY-MM-DD) so it sorts and parses reliably.
+import type { Project } from '../types'
 
-const projects = [
+// Mock internal IT projects for the Projects page.
+// No backend yet. The Project type checks every entry. dueDate is an ISO date
+// string (YYYY-MM-DD) so it sorts and parses reliably.
+const projects: Project[] = [
   {
     id: 1,
     name: 'Laptop refresh for the sales team',

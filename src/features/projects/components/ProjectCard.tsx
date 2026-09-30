@@ -1,8 +1,13 @@
 import { PROJECT_STATUS_LABELS } from '../data/projectStatuses'
 import { formatDate } from '../../../utils/dates'
+import type { Project } from '../types'
 import './ProjectCard.css'
 
-function ProjectCard({ project }) {
+interface ProjectCardProps {
+  project: Project
+}
+
+function ProjectCard({ project }: ProjectCardProps) {
   return (
     <article className="project-card">
       <span className="project-card__status">
