@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import initialTickets from '../data/tickets'
 import { FIRST_STATUS } from '../data/ticketStatuses'
@@ -7,6 +7,7 @@ import {
   moveTicketToNextStatus,
   updateTicketFields,
 } from '../utils/tickets'
+import { loadTickets, saveTickets } from '../utils/ticketStorage'
 import { TicketsContext } from './TicketsContext'
 import type { Ticket, TicketFormValues } from '../types'
 
@@ -19,7 +20,17 @@ interface TicketsProviderProps {
 // pages all read the same array from here, so a change made on one page shows
 // up everywhere, and nothing has to be passed down through the routes.
 function TicketsProvider({ children }: TicketsProviderProps) {
-  const [tickets, setTickets] = useState<Ticket[]>(initialTickets)
+  // Starts from the tickets saved in the browser, or the mock tickets if there
+  // are none. Passing a function means storage is only read on the first
+  // render, not on every one.
+  const [tickets, setTickets] = useState<Ticket[]>(() =>
+    loadTickets(initialTickets),
+  )
+
+  // Saves after every change: a move, a new ticket or an edit.
+  useEffect(() => {
+    saveTickets(tickets)
+  }, [tickets])
 
   function moveTicket(ticketId: number) {
     setTickets((currentTickets) =>
