@@ -6,7 +6,11 @@ import './TicketFormPage.css'
 
 // A new ticket starts empty, at medium priority. The type keeps 'MEDIUM' as a
 // Priority rather than loosening it to any text.
-const EMPTY_TICKET: TicketFormValues = { title: '', description: '', priority: 'MEDIUM' }
+const EMPTY_TICKET: TicketFormValues = {
+  title: '',
+  description: '',
+  priority: 'MEDIUM',
+}
 
 function NewTicketPage() {
   const { addTicket } = useTickets()

@@ -1,10 +1,11 @@
 import { Outlet } from 'react-router-dom'
 import NavBar from '../components/NavBar'
+import type { NavItem } from '../components/NavBar'
 import './Layout.css'
 
 // The navigation, and the order it appears in. Each path matches a route in
-// App.
-const NAV_LINKS = [
+// routes/AppRoutes.
+const NAV_LINKS: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/tickets', label: 'Tickets' },
   { to: '/projects', label: 'Projects' },

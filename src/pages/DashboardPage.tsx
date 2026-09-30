@@ -1,10 +1,14 @@
 import employees from '../features/employees/data/employees'
-import { STATUS_ORDER, STATUS_LABELS } from '../features/tickets/data/ticketStatuses'
+import {
+  STATUS_ORDER,
+  STATUS_LABELS,
+} from '../features/tickets/data/ticketStatuses'
 import { countTicketsByStatus } from '../features/tickets/utils/tickets'
 import { getDepartments } from '../features/employees/utils/employees'
 import { useUsers } from '../features/users/hooks/useUsers'
 import { useTickets } from '../features/tickets/hooks/useTickets'
 import StatCard from '../components/StatCard'
+import type { StatCardState } from '../components/StatCard'
 import './DashboardPage.css'
 
 // Employees and departments come from static data, so they are counted once.
@@ -18,7 +22,7 @@ function DashboardPage() {
 
   // The users count comes from the API, so this card has its own states.
   const { data: users, status, retry } = useUsers()
-  const usersState =
+  const usersState: StatCardState =
     status === 'loading' || status === 'error' ? status : 'ready'
 
   return (
