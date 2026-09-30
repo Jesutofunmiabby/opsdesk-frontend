@@ -1,7 +1,14 @@
 import { getInitials } from '../../../utils/getInitials'
+import type { Employee } from '../types'
 import './EmployeeCard.css'
 
-function EmployeeCard({ employee, isSelected, onSelect }) {
+interface EmployeeCardProps {
+  employee: Employee
+  isSelected: boolean
+  onSelect: (employee: Employee) => void
+}
+
+function EmployeeCard({ employee, isSelected, onSelect }: EmployeeCardProps) {
   return (
     <button
       type="button"

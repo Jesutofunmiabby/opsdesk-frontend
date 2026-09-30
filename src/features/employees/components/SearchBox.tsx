@@ -1,6 +1,12 @@
 import './SearchBox.css'
 
-function SearchBox({ value, onChange }) {
+interface SearchBoxProps {
+  value: string
+  // Called with the new text on every key press.
+  onChange: (value: string) => void
+}
+
+function SearchBox({ value, onChange }: SearchBoxProps) {
   return (
     <div className="search-box">
       <label className="search-box__label" htmlFor="employee-search">

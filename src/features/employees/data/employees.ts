@@ -1,9 +1,11 @@
+import type { Employee } from '../types'
+
 // Mock employee data for the OpsDesk directory.
 // No backend yet — this is a plain array we import directly into components.
 // Names, emails and phone numbers are invented; the 555-01xx range and the
 // example.com domain are both reserved for fictional use.
 
-const employees = [
+const employees: Employee[] = [
   {
     id: 1,
     name: 'Adaeze Okonkwo',
