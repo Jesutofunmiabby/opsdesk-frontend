@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { LAST_STATUS } from '../data/ticketStatuses'
 import PriorityBadge from './PriorityBadge'
 import './TicketCard.css'
@@ -8,7 +9,14 @@ function TicketCard({ ticket, onMove }) {
 
   return (
     <article className="ticket-card">
-      <h3 className="ticket-card__title">{ticket.title}</h3>
+      {/* The title link covers the whole card (see TicketCard.css), so a click
+          anywhere opens the ticket. The button is a sibling, not inside the
+          link, and sits above it, so it moves the ticket without opening it. */}
+      <h3 className="ticket-card__title">
+        <Link to={`/tickets/${ticket.id}`} className="ticket-card__link">
+          {ticket.title}
+        </Link>
+      </h3>
       <div className="ticket-card__footer">
         <PriorityBadge priority={ticket.priority} />
         {canMove && (

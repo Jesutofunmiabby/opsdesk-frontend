@@ -1,8 +1,12 @@
 .ticket-card {
+  position: relative;
   padding: 12px;
   background: var(--page-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .ticket-card__title {
@@ -11,6 +15,37 @@
   font-weight: 600;
   line-height: 135%;
   color: var(--text-strong);
+}
+
+.ticket-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Stretches the link over the whole card. */
+.ticket-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+}
+
+.ticket-card:hover {
+  border-color: var(--blue-soft-border);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.ticket-card:hover .ticket-card__link {
+  color: var(--blue);
+}
+
+.ticket-card__link:focus-visible {
+  outline: none;
+}
+
+.ticket-card__link:focus-visible::after {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 .ticket-card__footer {
@@ -22,6 +57,9 @@
 }
 
 .ticket-card__move {
+  /* Above the stretched link, so a click here does not open the ticket. */
+  position: relative;
+  z-index: 1;
   padding: 5px 11px;
   font-family: inherit;
   font-size: 12px;
