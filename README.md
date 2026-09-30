@@ -1,13 +1,13 @@
 # OpsDesk
 
-An internal operations dashboard for an IT support team, built as a Week 1
-internship project. It brings together three things a support team needs day to
-day — a staff directory, a ticket board, and a list of user accounts — behind
-one set of navigation, with a dashboard summarising all of them.
+An internal operations dashboard for an IT support team, built as an
+internship project. It brings together what a support team needs day to day —
+tickets, a staff directory, projects and a list of user accounts — behind one
+set of navigation, with a dashboard summarising them.
 
-Built with **React + Vite**, plain **JavaScript** and plain **CSS**. No
-routing library, no TypeScript, and no UI framework: everything here is written
-by hand so the underlying React ideas stay visible.
+Built with **React + Vite**, **TypeScript**, **React Router** and plain
+**CSS**. No UI framework: everything here is written by hand so the underlying
+React ideas stay visible.
 
 ## Week 2
 
@@ -79,15 +79,16 @@ URL on start, and picks a different port if 5173 is already in use.
 Other commands:
 
 ```bash
-npm run build   # production build into dist/
-npm run lint    # check the code with Oxlint
-npm run preview # serve the production build locally
+npm run typecheck # check the TypeScript types
+npm run build     # type check, then production build into dist/
+npm run lint      # check the code with Oxlint
+npm run preview   # serve the production build locally
 ```
 
 ## The pages
 
-Navigation lives in the blue header. One page shows at a time; the app opens on
-the Dashboard.
+Navigation lives in the blue header, and the current page is highlighted. Each
+page has its own URL; `/` opens the Dashboard.
 
 ### Dashboard
 Summary cards across two groups:
@@ -100,11 +101,21 @@ Summary cards across two groups:
   card shows its own loading and error states, with a Retry button.
 
 ### Tickets
-A board of four columns, one per status, with a ticket count in each column
-header. Each ticket shows its title and a colour-coded priority label — blue
-for LOW, amber for MEDIUM, red for HIGH. **Move to next** advances a ticket to
-the following status; tickets already Closed have nowhere to go, so they have
-no button.
+Two views, switched with the **Board** and **List** buttons:
+
+- **Board** — four columns, one per status, with a ticket count in each column
+  header. Each ticket shows its title and a colour-coded priority label — blue
+  for LOW, amber for MEDIUM, red for HIGH. **Move to next** advances a ticket
+  to the following status; tickets already Closed have nowhere to go, so they
+  have no button.
+- **List** — a table of tickets with a title search, a status filter and 10
+  tickets per page.
+
+Clicking a ticket opens its own page, with an **Edit** button. **New ticket**
+opens the create form.
+
+### Projects
+Internal IT projects as cards, each with its status, owner and due date.
 
 ### Teams
 The employee directory: a card per employee with their initials, name, role and
@@ -124,35 +135,42 @@ message with a Retry button when the request fails.
 
 ```
 src/
-  App.jsx            the shell: header, navigation, and which page is showing
-  main.jsx           entry point
+  main.tsx           entry point: the router around the app
+  App.tsx            the shared tickets around every route
   index.css          theme: every colour and shape variable lives here
-  App.css            shell layout
-  components/        small reusable pieces; take props, own no state
-  pages/             full screens; own their state and compose components
-  hooks/             reusable logic that uses React state
-  utils/             pure helper functions, no React
-  data/              mock data
+  features/
+    tickets/         components/, hooks/, data/, utils/, types.ts
+    employees/       components/, data/, utils/, types.ts
+    users/           components/, hooks/, types.ts
+    projects/        components/, data/, types.ts
+  components/        UI shared by several features: FormField, NavBar, StatCard
+  hooks/             shared hooks: useFetch
+  utils/             shared helpers: formatDate, getInitials
+  layouts/           Layout: the blue header, navigation, and page area
+  routes/            AppRoutes: every URL and the page it shows
+  pages/             thin pages that put feature components together
 ```
 
-The guiding rule is **where state lives**:
+The guiding rule is **keep each feature together**. Everything about tickets
+— its components, hooks, mock data, helpers and types — lives in
+`features/tickets/`. Only code that more than one feature uses goes in the
+shared `components/`, `hooks/` and `utils/` folders.
+
+Inside a feature:
 
 - **`utils/`** — plain functions. Given the same input they return the same
-  output, with no React involved: `getInitials`, `filterEmployees`,
-  `countTicketsByStatus`, `moveTicketToNextStatus`.
-- **`hooks/`** — reusable logic that *does* need React state. `useFetch` owns a
-  request and reports one of four statuses; `useUsers` wraps it with this
-  project's endpoint so pages do not repeat the URL.
-- **`components/`** — presentational. A card is handed an employee and draws
-  it; it never reaches outside itself.
-- **`pages/`** — own the state their section needs and pass it down.
-- **`App.jsx`** — owns only what more than one page needs: which page is
-  showing, and the tickets. The tickets sit here rather than in the tickets
-  page because a page unmounts when you navigate away, which would reset the
-  board, and because the dashboard has to count the same array.
+  output, with no React involved: `filterTickets`, `paginate`,
+  `validateTicket`, `moveTicketToNextStatus`.
+- **`hooks/`** — logic that *does* need React state. The tickets live in
+  `TicketsProvider`, shared through React context and read with `useTickets`,
+  so the dashboard, board, list and ticket pages all use the same tickets.
+  `useUsers` wraps the shared `useFetch` with the users API address.
+- **`components/`** — the feature's pieces, from a single card up to a whole
+  board or list.
+- **`types.ts`** — the TypeScript types for the feature's data.
 
-`data/` holds mock data, so the directory and board work with no backend. Only
-the users list talks to a real API.
+`data/` folders hold mock data, so tickets, the directory and projects work
+with no backend. Only the users list talks to a real API.
 
 ## Project conventions
 
@@ -161,8 +179,10 @@ the variables in `src/index.css` — no hard-coded colours in component styles,
 so the whole app can be re-themed from one place. Ticket priority labels are
 colour-coded: blue for LOW, amber for MEDIUM, red for HIGH.
 
-**Dependencies.** No new npm packages without discussing it first. No
-TypeScript and no routing library yet — both come later.
+**Dependencies.** No new npm packages without discussing it first.
+
+**TypeScript.** All code is TypeScript. `any` is never used to silence an
+error.
 
 **Git workflow.** Nothing is committed straight to `main`. Every change goes
 through a GitHub issue, then a feature branch, then a pull request. Commits are
