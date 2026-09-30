@@ -8,11 +8,6 @@
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
 
-    /* Gradual conversion: .tsx files may import the .jsx files that are not
-       converted yet. Those .jsx files are not type-checked themselves. */
-    "allowJs": true,
-    "checkJs": false,
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
