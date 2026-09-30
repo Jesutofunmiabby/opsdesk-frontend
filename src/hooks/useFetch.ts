@@ -1,16 +1,31 @@
 import { useEffect, useState } from 'react'
 
-// Fetches a URL once and reports the outcome as a single status:
-// 'loading' | 'success' | 'empty' | 'error'.
+// Where a request has got to. 'empty' means it worked but the list was empty.
+export type FetchStatus = 'loading' | 'success' | 'empty' | 'error'
+
+// What useFetch hands back. T is the type of one item in the list, such as
+// User, so the same hook works for any kind of list.
+export interface FetchResult<T> {
+  data: T[]
+  status: FetchStatus
+  retry: () => void
+}
+
+// Fetches a URL once and reports the outcome as a single FetchStatus.
 //
 // selectList pulls the list out of the response body, because APIs wrap their
-// data differently. It must be defined outside the calling component (or
-// memoised), since a new function on every render would restart the request.
+// data differently. It is given the body as unknown, because nothing about
+// the response has been checked yet, and must return a list of T. It must be
+// defined outside the calling component (or memoised), since a new function
+// on every render would restart the request.
 //
 // Returns { data, status, retry }. retry() runs the request again.
-export function useFetch(url, selectList) {
-  const [status, setStatus] = useState('loading')
-  const [data, setData] = useState([])
+export function useFetch<T>(
+  url: string,
+  selectList: (body: unknown) => T[],
+): FetchResult<T> {
+  const [status, setStatus] = useState<FetchStatus>('loading')
+  const [data, setData] = useState<T[]>([])
   // Bumped by retry(). It is a dependency of the effect, so changing it runs
   // the fetch again.
   const [attempt, setAttempt] = useState(0)
@@ -29,7 +44,9 @@ export function useFetch(url, selectList) {
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`)
         }
-        const body = await response.json()
+        // json() is typed as any. Storing it as unknown means it has to be
+        // checked (by selectList) before anything can use it.
+        const body: unknown = await response.json()
         if (ignore) {
           return
         }

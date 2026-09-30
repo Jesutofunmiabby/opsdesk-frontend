@@ -1,5 +1,5 @@
 // "Adaeze Okonkwo" -> "AO". Single-word names fall back to one letter.
-export function getInitials(name) {
+export function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/)
   const first = parts[0][0]
   const last = parts.length > 1 ? parts[parts.length - 1][0] : ''
