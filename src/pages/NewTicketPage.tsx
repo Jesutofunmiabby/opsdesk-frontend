@@ -1,12 +1,16 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useTickets } from '../hooks/useTickets'
-import TicketForm from '../components/TicketForm'
-import type { TicketFormValues } from '../types/ticket'
+import { useTickets } from '../features/tickets/hooks/useTickets'
+import TicketForm from '../features/tickets/components/TicketForm'
+import type { TicketFormValues } from '../features/tickets/types'
 import './TicketFormPage.css'
 
 // A new ticket starts empty, at medium priority. The type keeps 'MEDIUM' as a
 // Priority rather than loosening it to any text.
-const EMPTY_TICKET: TicketFormValues = { title: '', description: '', priority: 'MEDIUM' }
+const EMPTY_TICKET: TicketFormValues = {
+  title: '',
+  description: '',
+  priority: 'MEDIUM',
+}
 
 function NewTicketPage() {
   const { addTicket } = useTickets()

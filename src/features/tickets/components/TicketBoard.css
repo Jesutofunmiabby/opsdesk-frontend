@@ -1,0 +1,7 @@
+/* Four columns at full page width, fewer as the space narrows. */
+.ticket-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 16px;
+  align-items: start;
+}
