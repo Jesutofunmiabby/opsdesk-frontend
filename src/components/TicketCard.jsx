@@ -1,4 +1,5 @@
 import { LAST_STATUS } from '../data/ticketStatuses'
+import PriorityBadge from './PriorityBadge'
 import './TicketCard.css'
 
 function TicketCard({ ticket, onMove }) {
@@ -9,11 +10,7 @@ function TicketCard({ ticket, onMove }) {
     <article className="ticket-card">
       <h3 className="ticket-card__title">{ticket.title}</h3>
       <div className="ticket-card__footer">
-        <span
-          className={`ticket-card__priority ticket-card__priority--${ticket.priority.toLowerCase()}`}
-        >
-          {ticket.priority}
-        </span>
+        <PriorityBadge priority={ticket.priority} />
         {canMove && (
           <button
             type="button"
