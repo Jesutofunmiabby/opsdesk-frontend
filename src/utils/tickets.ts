@@ -56,3 +56,16 @@ export function updateTicketFields(
     ticket.id === ticketId ? { ...ticket, ...changes } : ticket,
   )
 }
+
+// Finds the ticket whose id is in the URL. URL parameters are text, and
+// useParams gives undefined when the route has no such parameter, so both are
+// handled here: no id, or text that is not a ticket's id, finds nothing.
+export function findTicketById(
+  tickets: Ticket[],
+  id: string | undefined,
+): Ticket | undefined {
+  if (id === undefined) {
+    return undefined
+  }
+  return tickets.find((ticket) => ticket.id === Number(id))
+}
