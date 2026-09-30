@@ -34,6 +34,9 @@ function TicketDetailPage() {
       <article className="ticket-detail-page__panel">
         <span className="ticket-detail-page__id">Ticket #{ticket.id}</span>
         <h2 className="ticket-detail-page__title">{ticket.title}</h2>
+        <p className="ticket-detail-page__description">
+          {ticket.description}
+        </p>
         <dl className="ticket-detail-page__details">
           <div>
             <dt>Status</dt>
