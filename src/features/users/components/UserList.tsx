@@ -1,30 +1,30 @@
-import { useUsers } from '../features/users/hooks/useUsers'
-import UserCard from '../features/users/components/UserCard'
-import './UsersPage.css'
+import { useUsers } from '../hooks/useUsers'
+import UserCard from './UserCard'
+import './UserList.css'
 
-function UsersPage() {
+// The users from the API, with a message while they load, if there are none,
+// or if the request fails.
+function UserList() {
   const { data: users, status, retry } = useUsers()
 
   return (
-    <section>
-      <h2 className="page-title">Users</h2>
-
+    <div>
       {status === 'loading' && (
-        <p className="users-page__message">Loading users…</p>
+        <p className="user-list__message">Loading users…</p>
       )}
 
       {status === 'empty' && (
-        <p className="users-page__message">No users to show just yet.</p>
+        <p className="user-list__message">No users to show just yet.</p>
       )}
 
       {status === 'error' && (
-        <div className="users-page__error">
-          <p className="users-page__message">
+        <div className="user-list__error">
+          <p className="user-list__message">
             Sorry, we could not load the users.
           </p>
           <button
             type="button"
-            className="users-page__retry"
+            className="user-list__retry"
             onClick={retry}
           >
             Retry
@@ -33,7 +33,7 @@ function UsersPage() {
       )}
 
       {status === 'success' && (
-        <ul className="users-page__grid">
+        <ul className="user-list__grid">
           {users.map((user) => (
             <li key={user.id}>
               <UserCard user={user} />
@@ -41,8 +41,8 @@ function UsersPage() {
           ))}
         </ul>
       )}
-    </section>
+    </div>
   )
 }
 
-export default UsersPage
+export default UserList
