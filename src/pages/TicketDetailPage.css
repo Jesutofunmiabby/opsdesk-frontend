@@ -66,11 +66,6 @@
   color: var(--text-strong);
 }
 
-.ticket-detail-page__text {
-  margin-bottom: 20px;
-  font-size: 15px;
-}
-
 .ticket-detail-page__button {
   display: inline-block;
   padding: 8px 16px;
