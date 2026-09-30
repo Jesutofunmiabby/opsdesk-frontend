@@ -1,28 +1,35 @@
 import { useState } from 'react'
-import employees from '../features/employees/data/employees'
-import EmployeeList from '../features/employees/components/EmployeeList'
-import EmployeeDetails from '../features/employees/components/EmployeeDetails'
-import SearchBox from '../features/employees/components/SearchBox'
-import DepartmentFilter from '../features/employees/components/DepartmentFilter'
+import employees from '../data/employees'
+import EmployeeList from './EmployeeList'
+import EmployeeDetails from './EmployeeDetails'
+import SearchBox from './SearchBox'
+import DepartmentFilter from './DepartmentFilter'
 import {
   ALL_DEPARTMENTS,
   getDepartments,
   filterEmployees,
-} from '../features/employees/utils/employees'
-import './TeamsPage.css'
+} from '../utils/employees'
+import type { Employee } from '../types'
+import './EmployeeDirectory.css'
 
 // Computed once outside the component: the data never changes.
 const departments = getDepartments(employees)
 
-function TeamsPage() {
-  const [selectedEmployee, setSelectedEmployee] = useState(null)
+// Search, department filter, the matching employees, and the details of the
+// one that is open.
+function EmployeeDirectory() {
+  // Without the type, TypeScript would decide from null that this can only
+  // ever be null.
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null,
+  )
   const [nameQuery, setNameQuery] = useState('')
   const [department, setDepartment] = useState(ALL_DEPARTMENTS)
 
   // Derived from state during render, not stored in state of its own.
   const visibleEmployees = filterEmployees(employees, nameQuery, department)
 
-  function handleSelect(employee) {
+  function handleSelect(employee: Employee) {
     setSelectedEmployee(employee)
   }
 
@@ -31,10 +38,8 @@ function TeamsPage() {
   }
 
   return (
-    <section>
-      <h2 className="page-title">Employee directory</h2>
-
-      <div className="teams-page__controls">
+    <div>
+      <div className="employee-directory__controls">
         <SearchBox value={nameQuery} onChange={setNameQuery} />
         <DepartmentFilter
           value={department}
@@ -46,8 +51,8 @@ function TeamsPage() {
       <div
         className={
           selectedEmployee
-            ? 'teams-page__body teams-page__body--split'
-            : 'teams-page__body'
+            ? 'employee-directory__body employee-directory__body--split'
+            : 'employee-directory__body'
         }
       >
         {visibleEmployees.length > 0 ? (
@@ -57,14 +62,14 @@ function TeamsPage() {
             onSelect={handleSelect}
           />
         ) : (
-          <p className="teams-page__empty">No employees match</p>
+          <p className="employee-directory__empty">No employees match</p>
         )}
         {selectedEmployee && (
           <EmployeeDetails employee={selectedEmployee} onClose={handleClose} />
         )}
       </div>
-    </section>
+    </div>
   )
 }
 
-export default TeamsPage
+export default EmployeeDirectory
