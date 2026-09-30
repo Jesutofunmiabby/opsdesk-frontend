@@ -1,0 +1,28 @@
+/* Shared by the New ticket and Edit ticket pages, which look the same. */
+.ticket-form-page__back {
+  display: inline-block;
+  margin-bottom: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.ticket-form-page__back:hover {
+  color: var(--blue-hover);
+  text-decoration: underline;
+}
+
+.ticket-form-page__back:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.ticket-form-page__panel {
+  max-width: 640px;
+  padding: 24px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}

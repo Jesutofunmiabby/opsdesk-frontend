@@ -3,6 +3,7 @@ import TicketsProvider from './context/TicketsProvider'
 import Layout from './layouts/Layout'
 import DashboardPage from './pages/DashboardPage'
 import TicketsPage from './pages/TicketsPage'
+import NewTicketPage from './pages/NewTicketPage'
 import TicketDetailPage from './pages/TicketDetailPage'
 import ProjectsPage from './pages/ProjectsPage'
 import TeamsPage from './pages/TeamsPage'
@@ -20,6 +21,7 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="tickets" element={<TicketsPage />} />
+          <Route path="tickets/new" element={<NewTicketPage />} />
           <Route path="tickets/:id" element={<TicketDetailPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="teams" element={<TeamsPage />} />
