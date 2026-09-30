@@ -1,5 +1,5 @@
 import { PROJECT_STATUS_LABELS } from '../data/projectStatuses'
-import { formatDate } from '../utils/dates'
+import { formatDate } from '../../../utils/dates'
 import './ProjectCard.css'
 
 function ProjectCard({ project }) {

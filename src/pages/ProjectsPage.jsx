@@ -1,5 +1,5 @@
-import projects from '../data/projects'
-import ProjectCard from '../components/ProjectCard'
+import projects from '../features/projects/data/projects'
+import ProjectCard from '../features/projects/components/ProjectCard'
 import './ProjectsPage.css'
 
 function ProjectsPage() {
