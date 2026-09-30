@@ -1,7 +1,16 @@
+import type { Ticket } from '../types/ticket'
 import TicketCard from './TicketCard'
 import './Column.css'
 
-function Column({ label, tickets, onMove }) {
+interface ColumnProps {
+  // The column heading, such as "In progress".
+  label: string
+  // Only the tickets that belong in this column.
+  tickets: Ticket[]
+  onMove: (ticketId: number) => void
+}
+
+function Column({ label, tickets, onMove }: ColumnProps) {
   return (
     <section className="column">
       <header className="column__header">

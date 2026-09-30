@@ -1,9 +1,16 @@
 import { Link } from 'react-router-dom'
 import { LAST_STATUS } from '../data/ticketStatuses'
+import type { Ticket } from '../types/ticket'
 import PriorityBadge from './PriorityBadge'
 import './TicketCard.css'
 
-function TicketCard({ ticket, onMove }) {
+interface TicketCardProps {
+  ticket: Ticket
+  // Called with the ticket's id when "Move to next" is pressed.
+  onMove: (ticketId: number) => void
+}
+
+function TicketCard({ ticket, onMove }: TicketCardProps) {
   // A CLOSED ticket has nowhere further to go, so it gets no button.
   const canMove = ticket.status !== LAST_STATUS
 
