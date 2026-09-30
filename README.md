@@ -9,6 +9,61 @@ Built with **React + Vite**, plain **JavaScript** and plain **CSS**. No
 routing library, no TypeScript, and no UI framework: everything here is written
 by hand so the underlying React ideas stay visible.
 
+## Week 2
+
+### What changed this week
+
+- **Routing.** React Router gives every page its own URL: `/dashboard`,
+  `/tickets`, `/tickets/:id`, `/tickets/new`, `/tickets/:id/edit`,
+  `/projects`, `/teams` and `/users`. `/` goes to the dashboard, and any other
+  URL shows a Not Found page with a link back. Every page sits inside a shared
+  Layout with the blue header, whose navigation highlights the current page.
+  Refresh, Back and Forward all work, and any page can be bookmarked.
+- **Ticket pages.** Each ticket has its own page, found from the id in the URL,
+  showing its description, status and priority. An unknown id shows "Ticket
+  not found". Every card on the board links to its ticket.
+- **Forms.** New tickets are created at `/tickets/new` and edited at
+  `/tickets/:id/edit`, with one form used for both. The title is required and
+  must be at least 3 characters; the description is required. Each problem is
+  shown in red directly under its field, and nothing is saved until it is
+  fixed. New tickets start as Open.
+- **TypeScript.** The whole project is now TypeScript. Tickets, employees,
+  users and projects each have a type, every component's props are typed, and
+  `any` is never used. The build runs the type check first, so a type error
+  stops it.
+- **Feature folders.** Code is grouped by feature under `src/features/`
+  (tickets, employees, users, projects), with each feature's components,
+  hooks, data, helpers and types together. See [Folder
+  structure](#folder-structure).
+- **Ticket list.** The Tickets page switches between the board and a list. The
+  list can be searched by title and filtered by status, shows 10 tickets per
+  page with Previous and Next buttons and "Page X of Y", and goes back to page
+  1 whenever the search or filter changes. A message shows when nothing
+  matches, and each row links to its ticket.
+- **Saved tickets.** Tickets are saved in the browser's localStorage, so
+  created, edited and moved tickets survive a refresh. On start the app loads
+  the saved tickets, and falls back to the 25 mock tickets if nothing is saved
+  or the saved data is broken. To start again from the mock tickets, remove
+  the `opsdesk.tickets` entry from localStorage in your browser's developer
+  tools (or clear the site's data).
+- **Projects.** A new Projects page shows six internal IT projects with their
+  owner, status and due date.
+
+### How to run it
+
+```bash
+npm install         # install dependencies, once
+npm run dev         # start the app at http://localhost:5173/
+```
+
+To check the code:
+
+```bash
+npm run typecheck   # TypeScript type check
+npm run lint        # Oxlint
+npm run build       # type check, then production build into dist/
+```
+
 ## Running it
 
 You need [Node.js](https://nodejs.org) (an LTS release; developed on v22).
