@@ -31,3 +31,17 @@ export function moveTicketToNextStatus(tickets, ticketId) {
     return { ...ticket, status: STATUS_ORDER[nextIndex] }
   })
 }
+
+// One more than the highest id in use, so a new ticket never reuses an id,
+// even after tickets in the middle of the list are gone. 1 for an empty list.
+export function getNextTicketId(tickets) {
+  return tickets.reduce((highest, ticket) => Math.max(highest, ticket.id), 0) + 1
+}
+
+// Returns a new array with one ticket's fields replaced by those in changes.
+// Fields not in changes, such as id and status, are kept as they were.
+export function updateTicketFields(tickets, ticketId, changes) {
+  return tickets.map((ticket) =>
+    ticket.id === ticketId ? { ...ticket, ...changes } : ticket,
+  )
+}
