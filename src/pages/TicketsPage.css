@@ -1,11 +1,3 @@
-/* Four columns at full page width, fewer as the space narrows. */
-.tickets-page__columns {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-  gap: 16px;
-  align-items: start;
-}
-
 /* Page title on the left, New ticket on the right; stacks on narrow screens. */
 .tickets-page__header {
   display: flex;
