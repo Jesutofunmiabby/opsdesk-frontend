@@ -1,4 +1,5 @@
-/* Page title on the left, New ticket on the right; stacks on narrow screens. */
+/* Page title on the left, view toggle and New ticket on the right; stacks on
+   narrow screens. */
 .tickets-page__header {
   display: flex;
   flex-wrap: wrap;
@@ -10,6 +11,13 @@
 
 .tickets-page__header .page-title {
   margin-bottom: 0;
+}
+
+.tickets-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 .tickets-page__new {

@@ -1,0 +1,44 @@
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.pagination__status {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.pagination__button {
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  background: var(--surface);
+  border: 1px solid var(--blue-soft-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.pagination__button:hover:not(:disabled) {
+  background: var(--blue-soft);
+}
+
+.pagination__button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* Greyed out, so it is clear there is no page in that direction. */
+.pagination__button:disabled {
+  color: var(--text);
+  border-color: var(--border);
+  opacity: 0.6;
+  cursor: not-allowed;
+}

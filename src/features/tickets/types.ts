@@ -26,3 +26,6 @@ export type TicketFormField = keyof TicketFormValues
 // A message for each form field that has a problem. Partial means every field
 // is optional: a field with no problem has no entry, so {} means all is well.
 export type TicketFormErrors = Partial<Record<TicketFormField, string>>
+
+// How the tickets page shows the tickets: as board columns or as a list.
+export type TicketView = 'board' | 'list'

@@ -1,0 +1,35 @@
+.ticket-view-toggle {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--surface);
+  border: 1px solid var(--blue-soft-border);
+  border-radius: var(--radius-sm);
+}
+
+.ticket-view-toggle__button {
+  padding: 5px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.ticket-view-toggle__button:hover {
+  background: var(--blue-soft);
+}
+
+.ticket-view-toggle__button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+/* The view that is showing: solid blue, like the current page in the nav. */
+.ticket-view-toggle__button[aria-pressed='true'] {
+  color: var(--text-on-blue);
+  background: var(--blue);
+}
