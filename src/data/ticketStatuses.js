@@ -9,5 +9,8 @@ export const STATUS_LABELS = {
   CLOSED: 'Closed',
 }
 
+// Every new ticket starts here.
+export const FIRST_STATUS = STATUS_ORDER[0]
+
 // A ticket here has nowhere further to go, so it gets no "Move to next".
 export const LAST_STATUS = STATUS_ORDER[STATUS_ORDER.length - 1]

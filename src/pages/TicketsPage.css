@@ -5,3 +5,37 @@
   gap: 16px;
   align-items: start;
 }
+
+/* Page title on the left, New ticket on the right; stacks on narrow screens. */
+.tickets-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tickets-page__header .page-title {
+  margin-bottom: 0;
+}
+
+.tickets-page__new {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-on-blue);
+  text-decoration: none;
+  background: var(--blue);
+  border-radius: var(--radius-sm);
+  transition: background 140ms ease;
+}
+
+.tickets-page__new:hover {
+  background: var(--blue-hover);
+}
+
+.tickets-page__new:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}

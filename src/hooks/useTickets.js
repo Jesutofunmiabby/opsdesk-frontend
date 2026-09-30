@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { TicketsContext } from '../context/TicketsContext'
 
-// Returns { tickets, moveTicket } from the nearest TicketsProvider.
+// Returns { tickets, moveTicket, addTicket, updateTicket } from the nearest TicketsProvider.
 export function useTickets() {
   const value = useContext(TicketsContext)
   if (value === null) {

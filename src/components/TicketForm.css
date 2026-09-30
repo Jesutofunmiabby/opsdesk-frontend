@@ -1,0 +1,52 @@
+.ticket-form {
+  display: grid;
+  gap: 20px;
+}
+
+.ticket-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.ticket-form__submit {
+  padding: 9px 18px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-on-blue);
+  background: var(--blue);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.ticket-form__submit:hover {
+  background: var(--blue-hover);
+}
+
+/* A quieter, outlined companion to the save button. */
+.ticket-form__cancel {
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blue);
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--blue-soft-border);
+  border-radius: var(--radius-sm);
+  transition: background 140ms ease;
+}
+
+.ticket-form__cancel:hover {
+  background: var(--blue-soft);
+}
+
+.ticket-form__submit:focus-visible,
+.ticket-form__cancel:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}

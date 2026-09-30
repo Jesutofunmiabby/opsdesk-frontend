@@ -1,6 +1,15 @@
-.ticket-detail-page__back {
-  display: inline-block;
+/* Back link on the left, Edit on the right, lined up with the panel below. */
+.ticket-detail-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 640px;
   margin-bottom: 14px;
+}
+
+.ticket-detail-page__back {
   font-size: 14px;
   font-weight: 600;
   color: var(--blue);
@@ -30,9 +39,17 @@
 }
 
 .ticket-detail-page__title {
-  margin: 6px 0 20px;
+  margin: 6px 0 12px;
   font-size: 22px;
   line-height: 130%;
+}
+
+.ticket-detail-page__description {
+  margin-bottom: 20px;
+  font-size: 15px;
+  line-height: 155%;
+  /* Keeps the line breaks someone typed into a description. */
+  white-space: pre-line;
 }
 
 .ticket-detail-page__details {
@@ -58,14 +75,8 @@
   color: var(--text-strong);
 }
 
-.ticket-detail-page__text {
-  margin-bottom: 20px;
-  font-size: 15px;
-}
-
-.ticket-detail-page__button {
-  display: inline-block;
-  padding: 8px 16px;
+.ticket-detail-page__edit {
+  padding: 7px 18px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-on-blue);
@@ -75,12 +86,12 @@
   transition: background 140ms ease;
 }
 
-.ticket-detail-page__button:hover {
+.ticket-detail-page__edit:hover {
   background: var(--blue-hover);
 }
 
 .ticket-detail-page__back:focus-visible,
-.ticket-detail-page__button:focus-visible {
+.ticket-detail-page__edit:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 2px;
 }

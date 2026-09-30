@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { STATUS_ORDER, STATUS_LABELS } from '../data/ticketStatuses'
 import { useTickets } from '../hooks/useTickets'
 import Column from '../components/Column'
@@ -10,7 +11,12 @@ function TicketsPage() {
 
   return (
     <section>
-      <h2 className="page-title">Ticket board</h2>
+      <header className="tickets-page__header">
+        <h2 className="page-title">Ticket board</h2>
+        <Link to="/tickets/new" className="tickets-page__new">
+          New ticket
+        </Link>
+      </header>
       <div className="tickets-page__columns">
         {STATUS_ORDER.map((status) => (
           <Column
