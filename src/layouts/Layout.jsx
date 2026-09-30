@@ -7,6 +7,7 @@ import './Layout.css'
 const NAV_LINKS = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/tickets', label: 'Tickets' },
+  { to: '/projects', label: 'Projects' },
   { to: '/teams', label: 'Teams' },
   { to: '/users', label: 'Users' },
 ]
