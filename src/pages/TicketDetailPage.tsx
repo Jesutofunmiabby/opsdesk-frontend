@@ -2,8 +2,8 @@ import { Link, useParams } from 'react-router-dom'
 import { STATUS_LABELS } from '../features/tickets/data/ticketStatuses'
 import { useTickets } from '../features/tickets/hooks/useTickets'
 import { findTicketById } from '../features/tickets/utils/tickets'
-import PriorityBadge from '../components/PriorityBadge'
-import TicketNotFound from '../components/TicketNotFound'
+import PriorityBadge from '../features/tickets/components/PriorityBadge'
+import TicketNotFound from '../features/tickets/components/TicketNotFound'
 import './TicketDetailPage.css'
 
 // One ticket, chosen by the :id part of the URL (/tickets/4 shows ticket 4).

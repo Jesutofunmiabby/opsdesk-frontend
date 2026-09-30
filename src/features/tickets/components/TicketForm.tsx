@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { PRIORITY_OPTIONS, isPriority } from '../features/tickets/data/ticketPriorities'
-import { validateTicket } from '../features/tickets/utils/validateTicket'
+import { PRIORITY_OPTIONS, isPriority } from '../data/ticketPriorities'
+import { validateTicket } from '../utils/validateTicket'
 import type {
   TicketFormErrors,
   TicketFormField,
   TicketFormValues,
-} from '../features/tickets/types'
-import FormField from './FormField'
+} from '../types'
+import FormField from '../../../components/FormField'
 import './TicketForm.css'
 
 interface TicketFormProps {

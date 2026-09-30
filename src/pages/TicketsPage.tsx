@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { STATUS_ORDER, STATUS_LABELS } from '../features/tickets/data/ticketStatuses'
 import { useTickets } from '../features/tickets/hooks/useTickets'
-import Column from '../components/Column'
+import Column from '../features/tickets/components/Column'
 import './TicketsPage.css'
 
 // The tickets are shared through TicketsProvider, so the board survives

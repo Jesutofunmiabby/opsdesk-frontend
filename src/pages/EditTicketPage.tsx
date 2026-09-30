@@ -2,8 +2,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTickets } from '../features/tickets/hooks/useTickets'
 import { findTicketById } from '../features/tickets/utils/tickets'
 import type { TicketFormValues } from '../features/tickets/types'
-import TicketForm from '../components/TicketForm'
-import TicketNotFound from '../components/TicketNotFound'
+import TicketForm from '../features/tickets/components/TicketForm'
+import TicketNotFound from '../features/tickets/components/TicketNotFound'
 import './TicketFormPage.css'
 
 // The same TicketForm as New ticket, started with this ticket's values.

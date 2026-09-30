@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { LAST_STATUS } from '../features/tickets/data/ticketStatuses'
-import type { Ticket } from '../features/tickets/types'
+import { LAST_STATUS } from '../data/ticketStatuses'
+import type { Ticket } from '../types'
 import PriorityBadge from './PriorityBadge'
 import './TicketCard.css'
 
