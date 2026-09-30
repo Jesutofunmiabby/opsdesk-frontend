@@ -1,16 +1,16 @@
 import { Link, useParams } from 'react-router-dom'
 import { STATUS_LABELS } from '../data/ticketStatuses'
 import { useTickets } from '../hooks/useTickets'
+import { findTicketById } from '../utils/tickets'
 import PriorityBadge from '../components/PriorityBadge'
 import TicketNotFound from '../components/TicketNotFound'
 import './TicketDetailPage.css'
 
 // One ticket, chosen by the :id part of the URL (/tickets/4 shows ticket 4).
 function TicketDetailPage() {
-  // URL parameters are always strings; ticket ids are numbers.
   const { id } = useParams()
   const { tickets } = useTickets()
-  const ticket = tickets.find((item) => item.id === Number(id))
+  const ticket = findTicketById(tickets, id)
 
   if (!ticket) {
     return <TicketNotFound id={id} />

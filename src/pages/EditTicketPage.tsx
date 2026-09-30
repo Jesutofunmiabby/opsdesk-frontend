@@ -1,5 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTickets } from '../hooks/useTickets'
+import { findTicketById } from '../utils/tickets'
+import type { TicketFormValues } from '../types/ticket'
 import TicketForm from '../components/TicketForm'
 import TicketNotFound from '../components/TicketNotFound'
 import './TicketFormPage.css'
@@ -9,33 +11,36 @@ function EditTicketPage() {
   const { id } = useParams()
   const { tickets, updateTicket } = useTickets()
   const navigate = useNavigate()
-  const ticket = tickets.find((item) => item.id === Number(id))
+  const ticket = findTicketById(tickets, id)
 
   if (!ticket) {
     return <TicketNotFound id={id} />
   }
 
-  const ticketPath = `/tickets/${ticket.id}`
+  // Copied out after the check above, where TypeScript knows the ticket
+  // exists. The check does not carry into handleSubmit on its own.
+  const ticketId = ticket.id
+  const ticketPath = `/tickets/${ticketId}`
 
   // Only called once the form's checks have passed.
-  function handleSubmit(values) {
-    updateTicket(ticket.id, values)
+  function handleSubmit(values: TicketFormValues) {
+    updateTicket(ticketId, values)
     navigate(ticketPath)
   }
 
   return (
     <section>
       <Link to={ticketPath} className="ticket-form-page__back">
-        ← Ticket #{ticket.id}
+        ← Ticket #{ticketId}
       </Link>
 
       <div className="ticket-form-page__panel">
-        <h2 className="page-title">Edit ticket #{ticket.id}</h2>
+        <h2 className="page-title">Edit ticket #{ticketId}</h2>
         {/* The form copies initialValues into its state once, when it first
             appears. The key gives it a fresh start if the URL moves straight
             to another ticket's edit page. */}
         <TicketForm
-          key={ticket.id}
+          key={ticketId}
           initialValues={{
             title: ticket.title,
             description: ticket.description,
