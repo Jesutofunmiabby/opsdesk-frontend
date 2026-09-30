@@ -1,8 +1,13 @@
 import { Link } from 'react-router-dom'
 import './TicketNotFound.css'
 
+interface TicketNotFoundProps {
+  // The id from the URL, as it was typed.
+  id: string
+}
+
 // Shown by any ticket page whose URL names a ticket that does not exist.
-function TicketNotFound({ id }) {
+function TicketNotFound({ id }: TicketNotFoundProps) {
   return (
     <section className="ticket-not-found">
       <h2 className="page-title">Ticket not found</h2>
