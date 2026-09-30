@@ -3,6 +3,7 @@ import { STATUS_ORDER, STATUS_LABELS } from '../data/ticketStatuses'
 import { countTicketsByStatus } from '../utils/tickets'
 import { getDepartments } from '../utils/employees'
 import { useUsers } from '../hooks/useUsers'
+import { useTickets } from '../hooks/useTickets'
 import StatCard from '../components/StatCard'
 import './DashboardPage.css'
 
@@ -10,8 +11,9 @@ import './DashboardPage.css'
 const employeeCount = employees.length
 const departmentCount = getDepartments(employees).length
 
-function DashboardPage({ tickets }) {
-  // Counted from the array App owns, so these stay right after a ticket moves.
+function DashboardPage() {
+  // Counted from the shared tickets, so these stay right after a ticket moves.
+  const { tickets } = useTickets()
   const ticketCounts = countTicketsByStatus(tickets)
 
   // The users count comes from the API, so this card has its own states.

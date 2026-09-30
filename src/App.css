@@ -1,38 +1,3 @@
-/* A plain block, so .app__content centres by ordinary block layout rather
-   than by flex cross-axis auto margins. */
-.app {
-  min-height: 100svh;
-}
-
-/* Full-width blue bar; the inner wrapper keeps its contents aligned with
-   the page content below. */
-.app__header {
-  background: var(--blue);
-  box-shadow: var(--shadow-header);
-}
-
-.app__header-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 14px 24px;
-}
-
-.app__title {
-  color: var(--text-on-blue);
-}
-
-.app__content {
-  width: 100%;
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 28px 24px 56px;
-}
-
 /* Shared heading style for every page. */
 .page-title {
   margin-bottom: 16px;
