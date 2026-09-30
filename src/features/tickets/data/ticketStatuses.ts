@@ -1,4 +1,4 @@
-import type { TicketStatus } from '../types/ticket'
+import type { TicketStatus } from '../types'
 
 // The four board columns, in the order a ticket moves through them.
 export const STATUS_ORDER: TicketStatus[] = [

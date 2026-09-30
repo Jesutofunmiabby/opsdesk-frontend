@@ -1,4 +1,4 @@
-import type { Priority } from '../types/ticket'
+import type { Priority } from '../types'
 
 // One choice in the priority dropdown.
 interface PriorityOption {

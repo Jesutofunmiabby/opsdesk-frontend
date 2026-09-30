@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import initialTickets from '../data/tickets'
-import { FIRST_STATUS } from '../data/ticketStatuses'
+import initialTickets from '../features/tickets/data/tickets'
+import { FIRST_STATUS } from '../features/tickets/data/ticketStatuses'
 import {
   getNextTicketId,
   moveTicketToNextStatus,
   updateTicketFields,
-} from '../utils/tickets'
+} from '../features/tickets/utils/tickets'
 import { TicketsContext } from './TicketsContext'
-import type { Ticket, TicketFormValues } from '../types/ticket'
+import type { Ticket, TicketFormValues } from '../features/tickets/types'
 
 interface TicketsProviderProps {
   // The part of the app that can use the tickets.

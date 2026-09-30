@@ -1,4 +1,4 @@
-import type { Ticket } from '../types/ticket'
+import type { Ticket } from '../features/tickets/types'
 import TicketCard from './TicketCard'
 import './Column.css'
 

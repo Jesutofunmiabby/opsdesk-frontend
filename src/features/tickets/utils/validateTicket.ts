@@ -1,4 +1,4 @@
-import type { TicketFormErrors, TicketFormValues } from '../types/ticket'
+import type { TicketFormErrors, TicketFormValues } from '../types'
 
 export const TITLE_MIN_LENGTH = 3
 

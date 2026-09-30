@@ -1,5 +1,5 @@
 import { STATUS_ORDER } from '../data/ticketStatuses'
-import type { Ticket, TicketFormValues, TicketStatus } from '../types/ticket'
+import type { Ticket, TicketFormValues, TicketStatus } from '../types'
 
 // How many tickets sit in each status. Every status appears in the result,
 // including the ones with no tickets, so a dashboard card can show 0 rather

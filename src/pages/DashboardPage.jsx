@@ -1,6 +1,6 @@
 import employees from '../data/employees'
-import { STATUS_ORDER, STATUS_LABELS } from '../data/ticketStatuses'
-import { countTicketsByStatus } from '../utils/tickets'
+import { STATUS_ORDER, STATUS_LABELS } from '../features/tickets/data/ticketStatuses'
+import { countTicketsByStatus } from '../features/tickets/utils/tickets'
 import { getDepartments } from '../utils/employees'
 import { useUsers } from '../hooks/useUsers'
 import { useTickets } from '../hooks/useTickets'

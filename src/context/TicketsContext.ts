@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { Ticket, TicketFormValues } from '../types/ticket'
+import type { Ticket, TicketFormValues } from '../features/tickets/types'
 
 // Everything TicketsProvider shares: the tickets, and the actions that change
 // them.

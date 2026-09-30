@@ -1,4 +1,4 @@
-import type { Priority } from '../types/ticket'
+import type { Priority } from '../features/tickets/types'
 import './PriorityBadge.css'
 
 interface PriorityBadgeProps {

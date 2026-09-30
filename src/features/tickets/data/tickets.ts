@@ -1,4 +1,4 @@
-import type { Ticket } from '../types/ticket'
+import type { Ticket } from '../types'
 
 // Mock IT support tickets for the board.
 // No backend yet — this is the starting array that TicketsProvider copies
