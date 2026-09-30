@@ -18,3 +18,11 @@ export interface Ticket {
 // The parts of a ticket someone fills in on the create and edit forms. The id
 // and status are set by the app, so they are not part of the form.
 export type TicketFormValues = Pick<Ticket, 'title' | 'description' | 'priority'>
+
+// The name of one field on the ticket form: 'title', 'description' or
+// 'priority'.
+export type TicketFormField = keyof TicketFormValues
+
+// A message for each form field that has a problem. Partial means every field
+// is optional: a field with no problem has no entry, so {} means all is well.
+export type TicketFormErrors = Partial<Record<TicketFormField, string>>

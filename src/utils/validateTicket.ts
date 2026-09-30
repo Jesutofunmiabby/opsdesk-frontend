@@ -1,3 +1,5 @@
+import type { TicketFormErrors, TicketFormValues } from '../types/ticket'
+
 export const TITLE_MIN_LENGTH = 3
 
 // Checks the ticket form's values. Returns an object with a message for each
@@ -5,8 +7,8 @@ export const TITLE_MIN_LENGTH = 3
 // object means the ticket can be saved. Keys follow the order of the fields
 // on the form, so the first key is the first problem on screen.
 // Spaces at either end are ignored: "  " is not a title.
-export function validateTicket(values) {
-  const errors = {}
+export function validateTicket(values: TicketFormValues): TicketFormErrors {
+  const errors: TicketFormErrors = {}
   const title = values.title.trim()
   const description = values.description.trim()
 
