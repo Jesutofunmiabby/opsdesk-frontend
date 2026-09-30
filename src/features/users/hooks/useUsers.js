@@ -1,4 +1,4 @@
-import { useFetch } from './useFetch'
+import { useFetch } from '../../../hooks/useFetch'
 
 const USERS_URL = 'https://dummyjson.com/users?limit=12'
 

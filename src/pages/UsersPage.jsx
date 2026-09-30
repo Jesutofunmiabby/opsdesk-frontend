@@ -1,5 +1,5 @@
-import { useUsers } from '../hooks/useUsers'
-import UserCard from '../components/UserCard'
+import { useUsers } from '../features/users/hooks/useUsers'
+import UserCard from '../features/users/components/UserCard'
 import './UsersPage.css'
 
 function UsersPage() {
