@@ -1,6 +1,11 @@
+import type { User } from '../types'
 import './UserCard.css'
 
-function UserCard({ user }) {
+interface UserCardProps {
+  user: User
+}
+
+function UserCard({ user }: UserCardProps) {
   const fullName = `${user.firstName} ${user.lastName}`
 
   return (
