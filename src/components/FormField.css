@@ -1,0 +1,58 @@
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+/* Shared by every kind of control, so text boxes and dropdowns match. */
+.form-field__control {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text-strong);
+  background: var(--surface);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+textarea.form-field__control {
+  min-height: 130px;
+  line-height: 150%;
+  resize: vertical;
+}
+
+.form-field__control:hover {
+  border-color: var(--blue-soft-border);
+}
+
+/* A clear focus style: blue border plus a soft blue ring. */
+.form-field__control:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+/* A field with a problem gets a red border, and a red ring when focused. */
+.form-field__control[aria-invalid='true'] {
+  border-color: var(--error);
+}
+
+.form-field__control[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px var(--error-ring);
+}
+
+.form-field__error {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--error);
+}
