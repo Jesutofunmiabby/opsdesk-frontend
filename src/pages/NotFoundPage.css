@@ -1,0 +1,34 @@
+.not-found-page {
+  max-width: 520px;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.not-found-page__text {
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.not-found-page__link {
+  display: inline-block;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-on-blue);
+  text-decoration: none;
+  background: var(--blue);
+  border-radius: var(--radius-sm);
+  transition: background 140ms ease;
+}
+
+.not-found-page__link:hover {
+  background: var(--blue-hover);
+}
+
+.not-found-page__link:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}

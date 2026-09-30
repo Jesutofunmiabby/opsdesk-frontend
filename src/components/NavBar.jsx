@@ -1,22 +1,22 @@
+import { NavLink } from 'react-router-dom'
 import './NavBar.css'
 
-// Buttons rather than links: there is no routing yet, so these change state
-// rather than navigate to a URL.
-function NavBar({ pages, currentPage, onNavigate }) {
+// NavLink knows the current URL, so it marks its own link as the current page
+// (and sets aria-current="page") without any state of ours. A link stays
+// current on the pages beneath it too: Tickets is highlighted on /tickets/4.
+function NavBar({ links }) {
   return (
     <nav className="nav-bar" aria-label="Main">
-      {pages.map((page) => (
-        <button
-          key={page.key}
-          type="button"
-          className={
-            page.key === currentPage ? 'nav-bar__link nav-bar__link--current' : 'nav-bar__link'
+      {links.map((link) => (
+        <NavLink
+          key={link.to}
+          to={link.to}
+          className={({ isActive }) =>
+            isActive ? 'nav-bar__link nav-bar__link--current' : 'nav-bar__link'
           }
-          aria-current={page.key === currentPage ? 'page' : undefined}
-          onClick={() => onNavigate(page.key)}
         >
-          {page.label}
-        </button>
+          {link.label}
+        </NavLink>
       ))}
     </nav>
   )

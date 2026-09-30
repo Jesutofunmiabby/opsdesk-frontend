@@ -9,6 +9,7 @@
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
+  text-decoration: none;
   color: var(--text-on-blue);
   background: none;
   border: 1px solid transparent;
