@@ -8,9 +8,12 @@ interface TicketCardProps {
   ticket: Ticket
   // Called with the ticket's id when "Move to next" is pressed.
   onMove: (ticketId: number) => void
+  // True while the move is being saved: the button says so and is disabled.
+  // Defaults to false.
+  isMoving?: boolean
 }
 
-function TicketCard({ ticket, onMove }: TicketCardProps) {
+function TicketCard({ ticket, onMove, isMoving = false }: TicketCardProps) {
   // A CLOSED ticket has nowhere further to go, so it gets no button.
   const canMove = ticket.status !== LAST_STATUS
 
@@ -30,9 +33,10 @@ function TicketCard({ ticket, onMove }: TicketCardProps) {
           <button
             type="button"
             className="ticket-card__move"
+            disabled={isMoving}
             onClick={() => onMove(ticket.id)}
           >
-            Move to next
+            {isMoving ? 'Moving…' : 'Move to next'}
           </button>
         )}
       </div>

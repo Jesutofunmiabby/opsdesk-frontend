@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTickets } from '../hooks/useTickets'
+import type { Ticket } from '../types'
 import {
   ALL_STATUSES,
   TICKETS_PER_PAGE,
@@ -12,9 +12,12 @@ import TicketTable from './TicketTable'
 import Pagination from './Pagination'
 import './TicketList.css'
 
+interface TicketListProps {
+  tickets: Ticket[]
+}
+
 // Every ticket as a searchable, filterable list, 10 to a page.
-function TicketList() {
-  const { tickets } = useTickets()
+function TicketList({ tickets }: TicketListProps) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<StatusFilter>(ALL_STATUSES)
   const [page, setPage] = useState(1)

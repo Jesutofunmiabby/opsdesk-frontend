@@ -20,6 +20,13 @@ export function countTicketsByStatus(
   return counts
 }
 
+// The status after this one on the board, or null for the last status, which
+// has nowhere further to go.
+export function getNextStatus(status: TicketStatus): TicketStatus | null {
+  const nextIndex = STATUS_ORDER.indexOf(status) + 1
+  return nextIndex < STATUS_ORDER.length ? STATUS_ORDER[nextIndex] : null
+}
+
 // Returns a new array with one ticket advanced to the next status. A ticket
 // already at the last status is returned unchanged. New objects rather than
 // edits in place, so React can see that the state changed.

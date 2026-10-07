@@ -1,0 +1,37 @@
+/* Matches the users page's error box. */
+.request-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px dashed var(--blue-soft-border);
+  border-radius: var(--radius);
+}
+
+.request-error__message {
+  font-size: 14px;
+}
+
+.request-error__retry {
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-on-blue);
+  background: var(--blue);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.request-error__retry:hover {
+  background: var(--blue-hover);
+}
+
+.request-error__retry:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
