@@ -7,7 +7,10 @@ import {
   isTicketStatus,
 } from '../features/tickets/data/ticketStatuses'
 import { isPriority } from '../features/tickets/data/ticketPriorities'
-import { getNextTicketId } from '../features/tickets/utils/tickets'
+import {
+  getNextTicketId,
+  parseTicketId,
+} from '../features/tickets/utils/tickets'
 import {
   loadTickets,
   saveTickets,
@@ -43,15 +46,6 @@ let tickets: Ticket[] = loadTickets(initialTickets)
 function setTickets(nextTickets: Ticket[]) {
   tickets = nextTickets
   saveTickets(tickets)
-}
-
-// URL parameters are always text. Only whole positive numbers written as
-// digits are ticket ids: "4" is 4, but "4.5", "abc" and "" are not ids.
-function parseId(param: string): number | null {
-  if (!/^\d+$/.test(param)) {
-    return null
-  }
-  return Number(param)
 }
 
 function notFound(param: string) {
@@ -147,7 +141,7 @@ export const handlers = [
     '/api/tickets/:id',
     async ({ params }) => {
       await delay(RESPONSE_DELAY_MS)
-      const id = parseId(params.id)
+      const id = parseTicketId(params.id)
       const ticket = tickets.find((item) => item.id === id)
       return ticket ? HttpResponse.json<Ticket>(ticket) : notFound(params.id)
     },
@@ -181,7 +175,7 @@ export const handlers = [
     '/api/tickets/:id',
     async ({ params, request }) => {
       await delay(RESPONSE_DELAY_MS)
-      const id = parseId(params.id)
+      const id = parseTicketId(params.id)
       const existing = tickets.find((item) => item.id === id)
       if (!existing) {
         return notFound(params.id)

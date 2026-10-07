@@ -64,6 +64,17 @@ export function updateTicketFields(
   )
 }
 
+// The ticket id from the URL as a number, or null if it is not one. URL
+// parameters are text, and useParams gives undefined when there is none.
+// Only whole numbers written as digits count: "4" is 4, but "4.5", "abc",
+// " 4" and "" are null, so they are never sent to the API.
+export function parseTicketId(id: string | undefined): number | null {
+  if (id === undefined || !/^\d+$/.test(id)) {
+    return null
+  }
+  return Number(id)
+}
+
 // Finds the ticket whose id is in the URL. URL parameters are text, and
 // useParams gives undefined when the route has no such parameter, so both are
 // handled here: no id, or text that is not a ticket's id, finds nothing.

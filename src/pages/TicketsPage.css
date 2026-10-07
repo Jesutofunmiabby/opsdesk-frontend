@@ -35,10 +35,6 @@
   background: var(--blue-hover);
 }
 
-.tickets-page__message {
-  font-size: 14px;
-}
-
 .tickets-page__new:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 2px;

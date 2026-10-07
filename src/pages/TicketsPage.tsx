@@ -3,6 +3,7 @@ import TicketBoard from '../features/tickets/components/TicketBoard'
 import TicketList from '../features/tickets/components/TicketList'
 import TicketViewToggle from '../features/tickets/components/TicketViewToggle'
 import type { TicketView } from '../features/tickets/types'
+import LoadingMessage from '../components/LoadingMessage'
 import RequestError from '../components/RequestError'
 import { useGetTicketsQuery } from '../store/ticketsApi'
 import './TicketsPage.css'
@@ -30,11 +31,7 @@ function TicketsPage() {
 
   function renderTickets() {
     if (isLoading) {
-      return (
-        <p className="tickets-page__message" role="status">
-          Loading tickets…
-        </p>
-      )
+      return <LoadingMessage text="Loading tickets…" />
     }
     if (isError) {
       return (

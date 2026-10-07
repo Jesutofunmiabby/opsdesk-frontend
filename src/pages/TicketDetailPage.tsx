@@ -1,18 +1,30 @@
-import { Link, useParams } from 'react-router-dom'
-import { useTickets } from '../features/tickets/hooks/useTickets'
-import { findTicketById } from '../features/tickets/utils/tickets'
+import { Link } from 'react-router-dom'
+import { useTicketFromUrl } from '../features/tickets/hooks/useTicketFromUrl'
 import TicketDetails from '../features/tickets/components/TicketDetails'
 import TicketNotFound from '../features/tickets/components/TicketNotFound'
+import LoadingMessage from '../components/LoadingMessage'
+import RequestError from '../components/RequestError'
 import './TicketDetailPage.css'
 
 // One ticket, chosen by the :id part of the URL (/tickets/4 shows ticket 4).
 function TicketDetailPage() {
-  const { id } = useParams()
-  const { tickets } = useTickets()
-  const ticket = findTicketById(tickets, id)
+  const { id, ticket, isLoading, isNotFound, isError, refetch } =
+    useTicketFromUrl()
 
-  if (!ticket) {
+  if (isNotFound) {
     return <TicketNotFound id={id} />
+  }
+  if (isLoading) {
+    return <LoadingMessage text="Loading ticket…" />
+  }
+  // After the checks above, no ticket means the request failed.
+  if (isError || !ticket) {
+    return (
+      <RequestError
+        message="Sorry, we could not load this ticket."
+        onRetry={refetch}
+      />
+    )
   }
 
   return (

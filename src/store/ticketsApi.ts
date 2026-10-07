@@ -64,6 +64,18 @@ export const ticketsApi = createApi({
   }),
 })
 
+// True if a request failed because the server said there is no such ticket
+// (404). RTK Query's errors are either an HTTP answer, which has a status, or
+// a problem in the app's own code, which does not.
+export function isNotFoundError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'status' in error &&
+    error.status === 404
+  )
+}
+
 // A hook for each endpoint, named from it: getTickets becomes
 // useGetTicketsQuery, createTicket becomes useCreateTicketMutation.
 export const {
