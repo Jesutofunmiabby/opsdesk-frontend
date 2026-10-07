@@ -1,34 +1,44 @@
-/* A plain block, so .layout__content centres by ordinary block layout rather
-   than by flex cross-axis auto margins. */
+/* Header on top, then the sidebar and page side by side filling the rest of
+   the screen, so the sidebar's border runs to the bottom. */
 .layout {
+  display: flex;
+  flex-direction: column;
   min-height: 100svh;
 }
 
-/* Full-width blue bar; the inner wrapper keeps its contents aligned with
-   the page content below. */
+/* Full-width blue bar. Its left padding lines the menu button up with the
+   sidebar's letters below it. */
 .layout__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 12px 13px;
   background: var(--blue);
   box-shadow: var(--shadow-header);
-}
-
-.layout__header-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 14px 24px;
 }
 
 .layout__title {
   color: var(--text-on-blue);
 }
 
+.layout__body {
+  display: flex;
+  flex: 1;
+}
+
+/* Grows to fill the space beside the sidebar, up to a readable width, and
+   centres in whatever is left. min-width: 0 lets wide content such as the
+   ticket table scroll inside the page instead of stretching it. */
 .layout__content {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   max-width: 1040px;
   margin: 0 auto;
   padding: 28px 24px 56px;
+}
+
+@media (max-width: 640px) {
+  .layout__content {
+    padding: 20px 16px 48px;
+  }
 }

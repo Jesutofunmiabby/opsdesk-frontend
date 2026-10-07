@@ -1,40 +1,59 @@
 .nav-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .nav-bar__link {
-  padding: 7px 13px;
-  font-family: inherit;
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px;
+  font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  color: var(--text-on-blue);
-  background: none;
-  border: 1px solid transparent;
+  color: var(--text-strong);
   border-radius: var(--radius-sm);
-  cursor: pointer;
   transition:
     background 140ms ease,
     color 140ms ease;
 }
 
 .nav-bar__link:hover {
-  background: var(--on-blue-soft);
+  background: var(--blue-soft);
 }
 
 .nav-bar__link:focus-visible {
-  outline: 2px solid var(--text-on-blue);
-  outline-offset: 2px;
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
 }
 
-/* The current page reads as a solid white tab against the blue bar. */
+/* A small blue square with the page's first letter. It is all that shows
+   when the sidebar is collapsed. */
+.nav-bar__letter {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+  color: var(--blue);
+  background: var(--blue-soft);
+  border-radius: 6px;
+}
+
+.nav-bar__label {
+  white-space: nowrap;
+}
+
+/* The current page: blue text on a soft blue wash, with a solid letter. */
 .nav-bar__link--current {
   color: var(--blue);
-  background: var(--surface);
+  background: var(--blue-soft);
 }
 
-.nav-bar__link--current:hover {
-  background: var(--surface);
+.nav-bar__link--current .nav-bar__letter {
+  color: var(--text-on-blue);
+  background: var(--blue);
 }
