@@ -24,8 +24,14 @@
   transition: background 140ms ease;
 }
 
-.ticket-form__submit:hover {
+.ticket-form__submit:hover:not(:disabled) {
   background: var(--blue-hover);
+}
+
+/* While the ticket is being saved. */
+.ticket-form__submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
 
 /* A quieter, outlined companion to the save button. */
