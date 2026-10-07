@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom'
+import Notifications from '../components/Notifications'
 import Sidebar from '../components/Sidebar'
 import SidebarToggle from '../components/SidebarToggle'
 import type { NavItem } from '../components/NavBar'
@@ -15,8 +16,8 @@ const NAV_LINKS: NavItem[] = [
 ]
 
 // The frame every page shares: the blue header with the sidebar button, the
-// sidebar with the navigation, and the content area. Outlet is where the
-// router draws the page for the current URL.
+// sidebar with the navigation, the content area, and the notifications in
+// the corner. Outlet is where the router draws the page for the current URL.
 function Layout() {
   return (
     <div className="layout">
@@ -31,6 +32,8 @@ function Layout() {
           <Outlet />
         </main>
       </div>
+
+      <Notifications />
     </div>
   )
 }

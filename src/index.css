@@ -40,6 +40,12 @@
   --error: #b3261e;
   --error-ring: rgba(179, 38, 30, 0.18);
 
+  /* Notifications. Success is green, the one colour outside the blue and
+     priority scales; errors reuse the red above. */
+  --success: #15803d;
+  --success-soft: #e3f4e8;
+  --error-soft: #fde3e1;
+
   /* Shape and depth */
   --radius: 12px;
   --radius-sm: 8px;

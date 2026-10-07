@@ -1,0 +1,20 @@
+/* Fixed to the bottom-right corner, above the page. It ignores clicks itself,
+   so the empty area does not block whatever is underneath. */
+.notifications {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .notifications {
+    right: 16px;
+    bottom: 16px;
+  }
+}
