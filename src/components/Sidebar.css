@@ -1,0 +1,41 @@
+.sidebar {
+  position: relative;
+  flex-shrink: 0;
+  width: 220px;
+  transition: width 180ms ease;
+}
+
+.sidebar--collapsed {
+  width: 64px;
+}
+
+/* Fills the sidebar's height, so the border runs down the whole page. */
+.sidebar__panel {
+  height: 100%;
+  padding: 16px 10px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+/* On a phone an open sidebar would squeeze the page to a sliver, so the page
+   keeps the narrow bar's width and the open panel is drawn over it. */
+@media (max-width: 640px) {
+  .sidebar {
+    width: 64px;
+  }
+
+  .sidebar:not(.sidebar--collapsed) .sidebar__panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: 220px;
+    box-shadow: var(--shadow-panel);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}
