@@ -1,6 +1,6 @@
-import { isTicketStatus } from '../data/ticketStatuses'
-import { isPriority } from '../data/ticketPriorities'
-import type { Ticket } from '../types'
+import { isTicketStatus } from '../features/tickets/data/ticketStatuses'
+import { isPriority } from '../features/tickets/data/ticketPriorities'
+import type { Ticket } from '../features/tickets/types'
 
 // Where the tickets are kept in the browser's localStorage.
 const STORAGE_KEY = 'opsdesk.tickets'

@@ -1,9 +1,10 @@
 import type { Ticket } from '../types'
 
 // Mock IT support tickets for the board.
-// No backend yet — this is the starting array that TicketsProvider copies
-// into state. The Ticket type checks every entry: a typo in a priority or
-// status, or a missing field, is an error.
+// No backend yet — this is the starting data for the mock API in
+// src/mocks/handlers.ts, used until anything has been saved. The Ticket type
+// checks every entry: a typo in a priority or status, or a missing field, is
+// an error.
 const tickets: Ticket[] = [
   {
     id: 1,

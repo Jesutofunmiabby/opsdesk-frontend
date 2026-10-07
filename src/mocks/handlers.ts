@@ -11,10 +11,7 @@ import {
   getNextTicketId,
   parseTicketId,
 } from '../features/tickets/utils/tickets'
-import {
-  loadTickets,
-  saveTickets,
-} from '../features/tickets/utils/ticketStorage'
+import { loadTickets, saveTickets } from './ticketStorage'
 import { validateTicket } from '../features/tickets/utils/validateTicket'
 import type {
   Ticket,
