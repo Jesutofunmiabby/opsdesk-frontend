@@ -4,6 +4,8 @@ import { findTicketById } from '../features/tickets/utils/tickets'
 import type { TicketFormValues } from '../features/tickets/types'
 import TicketForm from '../features/tickets/components/TicketForm'
 import TicketNotFound from '../features/tickets/components/TicketNotFound'
+import { useAppDispatch } from '../store/hooks'
+import { addNotification } from '../store/uiSlice'
 import './TicketFormPage.css'
 
 // The same TicketForm as New ticket, started with this ticket's values.
@@ -11,6 +13,7 @@ function EditTicketPage() {
   const { id } = useParams()
   const { tickets, updateTicket } = useTickets()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const ticket = findTicketById(tickets, id)
 
   if (!ticket) {
@@ -25,6 +28,12 @@ function EditTicketPage() {
   // Only called once the form's checks have passed.
   function handleSubmit(values: TicketFormValues) {
     updateTicket(ticketId, values)
+    dispatch(
+      addNotification({
+        message: `Ticket #${ticketId} updated`,
+        type: 'success',
+      }),
+    )
     navigate(ticketPath)
   }
 
