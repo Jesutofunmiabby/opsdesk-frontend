@@ -1,23 +1,37 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useTickets } from '../features/tickets/hooks/useTickets'
-import { findTicketById } from '../features/tickets/utils/tickets'
+import { Link, useNavigate } from 'react-router-dom'
+import { useTicketFromUrl } from '../features/tickets/hooks/useTicketFromUrl'
 import type { TicketFormValues } from '../features/tickets/types'
 import TicketForm from '../features/tickets/components/TicketForm'
 import TicketNotFound from '../features/tickets/components/TicketNotFound'
+import LoadingMessage from '../components/LoadingMessage'
+import RequestError from '../components/RequestError'
 import { useAppDispatch } from '../store/hooks'
+import { useUpdateTicketMutation } from '../store/ticketsApi'
 import { addNotification } from '../store/uiSlice'
 import './TicketFormPage.css'
 
 // The same TicketForm as New ticket, started with this ticket's values.
 function EditTicketPage() {
-  const { id } = useParams()
-  const { tickets, updateTicket } = useTickets()
+  const { id, ticket, isLoading, isNotFound, isError, refetch } =
+    useTicketFromUrl()
+  const [updateTicket, { isLoading: isSaving }] = useUpdateTicketMutation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const ticket = findTicketById(tickets, id)
 
-  if (!ticket) {
+  if (isNotFound) {
     return <TicketNotFound id={id} />
+  }
+  if (isLoading) {
+    return <LoadingMessage text="Loading ticket…" />
+  }
+  // After the checks above, no ticket means the request failed.
+  if (isError || !ticket) {
+    return (
+      <RequestError
+        message="Sorry, we could not load this ticket."
+        onRetry={refetch}
+      />
+    )
   }
 
   // Copied out after the check above, where TypeScript knows the ticket
@@ -25,16 +39,27 @@ function EditTicketPage() {
   const ticketId = ticket.id
   const ticketPath = `/tickets/${ticketId}`
 
-  // Only called once the form's checks have passed.
-  function handleSubmit(values: TicketFormValues) {
-    updateTicket(ticketId, values)
-    dispatch(
-      addNotification({
-        message: `Ticket #${ticketId} updated`,
-        type: 'success',
-      }),
-    )
-    navigate(ticketPath)
+  // Only called once the form's checks have passed. The mutation invalidates
+  // this ticket's tag, so its page and the board show the new values.
+  async function handleSubmit(values: TicketFormValues) {
+    try {
+      await updateTicket({ id: ticketId, changes: values }).unwrap()
+      dispatch(
+        addNotification({
+          message: `Ticket #${ticketId} updated`,
+          type: 'success',
+        }),
+      )
+      navigate(ticketPath)
+    } catch {
+      // The form stays as it was, so the changes are not lost.
+      dispatch(
+        addNotification({
+          message: `Could not save ticket #${ticketId}. Please try again.`,
+          type: 'error',
+        }),
+      )
+    }
   }
 
   return (
@@ -58,6 +83,7 @@ function EditTicketPage() {
           onSubmit={handleSubmit}
           submitLabel="Save changes"
           cancelTo={ticketPath}
+          isSaving={isSaving}
         />
       </div>
     </section>

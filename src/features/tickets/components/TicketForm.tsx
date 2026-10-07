@@ -21,6 +21,9 @@ interface TicketFormProps {
   submitLabel: string
   // Where Cancel goes.
   cancelTo: string
+  // True while the save request is running: the button is disabled, so the
+  // ticket cannot be sent twice. Defaults to false.
+  isSaving?: boolean
 }
 
 // One form for both creating and editing a ticket. The page using it decides
@@ -31,6 +34,7 @@ function TicketForm({
   onSubmit,
   submitLabel,
   cancelTo,
+  isSaving = false,
 }: TicketFormProps) {
   // Controlled inputs: React state holds what is in each box, and each box
   // shows that state. Typing calls a change handler, which updates the state.
@@ -133,8 +137,12 @@ function TicketForm({
       </FormField>
 
       <div className="ticket-form__actions">
-        <button type="submit" className="ticket-form__submit">
-          {submitLabel}
+        <button
+          type="submit"
+          className="ticket-form__submit"
+          disabled={isSaving}
+        >
+          {isSaving ? 'Saving…' : submitLabel}
         </button>
         <Link to={cancelTo} className="ticket-form__cancel">
           Cancel

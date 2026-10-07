@@ -8,9 +8,11 @@ interface ColumnProps {
   // Only the tickets that belong in this column.
   tickets: Ticket[]
   onMove: (ticketId: number) => void
+  // Whether a ticket's move is still being saved.
+  isMoving: (ticket: Ticket) => boolean
 }
 
-function Column({ label, tickets, onMove }: ColumnProps) {
+function Column({ label, tickets, onMove, isMoving }: ColumnProps) {
   return (
     <section className="column">
       <header className="column__header">
@@ -21,7 +23,11 @@ function Column({ label, tickets, onMove }: ColumnProps) {
         <ul className="column__list">
           {tickets.map((ticket) => (
             <li key={ticket.id}>
-              <TicketCard ticket={ticket} onMove={onMove} />
+              <TicketCard
+                ticket={ticket}
+                onMove={onMove}
+                isMoving={isMoving(ticket)}
+              />
             </li>
           ))}
         </ul>

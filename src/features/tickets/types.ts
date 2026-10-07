@@ -19,6 +19,10 @@ export interface Ticket {
 // and status are set by the app, so they are not part of the form.
 export type TicketFormValues = Pick<Ticket, 'title' | 'description' | 'priority'>
 
+// The fields an update can change: any of the form fields, or the status.
+// Partial means each is optional, so moving a ticket sends only its status.
+export type TicketUpdate = Partial<TicketFormValues & Pick<Ticket, 'status'>>
+
 // The name of one field on the ticket form: 'title', 'description' or
 // 'priority'.
 export type TicketFormField = keyof TicketFormValues

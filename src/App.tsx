@@ -1,15 +1,10 @@
-import TicketsProvider from './features/tickets/hooks/TicketsProvider'
 import AppRoutes from './routes/AppRoutes'
 import './App.css'
 
-// The whole app: the shared tickets around every route, so any page can use
-// them.
+// The whole app. Tickets come from the API through RTK Query, set up in the
+// Redux store in main.tsx, so nothing needs to wrap the routes here.
 function App() {
-  return (
-    <TicketsProvider>
-      <AppRoutes />
-    </TicketsProvider>
-  )
+  return <AppRoutes />
 }
 
 export default App

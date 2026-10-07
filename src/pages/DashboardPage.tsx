@@ -6,8 +6,8 @@ import {
 import { countTicketsByStatus } from '../features/tickets/utils/tickets'
 import { getDepartments } from '../features/employees/utils/employees'
 import { useUsers } from '../features/users/hooks/useUsers'
-import { useTickets } from '../features/tickets/hooks/useTickets'
 import StatCard from '../components/StatCard'
+import { useGetTicketsQuery } from '../store/ticketsApi'
 import type { StatCardState } from '../components/StatCard'
 import './DashboardPage.css'
 
@@ -16,9 +16,21 @@ const employeeCount = employees.length
 const departmentCount = getDepartments(employees).length
 
 function DashboardPage() {
-  // Counted from the shared tickets, so these stay right after a ticket moves.
-  const { tickets } = useTickets()
+  // The same cached query as the tickets page: opening the dashboard after
+  // the board uses the tickets already loaded, and a ticket moved on the
+  // board refreshes these counts too.
+  const {
+    data: tickets = [],
+    isLoading: ticketsLoading,
+    isError: ticketsError,
+    refetch: refetchTickets,
+  } = useGetTicketsQuery()
   const ticketCounts = countTicketsByStatus(tickets)
+  const ticketsState: StatCardState = ticketsLoading
+    ? 'loading'
+    : ticketsError
+      ? 'error'
+      : 'ready'
 
   // The users count comes from the API, so this card has its own states.
   const { data: users, status, retry } = useUsers()
@@ -36,6 +48,8 @@ function DashboardPage() {
             key={status}
             label={STATUS_LABELS[status]}
             value={ticketCounts[status]}
+            state={ticketsState}
+            onRetry={refetchTickets}
           />
         ))}
       </div>

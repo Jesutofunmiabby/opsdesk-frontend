@@ -72,8 +72,14 @@
   transition: background 140ms ease;
 }
 
-.ticket-card__move:hover {
+.ticket-card__move:hover:not(:disabled) {
   background: var(--blue-hover);
+}
+
+/* While the move is being saved. */
+.ticket-card__move:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
 
 .ticket-card__move:focus-visible {

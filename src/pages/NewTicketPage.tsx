@@ -1,8 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useTickets } from '../features/tickets/hooks/useTickets'
 import TicketForm from '../features/tickets/components/TicketForm'
 import type { TicketFormValues } from '../features/tickets/types'
 import { useAppDispatch } from '../store/hooks'
+import { useCreateTicketMutation } from '../store/ticketsApi'
 import { addNotification } from '../store/uiSlice'
 import './TicketFormPage.css'
 
@@ -15,17 +15,33 @@ const EMPTY_TICKET: TicketFormValues = {
 }
 
 function NewTicketPage() {
-  const { addTicket } = useTickets()
+  // createTicket sends the request; isLoading is true until it answers.
+  const [createTicket, { isLoading: isSaving }] = useCreateTicketMutation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
-  // Only called once the form's checks have passed.
-  function handleSubmit(values: TicketFormValues) {
-    const newId = addTicket(values)
-    dispatch(
-      addNotification({ message: `Ticket #${newId} created`, type: 'success' }),
-    )
-    navigate(`/tickets/${newId}`)
+  // Only called once the form's checks have passed. The API chooses the new
+  // ticket's id, so the page waits for its answer before going there.
+  async function handleSubmit(values: TicketFormValues) {
+    try {
+      // unwrap() gives the created ticket, or throws if the request failed.
+      const ticket = await createTicket(values).unwrap()
+      dispatch(
+        addNotification({
+          message: `Ticket #${ticket.id} created`,
+          type: 'success',
+        }),
+      )
+      navigate(`/tickets/${ticket.id}`)
+    } catch {
+      // The form stays as it was, so nothing typed is lost.
+      dispatch(
+        addNotification({
+          message: 'Could not create the ticket. Please try again.',
+          type: 'error',
+        }),
+      )
+    }
   }
 
   return (
@@ -41,6 +57,7 @@ function NewTicketPage() {
           onSubmit={handleSubmit}
           submitLabel="Create ticket"
           cancelTo="/tickets"
+          isSaving={isSaving}
         />
       </div>
     </section>
