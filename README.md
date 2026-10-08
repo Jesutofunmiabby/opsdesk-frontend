@@ -9,6 +9,40 @@ Built with **React + Vite**, **TypeScript**, **React Router** and plain
 **CSS**. No UI framework: everything here is written by hand so the underlying
 React ideas stay visible.
 
+## Week 3
+
+### What changed this week
+
+- **Redux for shared UI state.** A Redux Toolkit store holds the two pieces of
+  UI state that distant parts of the page share: whether the sidebar is
+  collapsed (the header button and the sidebar both read it), and the stack of
+  notifications that any page can add to. Server data such as tickets is never
+  kept in a Redux slice.
+- **Collapsible sidebar and notifications.** Navigation moved into a sidebar
+  that collapses to a narrow bar of letters. Creating or editing a ticket
+  shows a success notification in the corner, and a save or move that fails
+  shows an error one. Each closes itself after a few seconds, or straight
+  away with its dismiss button.
+- **Tickets from an API with RTK Query.** Tickets are loaded with RTK Query
+  instead of `useState` and `useEffect`. The board, list, dashboard and ticket
+  pages share one cached copy. Each page shows a loading message while the
+  request runs and an error with a Retry button if it fails, using RTK
+  Query's `isLoading` and `isError`. Creating, editing and moving tickets are
+  RTK Query mutations; each one marks the tickets it changed as out of date
+  (`invalidatesTags`), so the list refreshes by itself.
+- **Mock API with MSW.** The tickets API is mocked until the real backend
+  exists. See [Ticket data is mocked](#ticket-data-is-mocked).
+- **Performance.** The Projects and Users pages are lazy-loaded with
+  `React.lazy` and `Suspense`, so their code only downloads when they are
+  opened. The ticket list's search and status filter are wrapped in `useMemo`,
+  so turning the page does not redo the filtering.
+- **Accessibility.** A skip link, better contrast, clearer focus rings and
+  more. See [Accessibility](#accessibility).
+- **Tests.** The first automated tests, run with `npm test`: a component test
+  for the ticket card, an integration test for the create form's empty title
+  error, a test for the list's search and filter helper, and tests for the
+  skip link. See [Running the tests](#running-the-tests).
+
 ## Week 2
 
 ### What changed this week
@@ -49,21 +83,6 @@ React ideas stay visible.
 - **Projects.** A new Projects page shows six internal IT projects with their
   owner, status and due date.
 
-### How to run it
-
-```bash
-npm install         # install dependencies, once
-npm run dev         # start the app at http://localhost:5173/
-```
-
-To check the code:
-
-```bash
-npm run typecheck   # TypeScript type check
-npm run lint        # Oxlint
-npm run build       # type check, then production build into dist/
-```
-
 ## Running it
 
 You need [Node.js](https://nodejs.org) (an LTS release; developed on v22).
@@ -85,17 +104,44 @@ npm run lint      # check the code with Oxlint
 npm run preview   # serve the production build locally
 ```
 
+### Running the tests
+
+```bash
+npm test               # run the tests and watch for changes
+npm test -- --run      # run the tests once and stop
+```
+
+The tests use Vitest and React Testing Library and run in jsdom, a pretend
+browser, so no real browser is needed. Test files sit next to the code they
+test, named `*.test.ts` or `*.test.tsx`.
+
+### Ticket data is mocked
+
+There is no real tickets backend yet. Until there is, ticket data comes from a
+mock API built with [MSW](https://mswjs.io) (Mock Service Worker), in
+`src/mocks/`. It catches the app's requests to `/api/tickets` in the browser
+and answers them as a real server would, after a short delay so the loading
+states can be seen. Changes are kept in the browser's localStorage, so they
+survive a refresh; remove the `opsdesk.tickets` entry (or clear the site's
+data) to go back to the 25 starting tickets.
+
+The app itself only ever talks to `/api/tickets` through RTK Query, so when
+the real backend exists, the mock can be removed without changing any page.
+The mock only starts under `npm run dev`; a production build (`npm run
+preview`) has no tickets API yet, so the ticket pages show their error state.
+
 ## The pages
 
-Navigation lives in the blue header, and the current page is highlighted. Each
-page has its own URL; `/` opens the Dashboard.
+Navigation lives in the sidebar, and the current page is highlighted. The
+menu button in the blue header collapses the sidebar to a narrow bar of
+letters. Each page has its own URL; `/` opens the Dashboard.
 
 ### Dashboard
 Summary cards across two groups:
 
 - **Tickets by status** — how many tickets sit in Open, In progress, Resolved
-  and Closed. These are counted from the same array the ticket board edits, so
-  moving a ticket updates the dashboard.
+  and Closed. These are counted from the same RTK Query cache the ticket board
+  uses, so moving a ticket updates the dashboard.
 - **Organisation** — the number of employees, the number of departments, and
   the number of user accounts. The user count is fetched from an API, so that
   card shows its own loading and error states, with a Retry button.
@@ -166,15 +212,20 @@ Fixes made while checking this:
 
 ```
 src/
-  main.tsx           entry point: the router around the app
-  App.tsx            the shared tickets around every route
+  main.tsx           entry point: starts the mock API, then renders the app
+                     inside the Redux store and the router
+  App.tsx            the app's routes
   index.css          theme: every colour and shape variable lives here
+  store/             Redux: the store, uiSlice (sidebar and notifications)
+                     and ticketsApi (RTK Query, for tickets)
+  mocks/             the MSW mock tickets API and its localStorage saving
   features/
     tickets/         components/, hooks/, data/, utils/, types.ts
     employees/       components/, data/, utils/, types.ts
     users/           components/, hooks/, types.ts
     projects/        components/, data/, types.ts
-  components/        UI shared by several features: FormField, NavBar, StatCard
+  components/        UI shared by several features: FormField, Sidebar,
+                     Notifications, SkipLink, StatCard
   hooks/             shared hooks: useFetch
   utils/             shared helpers: formatDate, getInitials
   layouts/           Layout: the blue header, navigation, and page area
@@ -191,17 +242,22 @@ Inside a feature:
 
 - **`utils/`** — plain functions. Given the same input they return the same
   output, with no React involved: `filterTickets`, `paginate`,
-  `validateTicket`, `moveTicketToNextStatus`.
-- **`hooks/`** — logic that *does* need React state. The tickets live in
-  `TicketsProvider`, shared through React context and read with `useTickets`,
-  so the dashboard, board, list and ticket pages all use the same tickets.
-  `useUsers` wraps the shared `useFetch` with the users API address.
+  `validateTicket`, `getNextStatus`.
+- **`hooks/`** — logic that *does* need React. `useTicketFromUrl` reads the
+  ticket id from the URL and loads that ticket with RTK Query, for the detail
+  and edit pages. `useUsers` wraps the shared `useFetch` with the users API
+  address.
 - **`components/`** — the feature's pieces, from a single card up to a whole
   board or list.
 - **`types.ts`** — the TypeScript types for the feature's data.
 
-`data/` folders hold mock data, so tickets, the directory and projects work
-with no backend. Only the users list talks to a real API.
+Tickets themselves are not held by any feature: they come from the tickets
+API through RTK Query (`store/ticketsApi.ts`), which keeps one cached copy for
+the dashboard, board, list and ticket pages.
+
+`data/` folders hold static data, so the directory and projects work with no
+backend. `features/tickets/data/tickets.ts` holds the starting tickets the
+mock API serves. Only the users list talks to a real API.
 
 ## Project conventions
 

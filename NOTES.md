@@ -106,3 +106,18 @@ API.
 
 Redux is kept for the few things that are UI-only and truly needed by
 components far apart: this week, `sidebarCollapsed` and `notifications`.
+
+## Update after Week 3
+
+The plan above for tickets has now been carried out:
+
+- Tickets come from RTK Query (`store/ticketsApi.ts`). The board, list,
+  dashboard and ticket pages share its one cached copy, and creating, editing
+  and moving a ticket are RTK Query mutations that refresh the list through
+  `invalidatesTags`.
+- The tickets API is mocked with MSW (`src/mocks/`) until the real backend
+  exists. Saving to localStorage moved into the mock API, standing in for the
+  server's database.
+- The tickets context was removed: `TicketsProvider`, `TicketsContext` and
+  `useTickets` no longer exist. The notes on tickets above describe how things
+  were before this change.
