@@ -9,6 +9,40 @@ Built with **React + Vite**, **TypeScript**, **React Router** and plain
 **CSS**. No UI framework: everything here is written by hand so the underlying
 React ideas stay visible.
 
+## Week 3
+
+### What changed this week
+
+- **Redux for shared UI state.** A Redux Toolkit store holds the two pieces of
+  UI state that distant parts of the page share: whether the sidebar is
+  collapsed (the header button and the sidebar both read it), and the stack of
+  notifications that any page can add to. Server data such as tickets is never
+  kept in a Redux slice.
+- **Collapsible sidebar and notifications.** Navigation moved into a sidebar
+  that collapses to a narrow bar of letters. Creating or editing a ticket
+  shows a success notification in the corner, and a save or move that fails
+  shows an error one. Each closes itself after a few seconds, or straight
+  away with its dismiss button.
+- **Tickets from an API with RTK Query.** Tickets are loaded with RTK Query
+  instead of `useState` and `useEffect`. The board, list, dashboard and ticket
+  pages share one cached copy. Each page shows a loading message while the
+  request runs and an error with a Retry button if it fails, using RTK
+  Query's `isLoading` and `isError`. Creating, editing and moving tickets are
+  RTK Query mutations; each one marks the tickets it changed as out of date
+  (`invalidatesTags`), so the list refreshes by itself.
+- **Mock API with MSW.** The tickets API is mocked until the real backend
+  exists. See [Ticket data is mocked](#ticket-data-is-mocked).
+- **Performance.** The Projects and Users pages are lazy-loaded with
+  `React.lazy` and `Suspense`, so their code only downloads when they are
+  opened. The ticket list's search and status filter are wrapped in `useMemo`,
+  so turning the page does not redo the filtering.
+- **Accessibility.** A skip link, better contrast, clearer focus rings and
+  more. See [Accessibility](#accessibility).
+- **Tests.** The first automated tests, run with `npm test`: a component test
+  for the ticket card, an integration test for the create form's empty title
+  error, a test for the list's search and filter helper, and tests for the
+  skip link. See [Running the tests](#running-the-tests).
+
 ## Week 2
 
 ### What changed this week
