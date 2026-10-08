@@ -17,7 +17,14 @@ function Column({ label, tickets, onMove, isMoving }: ColumnProps) {
     <section className="column">
       <header className="column__header">
         <h2 className="column__title">{label}</h2>
-        <span className="column__count">{tickets.length}</span>
+        {/* Only the number shows; the hidden word means a screen reader
+            says "3 tickets" rather than a bare "3". */}
+        <span className="column__count">
+          {tickets.length}
+          <span className="visually-hidden">
+            {tickets.length === 1 ? ' ticket' : ' tickets'}
+          </span>
+        </span>
       </header>
       {tickets.length > 0 ? (
         <ul className="column__list">
