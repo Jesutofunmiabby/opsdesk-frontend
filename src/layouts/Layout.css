@@ -37,6 +37,12 @@
   padding: 28px 24px 56px;
 }
 
+/* The main area takes focus only from the skip link. It is not something to
+   press, so it gets no ring; the next Tab goes to the first control in it. */
+.layout__content:focus {
+  outline: none;
+}
+
 @media (max-width: 640px) {
   .layout__content {
     padding: 20px 16px 48px;
