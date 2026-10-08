@@ -49,21 +49,6 @@ React ideas stay visible.
 - **Projects.** A new Projects page shows six internal IT projects with their
   owner, status and due date.
 
-### How to run it
-
-```bash
-npm install         # install dependencies, once
-npm run dev         # start the app at http://localhost:5173/
-```
-
-To check the code:
-
-```bash
-npm run typecheck   # TypeScript type check
-npm run lint        # Oxlint
-npm run build       # type check, then production build into dist/
-```
-
 ## Running it
 
 You need [Node.js](https://nodejs.org) (an LTS release; developed on v22).
@@ -84,6 +69,32 @@ npm run build     # type check, then production build into dist/
 npm run lint      # check the code with Oxlint
 npm run preview   # serve the production build locally
 ```
+
+### Running the tests
+
+```bash
+npm test               # run the tests and watch for changes
+npm test -- --run      # run the tests once and stop
+```
+
+The tests use Vitest and React Testing Library and run in jsdom, a pretend
+browser, so no real browser is needed. Test files sit next to the code they
+test, named `*.test.ts` or `*.test.tsx`.
+
+### Ticket data is mocked
+
+There is no real tickets backend yet. Until there is, ticket data comes from a
+mock API built with [MSW](https://mswjs.io) (Mock Service Worker), in
+`src/mocks/`. It catches the app's requests to `/api/tickets` in the browser
+and answers them as a real server would, after a short delay so the loading
+states can be seen. Changes are kept in the browser's localStorage, so they
+survive a refresh; remove the `opsdesk.tickets` entry (or clear the site's
+data) to go back to the 25 starting tickets.
+
+The app itself only ever talks to `/api/tickets` through RTK Query, so when
+the real backend exists, the mock can be removed without changing any page.
+The mock only starts under `npm run dev`; a production build (`npm run
+preview`) has no tickets API yet, so the ticket pages show their error state.
 
 ## The pages
 
