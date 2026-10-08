@@ -42,9 +42,12 @@ select.ticket-list-filters__control {
   cursor: pointer;
 }
 
+/* Full-strength grey: faded to 70% it fell to about 3.2:1 against white,
+   below the 4.5:1 text needs. At full strength it is about 6.3:1. Firefox
+   fades placeholders by default, so opacity is set back to 1. */
 .ticket-list-filters__control::placeholder {
   color: var(--text);
-  opacity: 0.7;
+  opacity: 1;
 }
 
 .ticket-list-filters__control:focus-visible {
