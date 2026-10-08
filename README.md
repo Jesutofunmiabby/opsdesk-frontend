@@ -132,15 +132,16 @@ preview`) has no tickets API yet, so the ticket pages show their error state.
 
 ## The pages
 
-Navigation lives in the blue header, and the current page is highlighted. Each
-page has its own URL; `/` opens the Dashboard.
+Navigation lives in the sidebar, and the current page is highlighted. The
+menu button in the blue header collapses the sidebar to a narrow bar of
+letters. Each page has its own URL; `/` opens the Dashboard.
 
 ### Dashboard
 Summary cards across two groups:
 
 - **Tickets by status** — how many tickets sit in Open, In progress, Resolved
-  and Closed. These are counted from the same array the ticket board edits, so
-  moving a ticket updates the dashboard.
+  and Closed. These are counted from the same RTK Query cache the ticket board
+  uses, so moving a ticket updates the dashboard.
 - **Organisation** — the number of employees, the number of departments, and
   the number of user accounts. The user count is fetched from an API, so that
   card shows its own loading and error states, with a Retry button.
@@ -211,15 +212,20 @@ Fixes made while checking this:
 
 ```
 src/
-  main.tsx           entry point: the router around the app
-  App.tsx            the shared tickets around every route
+  main.tsx           entry point: starts the mock API, then renders the app
+                     inside the Redux store and the router
+  App.tsx            the app's routes
   index.css          theme: every colour and shape variable lives here
+  store/             Redux: the store, uiSlice (sidebar and notifications)
+                     and ticketsApi (RTK Query, for tickets)
+  mocks/             the MSW mock tickets API and its localStorage saving
   features/
     tickets/         components/, hooks/, data/, utils/, types.ts
     employees/       components/, data/, utils/, types.ts
     users/           components/, hooks/, types.ts
     projects/        components/, data/, types.ts
-  components/        UI shared by several features: FormField, NavBar, StatCard
+  components/        UI shared by several features: FormField, Sidebar,
+                     Notifications, SkipLink, StatCard
   hooks/             shared hooks: useFetch
   utils/             shared helpers: formatDate, getInitials
   layouts/           Layout: the blue header, navigation, and page area
@@ -236,17 +242,22 @@ Inside a feature:
 
 - **`utils/`** — plain functions. Given the same input they return the same
   output, with no React involved: `filterTickets`, `paginate`,
-  `validateTicket`, `moveTicketToNextStatus`.
-- **`hooks/`** — logic that *does* need React state. The tickets live in
-  `TicketsProvider`, shared through React context and read with `useTickets`,
-  so the dashboard, board, list and ticket pages all use the same tickets.
-  `useUsers` wraps the shared `useFetch` with the users API address.
+  `validateTicket`, `getNextStatus`.
+- **`hooks/`** — logic that *does* need React. `useTicketFromUrl` reads the
+  ticket id from the URL and loads that ticket with RTK Query, for the detail
+  and edit pages. `useUsers` wraps the shared `useFetch` with the users API
+  address.
 - **`components/`** — the feature's pieces, from a single card up to a whole
   board or list.
 - **`types.ts`** — the TypeScript types for the feature's data.
 
-`data/` folders hold mock data, so tickets, the directory and projects work
-with no backend. Only the users list talks to a real API.
+Tickets themselves are not held by any feature: they come from the tickets
+API through RTK Query (`store/ticketsApi.ts`), which keeps one cached copy for
+the dashboard, board, list and ticket pages.
+
+`data/` folders hold static data, so the directory and projects work with no
+backend. `features/tickets/data/tickets.ts` holds the starting tickets the
+mock API serves. Only the users list talks to a real API.
 
 ## Project conventions
 
