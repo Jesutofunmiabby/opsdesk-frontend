@@ -34,11 +34,9 @@
   --priority-high-text: #b3261e;
 
   /* Forms. Errors share the HIGH priority red so "something is wrong" reads
-     the same everywhere; the focus ring is a soft wash of the brand blue. */
+     the same everywhere. Focus rings use the solid brand blue. */
   --input-border: #cbd3e1;
-  --focus-ring: rgba(29, 78, 216, 0.22);
   --error: #b3261e;
-  --error-ring: rgba(179, 38, 30, 0.18);
 
   /* Notifications. Success is green, the one colour outside the blue and
      priority scales; errors reuse the red above. */

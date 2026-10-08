@@ -131,6 +131,37 @@ fetched, this page handles four outcomes: a loading message, the cards on
 success, a friendly message when the list comes back empty, and an error
 message with a Retry button when the request fails.
 
+## Accessibility
+
+The whole app can be used with a keyboard alone. Every link, button and form
+control can be reached with **Tab**, used with **Enter** (and **Space** for
+buttons), and shows a solid blue focus ring when it has keyboard focus. Text
+labels sit on every form control, every clickable thing is a real `<button>`
+or link, and the app has no images that would need alt text.
+
+Fixes made while checking this:
+
+- **Skip link.** There was no way past the navigation: a keyboard user had to
+  tab through the menu button and all five sidebar links on every page before
+  reaching its content. A "Skip to main content" link is now the first thing
+  Tab reaches. It is hidden until focused, and pressing it moves focus into the
+  page. A test checks that it does.
+- **Placeholder contrast.** The placeholder text in the ticket search and the
+  employee search was faded to 70%, giving a contrast of about 3.2:1 against
+  white, below the 4.5:1 that text needs. It is now full strength, about
+  6.3:1.
+- **Form focus ring.** Form fields showed focus with only a faint blue wash.
+  On a field with an error the red border stayed and the wash turned a faint
+  red, so a focused field looked almost the same as an unfocused one. Fields
+  now use the same solid blue focus ring as every other control, and a field
+  with an error keeps its red border as well.
+- **Board column counts.** The number beside each column heading was read out
+  on its own, as just "3". Hidden text now makes it "3 tickets" for screen
+  readers, with no change on screen.
+- **Email links.** The email links on the Users page and in the employee
+  details panel had only the browser's default focus outline. They now use the
+  app's blue focus ring like everything else.
+
 ## Folder structure
 
 ```

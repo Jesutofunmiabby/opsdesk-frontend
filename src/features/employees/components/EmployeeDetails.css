@@ -80,3 +80,9 @@
   color: var(--blue-hover);
   text-decoration: underline;
 }
+
+.employee-details__fields a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

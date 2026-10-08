@@ -35,20 +35,18 @@ textarea.form-field__control {
   border-color: var(--blue-soft-border);
 }
 
-/* A clear focus style: blue border plus a soft blue ring. */
-.form-field__control:focus {
-  outline: none;
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px var(--focus-ring);
+/* The same solid blue ring as every other control. A faint wash was hard to
+   see, and on a field with a problem it barely changed the red border, so
+   focused and unfocused looked alike. */
+.form-field__control:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
 }
 
-/* A field with a problem gets a red border, and a red ring when focused. */
+/* A field with a problem gets a red border. It keeps the blue focus ring, so
+   both "this needs fixing" and "you are here" show at once. */
 .form-field__control[aria-invalid='true'] {
   border-color: var(--error);
-}
-
-.form-field__control[aria-invalid='true']:focus {
-  box-shadow: 0 0 0 3px var(--error-ring);
 }
 
 .form-field__error {

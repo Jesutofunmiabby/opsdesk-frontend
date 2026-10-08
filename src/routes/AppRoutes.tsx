@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from '../layouts/Layout'
 import DashboardPage from '../pages/DashboardPage'
@@ -5,10 +6,14 @@ import TicketsPage from '../pages/TicketsPage'
 import NewTicketPage from '../pages/NewTicketPage'
 import TicketDetailPage from '../pages/TicketDetailPage'
 import EditTicketPage from '../pages/EditTicketPage'
-import ProjectsPage from '../pages/ProjectsPage'
 import TeamsPage from '../pages/TeamsPage'
-import UsersPage from '../pages/UsersPage'
 import NotFoundPage from '../pages/NotFoundPage'
+
+// Loaded only when first visited: each becomes its own file in the build, so
+// the code for these pages is not downloaded until someone opens them. While
+// it downloads, the Suspense in Layout shows a loading message.
+const ProjectsPage = lazy(() => import('../pages/ProjectsPage'))
+const UsersPage = lazy(() => import('../pages/UsersPage'))
 
 // Every URL the app answers to. The routes are nested inside Layout, so each
 // page is drawn inside the shared header and content area (at its Outlet).
