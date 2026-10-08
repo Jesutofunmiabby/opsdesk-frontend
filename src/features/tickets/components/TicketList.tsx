@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Ticket } from '../types'
 import {
   ALL_STATUSES,
@@ -22,10 +22,15 @@ function TicketList({ tickets }: TicketListProps) {
   const [status, setStatus] = useState<StatusFilter>(ALL_STATUSES)
   const [page, setPage] = useState(1)
 
-  // Worked out on every render from the tickets and the three choices above,
-  // so the list is always in step with them. paginate also moves a page
-  // number that is out of range to the nearest real page.
-  const matches = filterTickets(tickets, query, status)
+  // Worked out from the tickets and the choices above, so the list is always
+  // in step with them. useMemo keeps the last result and only filters again
+  // when tickets, query or status change, so turning the page does not redo
+  // the search. paginate also moves a page number that is out of range to the
+  // nearest real page.
+  const matches = useMemo(
+    () => filterTickets(tickets, query, status),
+    [tickets, query, status],
+  )
   const shown = paginate(matches, page, TICKETS_PER_PAGE)
 
   // A new search or filter starts again from page 1, where the first matches
