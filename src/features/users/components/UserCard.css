@@ -44,6 +44,12 @@
   text-decoration: underline;
 }
 
+.user-card__email a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* Company name sits at the bottom of the card, as a soft blue tag. */
 .user-card__company {
   margin-top: auto;
