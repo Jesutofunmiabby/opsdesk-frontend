@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
+import LoadingMessage from '../components/LoadingMessage'
 import Notifications from '../components/Notifications'
 import Sidebar from '../components/Sidebar'
 import SidebarToggle from '../components/SidebarToggle'
@@ -29,7 +31,11 @@ function Layout() {
       <div className="layout__body">
         <Sidebar links={NAV_LINKS} />
         <main className="layout__content">
-          <Outlet />
+          {/* Shown in place of a lazy-loaded page while its code downloads.
+              Inside main, so the header and sidebar stay on screen. */}
+          <Suspense fallback={<LoadingMessage text="Loading page…" />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
 
