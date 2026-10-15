@@ -1,0 +1,44 @@
+/* A white card like the not found page, so a crash looks like part of the
+   app rather than a broken one. */
+.error-boundary {
+  max-width: 520px;
+  margin: 28px auto;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.error-boundary__title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: var(--text-strong);
+}
+
+.error-boundary__text {
+  margin: 0 0 20px;
+  font-size: 15px;
+}
+
+.error-boundary__reload {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-on-blue);
+  background: var(--blue);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.error-boundary__reload:hover {
+  background: var(--blue-hover);
+}
+
+.error-boundary__reload:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
