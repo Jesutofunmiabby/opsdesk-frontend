@@ -1,5 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { http, HttpResponse } from 'msw'
+import { API_URL } from '../config'
 import { server } from '../mocks/server'
 import AppRoutes from '../routes/AppRoutes'
 import { renderWithProviders } from '../test/renderWithProviders'
@@ -92,5 +94,35 @@ describe('Deleting a ticket', () => {
       name: 'Laptop will not connect to the office Wi-Fi',
     })
     expect(screen.queryByRole('link', { name: TITLE })).not.toBeInTheDocument()
+  })
+})
+
+describe('A ticket that cannot be shown', () => {
+  it('says the ticket does not exist when the API answers NOT_FOUND', async () => {
+    renderWithProviders(<AppRoutes />, { route: '/tickets/999' })
+
+    expect(
+      await screen.findByRole('heading', { name: 'Ticket not found' }),
+    ).toBeInTheDocument()
+  })
+
+  it('offers Retry for a 404 that did not come from the API', async () => {
+    // Like a wrong VITE_API_URL, or a server with no API: a 404 without the
+    // contract's NOT_FOUND body. The ticket may well exist.
+    server.use(
+      http.get(
+        `${API_URL}/tickets/:id`,
+        () => new HttpResponse(null, { status: 404 }),
+      ),
+    )
+    renderWithProviders(<AppRoutes />, { route: '/tickets/3' })
+
+    expect(
+      await screen.findByText('Sorry, we could not load this ticket.'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Ticket not found' }),
+    ).not.toBeInTheDocument()
   })
 })

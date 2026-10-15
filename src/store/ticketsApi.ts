@@ -97,15 +97,28 @@ export const ticketsApi = createApi({
   }),
 })
 
-// True if a request failed because the server said there is no such ticket
-// (404). RTK Query's errors are either an HTTP answer, which has a status, or
-// a problem in the app's own code, which does not.
+// True if a request failed because the API said there is no such ticket: a
+// 404 with the contract's NOT_FOUND error body. A 404 without that body means
+// the request never reached the API (a wrong VITE_API_URL, or no API at all),
+// which is an ordinary failure that Retry might fix, not a missing ticket.
+// RTK Query's errors are either an HTTP answer, which has a status and the
+// body as data, or a problem in the app's own code, which does not.
 export function isNotFoundError(error: unknown): boolean {
+  if (
+    typeof error !== 'object' ||
+    error === null ||
+    !('status' in error) ||
+    error.status !== 404 ||
+    !('data' in error)
+  ) {
+    return false
+  }
+  const { data } = error
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'status' in error &&
-    error.status === 404
+    typeof data === 'object' &&
+    data !== null &&
+    'error' in data &&
+    data.error === 'NOT_FOUND'
   )
 }
 
