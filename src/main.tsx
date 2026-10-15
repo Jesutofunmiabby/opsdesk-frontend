@@ -15,11 +15,12 @@ if (!rootElement) {
 }
 
 // There is no real tickets API yet, so in development the mock one answers
-// instead. It must be running before the app renders, or the first request
-// for tickets would go out before anything could answer it. The import is
-// inside the check, so the mocks are left out of the production build.
+// instead. A build made with VITE_ENABLE_MOCKS=true (npm run preview:mock)
+// has it too, for demos. It must be running before the app renders, or the
+// first request for tickets would go out before anything could answer it.
+// The import is inside the check, so a normal build leaves the mocks out.
 async function startMockApi() {
-  if (!import.meta.env.DEV) {
+  if (!import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS !== 'true') {
     return
   }
   const { worker } = await import('./mocks/browser')

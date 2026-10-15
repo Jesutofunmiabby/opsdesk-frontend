@@ -1,190 +1,269 @@
 # OpsDesk
 
-An internal operations dashboard for an IT support team, built as an
-internship project. It brings together what a support team needs day to day —
-tickets, a staff directory, projects and a list of user accounts — behind one
-set of navigation, with a dashboard summarising them.
+OpsDesk is an internal operations dashboard for an IT support team. It brings
+together what a support team needs day to day: a board of support tickets, a
+staff directory, internal projects and a list of user accounts. They sit behind
+one set of navigation, with a dashboard summarising them.
 
-Built with **React + Vite**, **TypeScript**, **React Router** and plain
-**CSS**. No UI framework: everything here is written by hand so the underlying
-React ideas stay visible.
+This repository is the frontend, version 1.0. It was built as an internship
+project with React, TypeScript and plain CSS. There is no UI framework, so the
+underlying React ideas stay visible. The tickets backend does not exist yet: a
+mock API in the browser stands in for it, following the same
+[API contract](API_CONTRACT.md) the real backend will be built against.
 
-## Week 3
+## Contents
 
-### What changed this week
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Getting started](#getting-started)
+- [Environment variables](#environment-variables)
+- [Running the tests](#running-the-tests)
+- [Architecture](#architecture)
+- [The API](#the-api)
+- [Screenshots](#screenshots)
+- [Accessibility](#accessibility)
+- [Folder structure](#folder-structure)
+- [Troubleshooting](#troubleshooting)
+- [What's next](#whats-next)
+- [Project conventions](#project-conventions)
 
-- **Redux for shared UI state.** A Redux Toolkit store holds the two pieces of
-  UI state that distant parts of the page share: whether the sidebar is
-  collapsed (the header button and the sidebar both read it), and the stack of
-  notifications that any page can add to. Server data such as tickets is never
-  kept in a Redux slice.
-- **Collapsible sidebar and notifications.** Navigation moved into a sidebar
-  that collapses to a narrow bar of letters. Creating or editing a ticket
-  shows a success notification in the corner, and a save or move that fails
-  shows an error one. Each closes itself after a few seconds, or straight
-  away with its dismiss button.
-- **Tickets from an API with RTK Query.** Tickets are loaded with RTK Query
-  instead of `useState` and `useEffect`. The board, list, dashboard and ticket
-  pages share one cached copy. Each page shows a loading message while the
-  request runs and an error with a Retry button if it fails, using RTK
-  Query's `isLoading` and `isError`. Creating, editing and moving tickets are
-  RTK Query mutations; each one marks the tickets it changed as out of date
-  (`invalidatesTags`), so the list refreshes by itself.
-- **Mock API with MSW.** The tickets API is mocked until the real backend
-  exists. See [Ticket data is mocked](#ticket-data-is-mocked).
-- **Performance.** The Projects and Users pages are lazy-loaded with
-  `React.lazy` and `Suspense`, so their code only downloads when they are
-  opened. The ticket list's search and status filter are wrapped in `useMemo`,
-  so turning the page does not redo the filtering.
-- **Accessibility.** A skip link, better contrast, clearer focus rings and
-  more. See [Accessibility](#accessibility).
-- **Tests.** The first automated tests, run with `npm test`: a component test
-  for the ticket card, an integration test for the create form's empty title
-  error, a test for the list's search and filter helper, and tests for the
-  skip link. See [Running the tests](#running-the-tests).
+## Features
 
-## Week 2
+- **Dashboard.** Cards showing how many tickets are Open, In progress,
+  Resolved and Closed, and how many employees, departments and user accounts
+  there are. Each count comes from the server, so it stays right however many
+  tickets there are.
+- **Ticket board.** Four columns, one per status. Each ticket shows its title
+  and a colour-coded priority: blue for LOW, amber for MEDIUM, red for HIGH.
+  **Move to next** moves a ticket on to the next status.
+- **Ticket list.** A table with a title search, a status filter, and 10
+  tickets to a page with Previous and Next. The server does the searching,
+  filtering and paging, and the search waits until typing pauses before it is
+  sent.
+- **Ticket pages.** Every ticket has its own page and URL. From there it can be
+  edited, or deleted after a confirmation dialog.
+- **Create and edit forms.** One form for both. It checks the title (3 to 120
+  characters), the description (required) and the priority, and shows each
+  problem under its field.
+- **Feedback.** Success and failure notifications ("toasts") after every
+  create, edit, move and delete. Buttons are disabled while their request
+  runs, so nothing is sent twice.
+- **Loading, empty and error states.** Every screen that loads data shows a
+  skeleton shaped like the real content while it loads. It shows a helpful
+  message when there is nothing to show, and an error with a Retry button when
+  the request fails.
+- **Error boundary.** If a page crashes, a friendly message with a Reload
+  button replaces just that page, and the header and sidebar keep working.
+- **Projects, Teams and Users.** Internal IT projects with their owner, status
+  and due date. A searchable employee directory with a details panel. User
+  accounts loaded from the public DummyJSON API.
+- **Collapsible sidebar.** It folds down to a narrow bar of letters.
+- **Routing.** Every page has its own URL, so Refresh, Back, Forward and
+  bookmarks all work. An unknown address shows a Not Found page.
 
-### What changed this week
+## Tech stack
 
-- **Routing.** React Router gives every page its own URL: `/dashboard`,
-  `/tickets`, `/tickets/:id`, `/tickets/new`, `/tickets/:id/edit`,
-  `/projects`, `/teams` and `/users`. `/` goes to the dashboard, and any other
-  URL shows a Not Found page with a link back. Every page sits inside a shared
-  Layout with the blue header, whose navigation highlights the current page.
-  Refresh, Back and Forward all work, and any page can be bookmarked.
-- **Ticket pages.** Each ticket has its own page, found from the id in the URL,
-  showing its description, status and priority. An unknown id shows "Ticket
-  not found". Every card on the board links to its ticket.
-- **Forms.** New tickets are created at `/tickets/new` and edited at
-  `/tickets/:id/edit`, with one form used for both. The title is required and
-  must be at least 3 characters; the description is required. Each problem is
-  shown in red directly under its field, and nothing is saved until it is
-  fixed. New tickets start as Open.
-- **TypeScript.** The whole project is now TypeScript. Tickets, employees,
-  users and projects each have a type, every component's props are typed, and
-  `any` is never used. The build runs the type check first, so a type error
-  stops it.
-- **Feature folders.** Code is grouped by feature under `src/features/`
-  (tickets, employees, users, projects), with each feature's components,
-  hooks, data, helpers and types together. See [Folder
-  structure](#folder-structure).
-- **Ticket list.** The Tickets page switches between the board and a list. The
-  list can be searched by title and filtered by status, shows 10 tickets per
-  page with Previous and Next buttons and "Page X of Y", and goes back to page
-  1 whenever the search or filter changes. A message shows when nothing
-  matches, and each row links to its ticket.
-- **Saved tickets.** Tickets are saved in the browser's localStorage, so
-  created, edited and moved tickets survive a refresh. On start the app loads
-  the saved tickets, and falls back to the 25 mock tickets if nothing is saved
-  or the saved data is broken. To start again from the mock tickets, remove
-  the `opsdesk.tickets` entry from localStorage in your browser's developer
-  tools (or clear the site's data).
-- **Projects.** A new Projects page shows six internal IT projects with their
-  owner, status and due date.
+| Area | Tool |
+|------|------|
+| UI | [React](https://react.dev) 19 with TypeScript |
+| Build and dev server | [Vite](https://vite.dev) |
+| Routing | [React Router](https://reactrouter.com) |
+| Shared UI state | [Redux Toolkit](https://redux-toolkit.js.org) (`uiSlice`) |
+| Server data | RTK Query (`ticketsApi`), part of Redux Toolkit |
+| Mock API | [MSW](https://mswjs.io) (Mock Service Worker) |
+| Tests | [Vitest](https://vitest.dev), [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/), user-event, jsdom |
+| Linting | [Oxlint](https://oxc.rs) |
+| Styling | Plain CSS, with every colour in variables in `src/index.css` |
 
-## Running it
+## Getting started
 
-You need [Node.js](https://nodejs.org) (an LTS release; developed on v22).
+You need [Node.js](https://nodejs.org), an LTS release. It was developed on
+version 22.
 
 ```bash
-npm install     # install dependencies, once
-npm run dev     # start the dev server
+git clone https://github.com/Jesutofunmiabby/opsdesk-frontend.git
+cd opsdesk-frontend
+npm install              # install the dependencies, once
+cp .env.example .env     # create your own settings file (see below)
+npm run dev              # start the dev server
 ```
 
-After `npm run dev` the app runs at <http://localhost:5173/>. Vite prints the
-URL on start, and picks a different port if 5173 is already in use.
+Then open <http://localhost:5173/>. Vite prints the address when it starts,
+and picks another port if 5173 is busy. Use `localhost` rather than
+`127.0.0.1`.
 
-Other commands:
+In development the mock API answers every ticket request. It starts with 25
+tickets, and your changes are saved in your browser, so they survive a
+refresh.
+
+### All the commands
+
+| Command | What it does |
+|---------|--------------|
+| `npm run dev` | Starts the dev server, with the mock API. |
+| `npm test` | Runs the tests and watches for changes. |
+| `npm test -- --run` | Runs the tests once and stops. |
+| `npm run typecheck` | Checks the TypeScript types. |
+| `npm run lint` | Checks the code with Oxlint. |
+| `npm run build` | Type checks, then makes the production build in `dist/`. |
+| `npm run preview` | Serves the production build from `dist/`. |
+| `npm run preview:mock` | Makes a demo build with the mock API in `dist-mock/` and serves it. |
+
+`npm run preview` shows the build exactly as it would ship. A real build has
+no mock API, and there is no tickets backend yet. So under `npm run preview`
+the ticket screens show their error state, and only Projects, Teams and Users
+have data.
+
+To click through a production build with data, use `npm run preview:mock`.
+It builds with `VITE_ENABLE_MOCKS=true` (from `.env.mock`) into its own
+`dist-mock/` folder, so the real `dist/` build is never affected.
+
+## Environment variables
+
+Settings live in a `.env` file in the project folder. Git ignores it, so each
+person keeps their own. [`.env.example`](.env.example) lists every setting
+with an explanation: copy it to `.env` to start.
+
+| Variable | Default | What it does |
+|----------|---------|--------------|
+| `VITE_API_URL` | `/api/v1` | Where the tickets API lives, including the version. A path like `/api/v1` means "on the same server as the app". For a separate backend, use its full address, for example `https://api.example.com/api/v1`. |
+| `VITE_ENABLE_MOCKS` | `false` | `true` builds the mock API into the app. For demos and preview **only**: never set it to `true` for a real deployment. `npm run dev` always uses the mock API, whatever this says. |
+
+Never put passwords, secret keys or tokens in `.env`. Every `VITE_` variable
+is built into the JavaScript sent to the browser, so anyone using the app can
+read it.
+
+Vite reads `.env` when it starts, and a build keeps the values it was built
+with. After editing `.env`, restart `npm run dev`, or build again.
+
+## Running the tests
 
 ```bash
-npm run typecheck # check the TypeScript types
-npm run build     # type check, then production build into dist/
-npm run lint      # check the code with Oxlint
-npm run preview   # serve the production build locally
+npm test -- --run
 ```
 
-### Running the tests
+There are 48 tests in 10 files. They run in jsdom, a pretend browser, so no
+real browser is needed. Test files sit next to the code they test, named
+`*.test.ts` or `*.test.tsx`.
 
-```bash
-npm test               # run the tests and watch for changes
-npm test -- --run      # run the tests once and stop
+The tests talk to the same MSW mock API as the app, through `setupServer`, so
+they exercise the real requests. A single test can swap in a different answer
+(an empty list, a server error) with `server.use(...)`. The
+`renderWithProviders` helper in `src/test/` gives every test a fresh Redux
+store and a router.
+
+| What is tested | Where |
+|----------------|-------|
+| The mock API answers exactly as the contract says: the error shape, paging from 0, validation, status codes, ids never reused | `src/mocks/handlers.test.ts` |
+| The tickets page's loading, empty and error states | `src/pages/TicketsPage.test.tsx` |
+| Creating a ticket through the form, and the form's errors | `src/pages/NewTicketPage.test.tsx` |
+| Deleting a ticket: Cancel and Escape keep it, confirming deletes it. A missing ticket, and a failed load | `src/pages/TicketDetailPage.test.tsx` |
+| The list's status filter, Clear filters, pages shown from 1, and its empty state | `src/features/tickets/components/TicketList.test.tsx` |
+| The list's filter helper | `src/features/tickets/utils/ticketList.test.ts` |
+| The ticket card's link | `src/features/tickets/components/TicketCard.test.tsx` |
+| The confirmation dialog | `src/components/ConfirmDialog.test.tsx` |
+| The error boundary catching a crash | `src/components/ErrorBoundary.test.tsx` |
+| The skip link | `src/layouts/Layout.test.tsx` |
+
+Each test was checked by breaking the feature it covers and watching it fail.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph App["The React app, in the browser"]
+    Pages["Pages<br/>src/pages"]
+    Features["Feature folders<br/>tickets, employees,<br/>users, projects"]
+    Shared["Shared components<br/>Layout, Sidebar, Notifications,<br/>ErrorBoundary, ConfirmDialog,<br/>Skeleton, EmptyState"]
+    Store["Redux store<br/>uiSlice: sidebar and<br/>notifications"]
+    RTKQ["RTK Query<br/>ticketsApi"]
+  end
+
+  MSW["MSW mock API<br/>/api/v1/tickets, /api/v1/projects<br/>dev and preview:mock only"]
+  Backend["Java backend<br/>/api/v1, from Week 6"]
+  Dummy["DummyJSON users API<br/>dummyjson.com/users"]
+
+  Pages -->|"put together"| Features
+  Pages --> Shared
+  Features --> Shared
+  Pages -->|"show toasts"| Store
+  Features -->|"show toasts"| Store
+  Shared -->|"sidebar, toasts"| Store
+  Pages -->|"query and mutation hooks"| RTKQ
+  Features -->|"query and mutation hooks"| RTKQ
+  RTKQ -->|"its cache lives in"| Store
+  RTKQ -->|"HTTP + JSON, as API_CONTRACT.md says"| MSW
+  RTKQ -.->|"same requests, later"| Backend
+  Features -->|"useUsers, with fetch"| Dummy
 ```
 
-The tests use Vitest and React Testing Library and run in jsdom, a pretend
-browser, so no real browser is needed. Test files sit next to the code they
-test, named `*.test.ts` or `*.test.tsx`.
+How to read it:
 
-### Ticket data is mocked
+- **Pages** are thin. Each one puts feature components and shared components
+  together for one URL.
+- **Feature folders** hold everything about one subject: its components,
+  hooks, helpers, types and any static data.
+- **The Redux store** holds only shared UI state, through `uiSlice`: whether
+  the sidebar is collapsed, and the list of notifications. Ticket data is
+  never kept in a Redux slice.
+- **RTK Query (`ticketsApi`)** is the only way the app gets or changes
+  tickets. It caches each answer, shares it between screens, and refreshes
+  the right lists after a change. Its cache is kept inside the store.
+- **The MSW mock API** catches requests to `/api/v1` in the browser, during
+  `npm run dev` and in a `preview:mock` build. It answers as the real backend
+  will. When the Java backend arrives, `VITE_API_URL` points at it and the
+  mock is switched off. The pages do not change.
+- **DummyJSON** is a real public API that the Users page and the dashboard's
+  user count read from, until the backend has its own `GET /users`.
 
-There is no real tickets backend yet. Until there is, ticket data comes from a
-mock API built with [MSW](https://mswjs.io) (Mock Service Worker), in
-`src/mocks/`. It catches the app's requests to `/api/v1` in the browser and
-answers them exactly as [API_CONTRACT.md](API_CONTRACT.md) says the real
-backend will, after a short delay so the loading states can be seen. Changes are kept in the browser's localStorage, so they
-survive a refresh; remove the `opsdesk.tickets` entry (or clear the site's
-data) to go back to the 25 starting tickets.
+## The API
 
-The app itself only ever talks to `/api/v1` through RTK Query, so when the
-real backend exists and follows the contract, the mock can be removed without
-changing any page.
-The mock only starts under `npm run dev`; a production build (`npm run
-preview`) has no tickets API yet, so the ticket pages show their error state.
+[API_CONTRACT.md](API_CONTRACT.md) is the source of truth for the API. It
+covers:
 
-## The pages
+- the general rules: everything under `/api/v1`, JSON, numeric ids that are
+  never reused, and ISO 8601 dates;
+- the one error shape every error uses:
+  `{ "error": "VALIDATION_ERROR", "message": "...", "fields": { ... } }`;
+- the paged list shape, `{ items, page, size, totalItems, totalPages }`, with
+  pages counted from 0;
+- every endpoint for tickets, projects, users and auth, with its status
+  codes and examples;
+- a security review.
 
-Navigation lives in the sidebar, and the current page is highlighted. The
-menu button in the blue header collapses the sidebar to a narrow bar of
-letters. Each page has its own URL; `/` opens the Dashboard.
+If the mock API and the contract ever disagree, the mock API is wrong, and
+the contract tests in `src/mocks/handlers.test.ts` are there to catch that.
 
-### Dashboard
-Summary cards across two groups:
+## Screenshots
 
-- **Tickets by status** — how many tickets sit in Open, In progress, Resolved
-  and Closed. These are counted from the same RTK Query cache the ticket board
-  uses, so moving a ticket updates the dashboard.
-- **Organisation** — the number of employees, the number of departments, and
-  the number of user accounts. The user count is fetched from an API, so that
-  card shows its own loading and error states, with a Retry button.
+The images live in [`docs/screenshots/`](docs/screenshots/).
 
-### Tickets
-Two views, switched with the **Board** and **List** buttons:
+| Dashboard | Ticket board |
+|-----------|--------------|
+| ![The dashboard with ticket counts by status and organisation figures](docs/screenshots/dashboard.png) | ![The ticket board with four status columns](docs/screenshots/ticket-board.png) |
 
-- **Board** — four columns, one per status, with a ticket count in each column
-  header. Each ticket shows its title and a colour-coded priority label — blue
-  for LOW, amber for MEDIUM, red for HIGH. **Move to next** advances a ticket
-  to the following status; tickets already Closed have nowhere to go, so they
-  have no button.
-- **List** — a table of tickets with a title search, a status filter and 10
-  tickets per page.
+| Ticket list | Create form |
+|-------------|-------------|
+| ![The ticket list with search, status filter and pages](docs/screenshots/ticket-list.png) | ![The new ticket form with title, description and priority](docs/screenshots/create-form-errors.png) |
 
-Clicking a ticket opens its own page, with an **Edit** button. **New ticket**
-opens the create form.
+| Delete confirmation | Error state |
+|---------------------|-------------|
+| ![The dialog asking to confirm deleting a ticket](docs/screenshots/delete-confirmation.png) | ![The tickets page saying the tickets could not be loaded, with Retry](docs/screenshots/error-state.png) |
 
-### Projects
-Internal IT projects as cards, each with its status, owner and due date.
-
-### Teams
-The employee directory: a card per employee with their initials, name, role and
-department. Search by name as you type (case-insensitive), filter by
-department, or combine the two. Clicking a card opens a details panel with
-their role, department, email and phone, and highlights the card. A message
-appears when nothing matches.
-
-### Users
-User accounts loaded from the public [DummyJSON](https://dummyjson.com) API,
-shown as cards with a name, job title, email and company. Because the data is
-fetched, this page handles four outcomes: a loading message, the cards on
-success, a friendly message when the list comes back empty, and an error
-message with a Retry button when the request fails.
+| Error boundary |
+|----------------|
+| ![The friendly crash message with a Reload button, inside the normal header and sidebar](docs/screenshots/error-boundary.png) |
 
 ## Accessibility
 
-The whole app can be used with a keyboard alone. Every link, button and form
-control can be reached with **Tab**, used with **Enter** (and **Space** for
-buttons), and shows a solid blue focus ring when it has keyboard focus. Text
-labels sit on every form control, every clickable thing is a real `<button>`
-or link, and the app has no images that would need alt text.
+The whole app can be used with a keyboard alone:
+
+- every link, button and form control can be reached with **Tab**;
+- each one is used with **Enter** (and **Space** for buttons);
+- each one shows a solid blue focus ring when it has keyboard focus.
+
+Every form control has a text label, and every clickable thing is a real
+`<button>` or link. The app has no images that would need alt text.
 
 Fixes made while checking this:
 
@@ -202,78 +281,139 @@ Fixes made while checking this:
   red, so a focused field looked almost the same as an unfocused one. Fields
   now use the same solid blue focus ring as every other control, and a field
   with an error keeps its red border as well.
+- **Form field borders.** Field borders were too faint to see easily. They
+  were darkened to meet the 3:1 contrast that the edges of controls need.
 - **Board column counts.** The number beside each column heading was read out
   on its own, as just "3". Hidden text now makes it "3 tickets" for screen
   readers, with no change on screen.
+- **Headings.** The board's column headings are one level below the page
+  title, so the page's outline makes sense to screen reader users.
 - **Email links.** The email links on the Users page and in the employee
   details panel had only the browser's default focus outline. They now use the
   app's blue focus ring like everything else.
+- **Confirmation dialog.**
+  - Focus moves into the dialog and stays there while it is open. Tab cannot
+    wander to the page behind it.
+  - Escape closes the dialog, and so does Cancel.
+  - Either way, focus goes back to the button that opened it.
+- **Loading states.** Screen readers announce a skeleton by its label, such
+  as "Loading tickets…", and skip its empty shapes. A list that is being
+  refreshed is marked as busy.
 
 ## Folder structure
 
 ```
 src/
-  main.tsx           entry point: starts the mock API, then renders the app
-                     inside the Redux store and the router
-  App.tsx            the app's routes
+  main.tsx           entry point: starts the mock API if it is on, then
+                     renders the app inside the error boundary, the Redux
+                     store and the router
+  App.tsx            the app itself: its routes
+  config.ts          reads VITE_API_URL
   index.css          theme: every colour and shape variable lives here
-  store/             Redux: the store, uiSlice (sidebar and notifications)
-                     and ticketsApi (RTK Query, for tickets)
-  mocks/             the MSW mock tickets API and its localStorage saving
+  store/             Redux: the store, uiSlice (sidebar and notifications),
+                     ticketsApi (RTK Query) and the shared API types
+  mocks/             the MSW mock API, its contract tests and its
+                     localStorage saving
   features/
     tickets/         components/, hooks/, data/, utils/, types.ts
     employees/       components/, data/, utils/, types.ts
     users/           components/, hooks/, types.ts
     projects/        components/, data/, types.ts
-  components/        UI shared by several features: FormField, Sidebar,
-                     Notifications, SkipLink, StatCard
-  hooks/             shared hooks: useFetch
-  utils/             shared helpers: formatDate, getInitials
-  layouts/           Layout: the blue header, navigation, and page area
+  components/        UI shared by several features: ErrorBoundary,
+                     ConfirmDialog, EmptyState, RequestError, Skeleton,
+                     Sidebar, Notifications, FormField, SkipLink, StatCard
+  hooks/             shared hooks: useFetch, useDebouncedValue
+  utils/             shared helpers: dates, getInitials
+  layouts/           Layout: the blue header, sidebar and page area
   routes/            AppRoutes: every URL and the page it shows
   pages/             thin pages that put feature components together
+  test/              renderWithProviders, the test helper
+docs/
+  screenshots/       the images in this README
 ```
 
 The guiding rule is **keep each feature together**. Everything about tickets
-— its components, hooks, mock data, helpers and types — lives in
-`features/tickets/`. Only code that more than one feature uses goes in the
-shared `components/`, `hooks/` and `utils/` folders.
+lives in `features/tickets/`: its components, hooks, mock data, helpers and
+types. Only code that more than one feature uses goes in the shared
+`components/`, `hooks/` and `utils/` folders.
 
 Inside a feature:
 
-- **`utils/`** — plain functions. Given the same input they return the same
-  output, with no React involved: `filterTickets`, `paginate`,
-  `validateTicket`, `getNextStatus`.
-- **`hooks/`** — logic that *does* need React. `useTicketFromUrl` reads the
-  ticket id from the URL and loads that ticket with RTK Query, for the detail
-  and edit pages. `useUsers` wraps the shared `useFetch` with the users API
-  address.
-- **`components/`** — the feature's pieces, from a single card up to a whole
+- **`utils/`**: plain functions with no React. Given the same input they
+  return the same output: `filterTickets`, `paginate`, `validateTicket`,
+  `getNextStatus`.
+- **`hooks/`**: logic that *does* need React.
+  - `useTicketFromUrl` reads the ticket id from the URL and loads that ticket.
+  - `useTicketCounts` gets the dashboard's counts.
+  - `useUsers` loads the users from DummyJSON.
+- **`components/`**: the feature's pieces, from a single card up to a whole
   board or list.
-- **`types.ts`** — the TypeScript types for the feature's data.
+- **`types.ts`**: the TypeScript types for the feature's data.
 
-Tickets themselves are not held by any feature: they come from the tickets
-API through RTK Query (`store/ticketsApi.ts`), which keeps one cached copy for
-the dashboard, board, list and ticket pages.
+## Troubleshooting
 
-`data/` folders hold static data, so the directory and projects work with no
-backend. `features/tickets/data/tickets.ts` holds the starting tickets the
-mock API serves. Only the users list talks to a real API.
+**The console says "Failed to fetch at passthrough (mockServiceWorker.js)" or
+"The FetchEvent … resulted in a network error response".** The mock API runs
+as a service worker, which sees every request the page makes and passes on
+the ones it does not answer, including the page itself. These messages mean
+it passed a request on and nothing answered, because the dev server was not
+running at that moment (or was restarting). Check that `npm run dev` is still
+running in its terminal, then reload. If it keeps happening while the server
+is clearly running, unregister the worker: DevTools, then Application, then
+Service workers, then Unregister. Reload, and the app registers a fresh one.
+
+**I changed `.env` and nothing happened.** Vite reads `.env` only when it
+starts. Stop `npm run dev` with Ctrl+C and start it again. For a build, run
+the build again: a build keeps the values it was made with.
+
+**The tickets look wrong, old or empty.** Your changes are saved in the
+browser, and data saved by an older version can confuse a newer one. Clear
+the site's data: DevTools, then Application, then Storage, then **Clear site
+data**, then reload. This also removes the service worker. Or, to reset only
+the tickets, run `localStorage.removeItem('opsdesk.tickets')` in the Console
+and reload. Either way you get the 25 starting tickets back.
+
+**Under `npm run preview` the ticket pages say they could not load.** That is
+expected: a real build has no mock API, and there is no backend yet. Use
+`npm run preview:mock` to click through a build with data.
+
+**The Users page shows an error.** Users come from dummyjson.com, so this
+page needs an internet connection. Press Retry once you are back online.
+
+**The page will not load at `127.0.0.1:5173`.** Use
+<http://localhost:5173/> instead. The dev server listens on `localhost`.
+
+## What's next
+
+- **Week 6: the Java backend.** A Spring Boot backend will be built to
+  [API_CONTRACT.md](API_CONTRACT.md). Then:
+  - `VITE_API_URL` points at it, and the mock API is switched off;
+  - the Users page moves from DummyJSON to the backend's `GET /users`;
+  - the Projects page reads from `GET /projects`.
+- **Week 8: login.** Register and log in, using the auth endpoints already
+  described in the contract, so each request says who is asking.
 
 ## Project conventions
 
 **Design.** Light theme, white surfaces, blue accents. Every colour comes from
-the variables in `src/index.css` — no hard-coded colours in component styles,
-so the whole app can be re-themed from one place. Ticket priority labels are
-colour-coded: blue for LOW, amber for MEDIUM, red for HIGH.
+the variables in `src/index.css`, with no hard-coded colours in component
+styles, so the whole app can be re-themed from one place. Ticket priority
+labels are colour-coded: blue for LOW, amber for MEDIUM, red for HIGH.
 
 **Dependencies.** No new npm packages without discussing it first.
 
-**TypeScript.** All code is TypeScript. `any` is never used to silence an
+**TypeScript.** All new code is TypeScript. `any` is never used to silence an
 error.
+
+**Security.** No passwords, keys or tokens in the code or `.env` files, and no
+`dangerouslySetInnerHTML`. See the Security section of
+[API_CONTRACT.md](API_CONTRACT.md).
+
+**Safety.** Every destructive action, such as deleting a ticket, asks for
+confirmation first.
 
 **Git workflow.** Nothing is committed straight to `main`. Every change goes
 through a GitHub issue, then a feature branch, then a pull request. Commits are
-kept small, with messages saying what changed and why.
+kept small, with messages saying what changed.
 
 **Components.** Small and focused, one component per file.
