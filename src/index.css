@@ -37,6 +37,8 @@
      the same everywhere. Focus rings use the solid brand blue. */
   --input-border: #cbd3e1;
   --error: #b3261e;
+  /* Hover for red buttons, such as Delete. */
+  --error-hover: #96201a;
 
   /* Notifications. Success is green, the one colour outside the blue and
      priority scales; errors reuse the red above. */
@@ -58,6 +60,9 @@
     0 2px 4px rgba(17, 24, 39, 0.06), 0 10px 22px rgba(29, 78, 216, 0.14);
   --shadow-panel: 0 4px 18px rgba(17, 24, 39, 0.08);
   --shadow-header: 0 1px 3px rgba(17, 24, 39, 0.12);
+  --shadow-dialog: 0 12px 40px rgba(17, 24, 39, 0.22);
+  /* Dims the page behind a dialog. */
+  --backdrop: rgba(17, 24, 39, 0.45);
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
 
