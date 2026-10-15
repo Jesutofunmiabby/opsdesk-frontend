@@ -9,6 +9,8 @@ const sampleTicket: Ticket = {
   description: 'Paper stuck in tray 1.',
   priority: 'HIGH',
   status: 'OPEN',
+  createdAt: '2026-09-07T09:00:00.000Z',
+  updatedAt: '2026-09-07T09:00:00.000Z',
 }
 
 describe('TicketCard', () => {

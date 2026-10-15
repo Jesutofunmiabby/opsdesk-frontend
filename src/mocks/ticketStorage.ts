@@ -6,7 +6,8 @@ import type { Ticket } from '../features/tickets/types'
 const STORAGE_KEY = 'opsdesk.tickets'
 
 // Checks every field of one saved ticket, since anything could be in storage:
-// an older format, a half-written value, or something edited by hand.
+// an older format (such as tickets saved before they had dates), a
+// half-written value, or something edited by hand.
 function isTicket(value: unknown): value is Ticket {
   return (
     typeof value === 'object' &&
@@ -21,7 +22,11 @@ function isTicket(value: unknown): value is Ticket {
     typeof value.priority === 'string' &&
     isPriority(value.priority) &&
     'status' in value &&
-    isTicketStatus(value.status)
+    isTicketStatus(value.status) &&
+    'createdAt' in value &&
+    typeof value.createdAt === 'string' &&
+    'updatedAt' in value &&
+    typeof value.updatedAt === 'string'
   )
 }
 

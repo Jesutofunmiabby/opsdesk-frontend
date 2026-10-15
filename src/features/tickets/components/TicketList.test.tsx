@@ -11,6 +11,8 @@ const sampleTickets: Ticket[] = [
     description: 'Paper stuck in tray 1.',
     priority: 'HIGH',
     status: 'OPEN',
+    createdAt: '2026-09-01T09:00:00.000Z',
+    updatedAt: '2026-09-01T09:00:00.000Z',
   },
   {
     id: 2,
@@ -18,6 +20,8 @@ const sampleTickets: Ticket[] = [
     description: 'Locked out after three tries.',
     priority: 'MEDIUM',
     status: 'IN_PROGRESS',
+    createdAt: '2026-09-02T09:00:00.000Z',
+    updatedAt: '2026-09-03T14:00:00.000Z',
   },
 ]
 

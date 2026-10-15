@@ -3,7 +3,15 @@ import { ALL_STATUSES, filterTickets } from './ticketList'
 
 // Just the fields the filter looks at matter; the rest are filler.
 function makeTicket(id: number, title: string, status: Ticket['status']): Ticket {
-  return { id, title, status, description: 'Details', priority: 'LOW' }
+  return {
+    id,
+    title,
+    status,
+    description: 'Details',
+    priority: 'LOW',
+    createdAt: '2026-09-01T09:00:00.000Z',
+    updatedAt: '2026-09-01T09:00:00.000Z',
+  }
 }
 
 const tickets: Ticket[] = [

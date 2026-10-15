@@ -4,7 +4,8 @@ import type { Ticket } from '../types'
 // No backend yet — this is the starting data for the mock API in
 // src/mocks/handlers.ts, used until anything has been saved. The Ticket type
 // checks every entry: a typo in a priority or status, or a missing field, is
-// an error.
+// an error. One ticket was raised each day from 1 September 2026; those no
+// longer OPEN were last changed a day and five hours after they were raised.
 const tickets: Ticket[] = [
   {
     id: 1,
@@ -13,6 +14,8 @@ const tickets: Ticket[] = [
       'Since this morning the laptop sees the office network but fails to connect, saying the password is wrong. Other devices at the same desk connect fine.',
     priority: 'HIGH',
     status: 'OPEN',
+    createdAt: '2026-09-01T09:00:00.000Z',
+    updatedAt: '2026-09-01T09:00:00.000Z',
   },
   {
     id: 2,
@@ -21,6 +24,8 @@ const tickets: Ticket[] = [
       'The finance desk works across several spreadsheets at once and would like a second monitor. A spare monitor and cable are needed.',
     priority: 'LOW',
     status: 'OPEN',
+    createdAt: '2026-09-02T09:00:00.000Z',
+    updatedAt: '2026-09-02T09:00:00.000Z',
   },
   {
     id: 3,
@@ -29,6 +34,8 @@ const tickets: Ticket[] = [
       'A new starter in marketing cannot open the Marketing folder on the shared drive. They need the same access as the rest of their team.',
     priority: 'MEDIUM',
     status: 'OPEN',
+    createdAt: '2026-09-03T09:00:00.000Z',
+    updatedAt: '2026-09-03T09:00:00.000Z',
   },
   {
     id: 4,
@@ -37,6 +44,8 @@ const tickets: Ticket[] = [
       'The monthly payroll export stops after about a minute with a timeout error. It needs to run before the payroll deadline on Friday.',
     priority: 'HIGH',
     status: 'IN_PROGRESS',
+    createdAt: '2026-09-04T09:00:00.000Z',
+    updatedAt: '2026-09-05T14:00:00.000Z',
   },
   {
     id: 5,
@@ -45,6 +54,8 @@ const tickets: Ticket[] = [
       'The projector in the second-floor meeting room shows "No signal" with any laptop. The HDMI cable has already been swapped.',
     priority: 'MEDIUM',
     status: 'IN_PROGRESS',
+    createdAt: '2026-09-05T09:00:00.000Z',
+    updatedAt: '2026-09-06T14:00:00.000Z',
   },
   {
     id: 6,
@@ -53,6 +64,8 @@ const tickets: Ticket[] = [
       'The design team needs the design software licence installed on a spare machine for a contractor starting next week.',
     priority: 'LOW',
     status: 'IN_PROGRESS',
+    createdAt: '2026-09-06T09:00:00.000Z',
+    updatedAt: '2026-09-07T14:00:00.000Z',
   },
   {
     id: 7,
@@ -61,6 +74,8 @@ const tickets: Ticket[] = [
       'The warehouse tablet is locked after too many wrong password attempts. The team needs it reset to scan deliveries.',
     priority: 'MEDIUM',
     status: 'RESOLVED',
+    createdAt: '2026-09-07T09:00:00.000Z',
+    updatedAt: '2026-09-08T14:00:00.000Z',
   },
   {
     id: 8,
@@ -69,6 +84,8 @@ const tickets: Ticket[] = [
       'Email signatures still show the old company logo. All staff signatures need updating to the new logo.',
     priority: 'LOW',
     status: 'RESOLVED',
+    createdAt: '2026-09-08T09:00:00.000Z',
+    updatedAt: '2026-09-09T14:00:00.000Z',
   },
   {
     id: 9,
@@ -77,6 +94,8 @@ const tickets: Ticket[] = [
       'Remote staff lose their VPN connection every few minutes, which interrupts calls and file transfers.',
     priority: 'HIGH',
     status: 'CLOSED',
+    createdAt: '2026-09-09T09:00:00.000Z',
+    updatedAt: '2026-09-10T14:00:00.000Z',
   },
   {
     id: 10,
@@ -85,6 +104,8 @@ const tickets: Ticket[] = [
       'Several keys on the front desk keyboard have stopped working. It needs replacing with a standard office keyboard.',
     priority: 'LOW',
     status: 'CLOSED',
+    createdAt: '2026-09-10T09:00:00.000Z',
+    updatedAt: '2026-09-11T14:00:00.000Z',
   },
   {
     id: 11,
@@ -93,6 +114,8 @@ const tickets: Ticket[] = [
       'The shared printer on the third floor jams on every print job, even single pages. A replacement roller may be needed.',
     priority: 'MEDIUM',
     status: 'OPEN',
+    createdAt: '2026-09-11T09:00:00.000Z',
+    updatedAt: '2026-09-11T09:00:00.000Z',
   },
   {
     id: 12,
@@ -101,6 +124,8 @@ const tickets: Ticket[] = [
       'A new analyst starts in finance on Monday and needs a laptop, an email account and access to the finance shared drive.',
     priority: 'HIGH',
     status: 'OPEN',
+    createdAt: '2026-09-12T09:00:00.000Z',
+    updatedAt: '2026-09-12T09:00:00.000Z',
   },
   {
     id: 13,
@@ -109,6 +134,8 @@ const tickets: Ticket[] = [
       "Calendar changes made in Outlook do not appear on one manager's phone. Email on the same phone works normally.",
     priority: 'LOW',
     status: 'OPEN',
+    createdAt: '2026-09-13T09:00:00.000Z',
+    updatedAt: '2026-09-13T09:00:00.000Z',
   },
   {
     id: 14,
@@ -117,6 +144,8 @@ const tickets: Ticket[] = [
       'Several people received an email asking them to confirm their password on an unknown site. It needs checking and blocking.',
     priority: 'HIGH',
     status: 'IN_PROGRESS',
+    createdAt: '2026-09-14T09:00:00.000Z',
+    updatedAt: '2026-09-15T14:00:00.000Z',
   },
   {
     id: 15,
@@ -125,6 +154,8 @@ const tickets: Ticket[] = [
       'Remote participants hear the boardroom audio cut out every few minutes. The speakerphone firmware may be out of date.',
     priority: 'MEDIUM',
     status: 'IN_PROGRESS',
+    createdAt: '2026-09-15T09:00:00.000Z',
+    updatedAt: '2026-09-16T14:00:00.000Z',
   },
   {
     id: 16,
@@ -133,6 +164,8 @@ const tickets: Ticket[] = [
       'A team lead in operations needs read-only access to the monthly reporting dashboard.',
     priority: 'LOW',
     status: 'OPEN',
+    createdAt: '2026-09-16T09:00:00.000Z',
+    updatedAt: '2026-09-16T09:00:00.000Z',
   },
   {
     id: 17,
@@ -141,6 +174,8 @@ const tickets: Ticket[] = [
       'A sales laptop runs out of battery within an hour of being unplugged. The battery may need replacing.',
     priority: 'MEDIUM',
     status: 'OPEN',
+    createdAt: '2026-09-17T09:00:00.000Z',
+    updatedAt: '2026-09-17T09:00:00.000Z',
   },
   {
     id: 18,
@@ -149,6 +184,8 @@ const tickets: Ticket[] = [
       'The customer service shared mailbox has disappeared from Outlook for two team members since yesterday.',
     priority: 'MEDIUM',
     status: 'IN_PROGRESS',
+    createdAt: '2026-09-18T09:00:00.000Z',
+    updatedAt: '2026-09-19T14:00:00.000Z',
   },
   {
     id: 19,
@@ -157,6 +194,8 @@ const tickets: Ticket[] = [
       'A contractor returns next week and needs their old laptop wiped, updated and set up again.',
     priority: 'LOW',
     status: 'RESOLVED',
+    createdAt: '2026-09-19T09:00:00.000Z',
+    updatedAt: '2026-09-20T14:00:00.000Z',
   },
   {
     id: 20,
@@ -165,6 +204,8 @@ const tickets: Ticket[] = [
       'Messages sent through the website contact form are not reaching the sales inbox.',
     priority: 'HIGH',
     status: 'RESOLVED',
+    createdAt: '2026-09-20T09:00:00.000Z',
+    updatedAt: '2026-09-21T14:00:00.000Z',
   },
   {
     id: 21,
@@ -173,6 +214,8 @@ const tickets: Ticket[] = [
       'A software update has been stuck at 30% on the reception PC since this morning.',
     priority: 'LOW',
     status: 'IN_PROGRESS',
+    createdAt: '2026-09-21T09:00:00.000Z',
+    updatedAt: '2026-09-22T14:00:00.000Z',
   },
   {
     id: 22,
@@ -181,6 +224,8 @@ const tickets: Ticket[] = [
       'A member of the field team has lost their work phone. It needs to be locked remotely and wiped.',
     priority: 'HIGH',
     status: 'CLOSED',
+    createdAt: '2026-09-22T09:00:00.000Z',
+    updatedAt: '2026-09-23T14:00:00.000Z',
   },
   {
     id: 23,
@@ -189,6 +234,8 @@ const tickets: Ticket[] = [
       "The design team's shared drive is almost full. They are asking for more storage.",
     priority: 'MEDIUM',
     status: 'RESOLVED',
+    createdAt: '2026-09-23T09:00:00.000Z',
+    updatedAt: '2026-09-24T14:00:00.000Z',
   },
   {
     id: 24,
@@ -197,6 +244,8 @@ const tickets: Ticket[] = [
       "A laptop's built-in webcam is not detected by the video call app, though it works in the camera app.",
     priority: 'LOW',
     status: 'OPEN',
+    createdAt: '2026-09-24T09:00:00.000Z',
+    updatedAt: '2026-09-24T09:00:00.000Z',
   },
   {
     id: 25,
@@ -205,6 +254,8 @@ const tickets: Ticket[] = [
       "Last night's backup of the file server failed with a disk space error. It needs fixing before tonight's run.",
     priority: 'HIGH',
     status: 'OPEN',
+    createdAt: '2026-09-25T09:00:00.000Z',
+    updatedAt: '2026-09-25T09:00:00.000Z',
   },
 ]
 

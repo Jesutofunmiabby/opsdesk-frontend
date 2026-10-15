@@ -171,10 +171,13 @@ export const handlers = [
       if (typeof values === 'string') {
         return badRequest(values)
       }
+      const now = new Date().toISOString()
       const ticket: Ticket = {
         id: getNextTicketId(tickets),
         ...values,
         status: FIRST_STATUS,
+        createdAt: now,
+        updatedAt: now,
       }
       setTickets([...tickets, ticket])
       return HttpResponse.json<Ticket>(ticket, { status: 201 })
@@ -197,7 +200,11 @@ export const handlers = [
       if (typeof changes === 'string') {
         return badRequest(changes)
       }
-      const updated: Ticket = { ...existing, ...changes }
+      const updated: Ticket = {
+        ...existing,
+        ...changes,
+        updatedAt: new Date().toISOString(),
+      }
       // The same rules as the form, so an update cannot blank out the title.
       const errors = Object.values(validateTicket(updated))
       if (errors.length > 0) {
