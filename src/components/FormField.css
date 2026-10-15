@@ -31,8 +31,10 @@ textarea.form-field__control {
   resize: vertical;
 }
 
+/* Blue on hover. The light blue it used before was paler than the resting
+   border, so the edge faded when the pointer reached it. */
 .form-field__control:hover {
-  border-color: var(--blue-soft-border);
+  border-color: var(--blue);
 }
 
 /* The same solid blue ring as every other control. A faint wash was hard to
