@@ -5,6 +5,7 @@ import type { Ticket, TicketStatus } from '../types'
 import { useUpdateTicketMutation } from '../../../store/ticketsApi'
 import { useAppDispatch } from '../../../store/hooks'
 import { addNotification } from '../../../store/uiSlice'
+import EmptyState from '../../../components/EmptyState'
 import Column from './Column'
 import './TicketBoard.css'
 
@@ -56,6 +57,18 @@ function TicketBoard({ tickets }: TicketBoardProps) {
         }),
       )
     }
+  }
+
+  // With no tickets at all, four empty columns would look broken. Each
+  // column still says "No tickets" when only it is empty.
+  if (tickets.length === 0) {
+    return (
+      <EmptyState
+        title="No tickets yet."
+        text="New tickets start in the Open column and move along as they are worked on."
+        action={{ label: 'New ticket', to: '/tickets/new' }}
+      />
+    )
   }
 
   return (
