@@ -242,17 +242,13 @@ The images live in [`docs/screenshots/`](docs/screenshots/).
 |-----------|--------------|
 | ![The dashboard with ticket counts by status and organisation figures](docs/screenshots/dashboard.png) | ![The ticket board with four status columns](docs/screenshots/ticket-board.png) |
 
-| Ticket list | Ticket detail |
-|-------------|---------------|
-| ![The ticket list with search, status filter and pages](docs/screenshots/ticket-list.png) | ![A ticket's own page with Edit and Delete](docs/screenshots/ticket-detail.png) |
+| Ticket list | Create form |
+|-------------|-------------|
+| ![The ticket list with search, status filter and pages](docs/screenshots/ticket-list.png) | ![The new ticket form with title, description and priority](docs/screenshots/create-form-errors.png) |
 
-| Create form with errors | Delete confirmation |
-|-------------------------|---------------------|
-| ![The new ticket form showing an error under each empty field](docs/screenshots/create-form-errors.png) | ![The dialog asking to confirm deleting a ticket](docs/screenshots/delete-confirmation.png) |
-
-| Loading skeleton | Error state |
-|------------------|-------------|
-| ![The ticket board's skeleton while the tickets load](docs/screenshots/loading-skeleton.png) | ![The tickets page saying the tickets could not be loaded, with Retry](docs/screenshots/error-state.png) |
+| Delete confirmation | Error state |
+|---------------------|-------------|
+| ![The dialog asking to confirm deleting a ticket](docs/screenshots/delete-confirmation.png) | ![The tickets page saying the tickets could not be loaded, with Retry](docs/screenshots/error-state.png) |
 
 | Error boundary |
 |----------------|
