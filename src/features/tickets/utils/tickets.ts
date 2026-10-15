@@ -1,25 +1,6 @@
 import { STATUS_ORDER } from '../data/ticketStatuses'
 import type { Ticket, TicketStatus } from '../types'
 
-// How many tickets sit in each status. Every status appears in the result,
-// including the ones with no tickets, so a dashboard card can show 0 rather
-// than undefined.
-export function countTicketsByStatus(
-  tickets: Ticket[],
-): Record<TicketStatus, number> {
-  // Written out in full so TypeScript can check that no status is missing.
-  const counts: Record<TicketStatus, number> = {
-    OPEN: 0,
-    IN_PROGRESS: 0,
-    RESOLVED: 0,
-    CLOSED: 0,
-  }
-  tickets.forEach((ticket) => {
-    counts[ticket.status] += 1
-  })
-  return counts
-}
-
 // The status after this one on the board, or null for the last status, which
 // has nowhere further to go.
 export function getNextStatus(status: TicketStatus): TicketStatus | null {

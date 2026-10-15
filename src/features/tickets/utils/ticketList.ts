@@ -1,4 +1,4 @@
-import type { Ticket, TicketStatus } from '../types'
+import type { Priority, Ticket, TicketStatus } from '../types'
 
 // The status filter's "All statuses" choice.
 export const ALL_STATUSES = 'ALL'
@@ -6,20 +6,33 @@ export const ALL_STATUSES = 'ALL'
 // What the status filter can be set to: one status, or all of them.
 export type StatusFilter = TicketStatus | typeof ALL_STATUSES
 
+// How many tickets the list asks for per page.
 export const TICKETS_PER_PAGE = 10
 
-// Tickets whose title contains the search text (ignoring capitals and spaces
-// at either end) and whose status matches the filter. Both apply together.
+// The largest page the API gives (see "Lists and pages" in the contract).
+export const MAX_PAGE_SIZE = 100
+
+// What the ticket list can be narrowed by: the filters of GET /tickets in
+// API_CONTRACT.md. Each one left out matches every ticket.
+export interface TicketFilters {
+  search?: string
+  status?: TicketStatus
+  priority?: Priority
+}
+
+// Tickets whose title contains the search (ignoring capitals and spaces at
+// either end), with the given status and priority. All filters apply
+// together. The mock API uses this to answer GET /tickets.
 export function filterTickets(
   tickets: Ticket[],
-  query: string,
-  status: StatusFilter,
+  { search = '', status, priority }: TicketFilters,
 ): Ticket[] {
-  const search = query.trim().toLowerCase()
+  const text = search.trim().toLowerCase()
   return tickets.filter(
     (ticket) =>
-      ticket.title.toLowerCase().includes(search) &&
-      (status === ALL_STATUSES || ticket.status === status),
+      ticket.title.toLowerCase().includes(text) &&
+      (status === undefined || ticket.status === status) &&
+      (priority === undefined || ticket.priority === priority),
   )
 }
 

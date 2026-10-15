@@ -5,6 +5,15 @@ import type {
   TicketFormValues,
   TicketUpdate,
 } from '../features/tickets/types'
+import type { TicketFilters } from '../features/tickets/utils/ticketList'
+import type { PagedResponse } from './apiTypes'
+
+// What getTickets is called with: which page, how big, and any filters.
+// Anything left out uses the API's default (page 1, 20 a page, no filter).
+export interface TicketListParams extends TicketFilters {
+  page?: number
+  size?: number
+}
 
 // What updateTicket is called with: which ticket, and what to change.
 interface UpdateTicketArgs {
@@ -29,12 +38,16 @@ export const ticketsApi = createApi({
 
   endpoints: (build) => ({
     // build.query<what comes back, what it is called with>.
-    getTickets: build.query<Ticket[], void>({
-      query: () => '/tickets',
-      // A tag for every ticket in the list, plus one for the list itself, so
-      // changing any one ticket, or adding a new one, refreshes the list.
-      providesTags: (tickets = []) => [
-        ...tickets.map((ticket) => ({
+    // One page of tickets (see "List tickets" in API_CONTRACT.md). Each set
+    // of params is cached on its own, so the board, the list's pages and the
+    // dashboard's counts are separate entries. Params left undefined are not
+    // sent.
+    getTickets: build.query<PagedResponse<Ticket>, TicketListParams>({
+      query: (params) => ({ url: '/tickets', params }),
+      // A tag for every ticket on the page, plus one shared by every list,
+      // so any change to the tickets can refresh all of them.
+      providesTags: (result) => [
+        ...(result?.items ?? []).map((ticket) => ({
           type: 'Ticket' as const,
           id: ticket.id,
         })),
@@ -53,25 +66,31 @@ export const ticketsApi = createApi({
       invalidatesTags: [{ type: 'Ticket', id: 'LIST' }],
     }),
 
-    // Changing a ticket refreshes everything holding that ticket: its own
-    // page, and the list, which provides a tag for each of its tickets.
+    // Changing a ticket refreshes its own page and every list. Lists are
+    // refreshed even if they do not hold it: a new status can move it into
+    // a filtered list, such as the dashboard's count of open tickets.
     updateTicket: build.mutation<Ticket, UpdateTicketArgs>({
       query: ({ id, changes }) => ({
         url: `/tickets/${id}`,
         method: 'PATCH',
         body: changes,
       }),
-      invalidatesTags: (_ticket, _error, { id }) => [{ type: 'Ticket', id }],
+      invalidatesTags: (_ticket, _error, { id }) => [
+        { type: 'Ticket', id },
+        { type: 'Ticket', id: 'LIST' },
+      ],
     }),
 
     // Called with the ticket's id. The API answers 204 with no body, so
-    // there is nothing to return (void). Invalidating the ticket's tag
-    // refreshes the list, which provides a tag for each of its tickets, and
-    // drops the deleted ticket's own cached page, so going Back to it asks
+    // there is nothing to return (void). Every list is refreshed, and the
+    // deleted ticket's own cached page is dropped, so going Back to it asks
     // the API again and shows "not found" instead of the old copy.
     deleteTicket: build.mutation<void, number>({
       query: (id) => ({ url: `/tickets/${id}`, method: 'DELETE' }),
-      invalidatesTags: (_result, _error, id) => [{ type: 'Ticket', id }],
+      invalidatesTags: (_result, _error, id) => [
+        { type: 'Ticket', id },
+        { type: 'Ticket', id: 'LIST' },
+      ],
     }),
   }),
 })

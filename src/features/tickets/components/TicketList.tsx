@@ -1,39 +1,45 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import EmptyState from '../../../components/EmptyState'
-import type { Ticket } from '../types'
-import {
-  ALL_STATUSES,
-  TICKETS_PER_PAGE,
-  filterTickets,
-  paginate,
-} from '../utils/ticketList'
+import RequestError from '../../../components/RequestError'
+import { useDebouncedValue } from '../../../hooks/useDebouncedValue'
+import { useGetTicketsQuery } from '../../../store/ticketsApi'
+import { ALL_STATUSES, TICKETS_PER_PAGE } from '../utils/ticketList'
 import type { StatusFilter } from '../utils/ticketList'
 import TicketListFilters from './TicketListFilters'
+import TicketListSkeleton from './TicketListSkeleton'
 import TicketTable from './TicketTable'
 import Pagination from './Pagination'
 import './TicketList.css'
 
-interface TicketListProps {
-  tickets: Ticket[]
-}
+// How long typing has to pause before the search is sent.
+const SEARCH_DELAY_MS = 300
 
-// Every ticket as a searchable, filterable list, 10 to a page.
-function TicketList({ tickets }: TicketListProps) {
+// The tickets as a searchable, filterable list, 10 to a page. The API does
+// the searching, filtering and paging (GET /tickets in API_CONTRACT.md), so
+// only the page on screen is downloaded, however many tickets there are.
+function TicketList() {
+  // Local state: only the list and its controls use these.
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<StatusFilter>(ALL_STATUSES)
   const [page, setPage] = useState(1)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  // Worked out from the tickets and the choices above, so the list is always
-  // in step with them. useMemo keeps the last result and only filters again
-  // when tickets, query or status change, so turning the page does not redo
-  // the search. paginate also moves a page number that is out of range to the
-  // nearest real page.
-  const matches = useMemo(
-    () => filterTickets(tickets, query, status),
-    [tickets, query, status],
+  // The box updates on every key press; the search sent waits for a pause.
+  const search = useDebouncedValue(query.trim(), SEARCH_DELAY_MS)
+
+  // A new request whenever the page or a filter changes. Filters that are
+  // off are left undefined, so they are not sent. While a new page loads,
+  // data still holds the last one, so the table stays on screen.
+  const { data, isLoading, isError, isFetching, refetch } = useGetTicketsQuery(
+    {
+      page,
+      size: TICKETS_PER_PAGE,
+      status: status === ALL_STATUSES ? undefined : status,
+      search: search || undefined,
+    },
   )
-  const shown = paginate(matches, page, TICKETS_PER_PAGE)
+
+  const filtersOn = query.trim() !== '' || status !== ALL_STATUSES
 
   // A new search or filter starts again from page 1, where the first matches
   // are. Done here, when the choice changes, rather than in an effect.
@@ -56,9 +62,28 @@ function TicketList({ tickets }: TicketListProps) {
     searchRef.current?.focus()
   }
 
-  function renderEmpty() {
-    if (tickets.length === 0) {
+  // The first load, before there is anything to show.
+  if (isLoading) {
+    return <TicketListSkeleton />
+  }
+
+  function renderResults() {
+    if (isError || !data) {
       return (
+        <RequestError
+          message="Sorry, we could not load the tickets."
+          onRetry={refetch}
+        />
+      )
+    }
+    if (data.totalItems === 0) {
+      return filtersOn ? (
+        <EmptyState
+          title="No tickets match your filters."
+          text="Try a different search or status, or clear them to see every ticket."
+          action={{ label: 'Clear filters', onClick: handleClearFilters }}
+        />
+      ) : (
         <EmptyState
           title="No tickets yet."
           text="Tickets people raise will be listed here."
@@ -67,11 +92,17 @@ function TicketList({ tickets }: TicketListProps) {
       )
     }
     return (
-      <EmptyState
-        title="No tickets match your filters."
-        text="Try a different search or status, or clear them to see every ticket."
-        action={{ label: 'Clear filters', onClick: handleClearFilters }}
-      />
+      <>
+        <p className="ticket-list__count">
+          {data.totalItems} {data.totalItems === 1 ? 'ticket' : 'tickets'}
+        </p>
+        <TicketTable tickets={data.items} />
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          onPageChange={setPage}
+        />
+      </>
     )
   }
 
@@ -84,22 +115,8 @@ function TicketList({ tickets }: TicketListProps) {
         onStatusChange={handleStatusChange}
         searchRef={searchRef}
       />
-
-      {matches.length > 0 ? (
-        <>
-          <p className="ticket-list__count">
-            {matches.length} {matches.length === 1 ? 'ticket' : 'tickets'}
-          </p>
-          <TicketTable tickets={shown.items} />
-          <Pagination
-            page={shown.page}
-            totalPages={shown.totalPages}
-            onPageChange={setPage}
-          />
-        </>
-      ) : (
-        renderEmpty()
-      )}
+      {/* aria-busy tells screen readers the results are being replaced. */}
+      <div aria-busy={isFetching}>{renderResults()}</div>
     </div>
   )
 }

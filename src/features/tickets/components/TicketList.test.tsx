@@ -1,44 +1,41 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { http, HttpResponse } from 'msw'
+import { API_URL } from '../../../config'
+import { server } from '../../../mocks/server'
+import type { PagedResponse } from '../../../store/apiTypes'
+import { renderWithProviders } from '../../../test/renderWithProviders'
 import type { Ticket } from '../types'
 import TicketList from './TicketList'
 
-const sampleTickets: Ticket[] = [
-  {
-    id: 1,
-    title: 'Printer on floor 2 is jammed',
-    description: 'Paper stuck in tray 1.',
-    priority: 'HIGH',
-    status: 'OPEN',
-    createdAt: '2026-09-01T09:00:00.000Z',
-    updatedAt: '2026-09-01T09:00:00.000Z',
-  },
-  {
-    id: 2,
-    title: 'Reset my VPN password',
-    description: 'Locked out after three tries.',
-    priority: 'MEDIUM',
-    status: 'IN_PROGRESS',
-    createdAt: '2026-09-02T09:00:00.000Z',
-    updatedAt: '2026-09-03T14:00:00.000Z',
-  },
-]
+// Two of the starting mock tickets: #1 is OPEN, #4 is IN_PROGRESS.
+const OPEN_TICKET = 'Laptop will not connect to the office Wi-Fi'
+const IN_PROGRESS_TICKET = 'Payroll export fails with a timeout error'
 
-// MemoryRouter: the table's titles and the empty state's link are router
-// Links, which need a router.
-function renderTicketList(tickets: Ticket[]) {
-  render(
-    <MemoryRouter>
-      <TicketList tickets={tickets} />
-    </MemoryRouter>,
-  )
+// The list on its own, talking to the mock API, once its first page is in.
+async function renderTicketList() {
+  renderWithProviders(<TicketList />)
+  await screen.findByRole('link', { name: OPEN_TICKET })
 }
 
-describe('TicketList empty states', () => {
+describe('TicketList', () => {
+  it('asks the API for the status chosen', async () => {
+    const user = userEvent.setup()
+    await renderTicketList()
+
+    await user.selectOptions(screen.getByLabelText('Status'), 'IN_PROGRESS')
+
+    expect(
+      await screen.findByRole('link', { name: IN_PROGRESS_TICKET }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: OPEN_TICKET }),
+    ).not.toBeInTheDocument()
+  })
+
   it('clears the search and status when nothing matches', async () => {
     const user = userEvent.setup()
-    renderTicketList(sampleTickets)
+    await renderTicketList()
 
     const search = screen.getByLabelText('Search by title')
     const status = screen.getByLabelText('Status')
@@ -46,7 +43,7 @@ describe('TicketList empty states', () => {
     await user.type(search, 'no such ticket')
 
     expect(
-      screen.getByText('No tickets match your filters.'),
+      await screen.findByText('No tickets match your filters.'),
     ).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
 
@@ -55,19 +52,31 @@ describe('TicketList empty states', () => {
     expect(search).toHaveValue('')
     expect(status).toHaveValue('ALL')
     expect(
-      screen.getByRole('link', { name: 'Printer on floor 2 is jammed' }),
+      await screen.findByRole('link', { name: OPEN_TICKET }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: 'Reset my VPN password' }),
+      screen.getByRole('link', { name: IN_PROGRESS_TICKET }),
     ).toBeInTheDocument()
     // The button has gone, so focus goes somewhere useful rather than lost.
     expect(search).toHaveFocus()
   })
 
-  it('offers to create a ticket when there are none at all', () => {
-    renderTicketList([])
+  it('offers to create a ticket when there are none at all', async () => {
+    // For this test only, the API has no tickets.
+    server.use(
+      http.get(`${API_URL}/tickets`, () =>
+        HttpResponse.json<PagedResponse<Ticket>>({
+          items: [],
+          page: 1,
+          size: 10,
+          totalItems: 0,
+          totalPages: 1,
+        }),
+      ),
+    )
+    renderWithProviders(<TicketList />)
 
-    expect(screen.getByText('No tickets yet.')).toBeInTheDocument()
+    expect(await screen.findByText('No tickets yet.')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'New ticket' })).toHaveAttribute(
       'href',
       '/tickets/new',

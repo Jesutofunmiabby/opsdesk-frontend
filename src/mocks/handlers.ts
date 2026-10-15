@@ -7,6 +7,12 @@ import {
   isTicketStatus,
 } from '../features/tickets/data/ticketStatuses'
 import { isPriority } from '../features/tickets/data/ticketPriorities'
+import {
+  MAX_PAGE_SIZE,
+  filterTickets,
+  paginate,
+} from '../features/tickets/utils/ticketList'
+import type { TicketFilters } from '../features/tickets/utils/ticketList'
 import { parseTicketId } from '../features/tickets/utils/tickets'
 import {
   descriptionError,
@@ -19,7 +25,11 @@ import type {
   TicketFormValues,
   TicketUpdate,
 } from '../features/tickets/types'
-import type { ApiErrorBody, ApiErrorCode } from '../store/apiTypes'
+import type {
+  ApiErrorBody,
+  ApiErrorCode,
+  PagedResponse,
+} from '../store/apiTypes'
 
 // A pretend API that follows API_CONTRACT.md exactly. MSW catches the app's
 // requests and answers them here, in the browser (or in Node during tests),
@@ -41,6 +51,12 @@ const CHECK_FIELDS = 'Check the highlighted fields.'
 const NOT_AN_OBJECT = 'The request body must be a JSON object.'
 const PRIORITY_MESSAGE = 'Choose a priority: LOW, MEDIUM or HIGH.'
 const STATUS_MESSAGE = 'Choose a status: OPEN, IN_PROGRESS, RESOLVED or CLOSED.'
+const CHECK_QUERY = 'Check the query parameters.'
+const PAGE_MESSAGE = 'page must be a whole number of 1 or more.'
+const SIZE_MESSAGE = `size must be a whole number from 1 to ${MAX_PAGE_SIZE}.`
+
+// The page size when the request does not give one.
+const DEFAULT_PAGE_SIZE = 20
 
 // What a handler can answer with: a ticket, or an error.
 type TicketOrError = Ticket | ApiErrorBody
@@ -197,6 +213,76 @@ function parseUpdate(body: unknown): TicketUpdate | Problem {
   return changes
 }
 
+// A whole number from the query string, the fallback when it is not there,
+// or null when it is there but is not a whole number ("abc", "-1", "2.5").
+function readWholeNumber(raw: string | null, fallback: number): number | null {
+  if (raw === null) {
+    return fallback
+  }
+  return /^\d+$/.test(raw) ? Number(raw) : null
+}
+
+// The page and size asked for, checked against the contract's rules. Any
+// problem is added to fields, keyed by the parameter's name.
+function readPaging(query: URLSearchParams, fields: Record<string, string>) {
+  const page = readWholeNumber(query.get('page'), 1)
+  const size = readWholeNumber(query.get('size'), DEFAULT_PAGE_SIZE)
+  if (page === null || page < 1) {
+    fields.page = PAGE_MESSAGE
+  }
+  if (size === null || size < 1 || size > MAX_PAGE_SIZE) {
+    fields.size = SIZE_MESSAGE
+  }
+  return { page: page ?? 1, size: size ?? DEFAULT_PAGE_SIZE }
+}
+
+// One page of a list in the contract's shape, oldest (lowest id) first. A
+// page past the end gives the last page, and says so in page.
+function toPage<T extends { id: number }>(
+  items: T[],
+  page: number,
+  size: number,
+): PagedResponse<T> {
+  const sorted = [...items].sort((a, b) => a.id - b.id)
+  const shown = paginate(sorted, page, size)
+  return {
+    items: shown.items,
+    page: shown.page,
+    size,
+    totalItems: items.length,
+    totalPages: shown.totalPages,
+  }
+}
+
+// The filters for GET /tickets, checked. Any problem is added to fields.
+function readTicketFilters(
+  query: URLSearchParams,
+  fields: Record<string, string>,
+): TicketFilters {
+  const filters: TicketFilters = {}
+  const search = query.get('search')?.trim()
+  if (search) {
+    filters.search = search
+  }
+  const status = query.get('status')
+  if (status !== null) {
+    if (isTicketStatus(status)) {
+      filters.status = status
+    } else {
+      fields.status = STATUS_MESSAGE
+    }
+  }
+  const priority = query.get('priority')
+  if (priority !== null) {
+    if (isPriority(priority)) {
+      filters.priority = priority
+    } else {
+      fields.priority = PRIORITY_MESSAGE
+    }
+  }
+  return filters
+}
+
 // parseNewTicket and parseUpdate give back either the values or a Problem.
 // Only a Problem has a message.
 function isProblem(value: object): value is Problem {
@@ -204,11 +290,24 @@ function isProblem(value: object): value is Problem {
 }
 
 export const handlers = [
-  // Every ticket.
-  http.get(TICKETS_URL, async () => {
-    await delay(RESPONSE_DELAY_MS)
-    return HttpResponse.json<Ticket[]>(tickets)
-  }),
+  // One page of tickets, narrowed by any of status, priority and search.
+  http.get<PathParams, never, PagedResponse<Ticket> | ApiErrorBody>(
+    TICKETS_URL,
+    async ({ request }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const query = new URL(request.url).searchParams
+      const fields: Record<string, string> = {}
+      const { page, size } = readPaging(query, fields)
+      const filters = readTicketFilters(query, fields)
+      if (Object.keys(fields).length > 0) {
+        return validationError({ message: CHECK_QUERY, fields })
+      }
+      const matches = filterTickets(tickets, filters)
+      return HttpResponse.json<PagedResponse<Ticket>>(
+        toPage(matches, page, size),
+      )
+    },
+  ),
 
   // One ticket, or 404.
   // The type arguments are the URL parameters, the request body and the
