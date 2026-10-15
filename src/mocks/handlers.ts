@@ -7,11 +7,8 @@ import {
   isTicketStatus,
 } from '../features/tickets/data/ticketStatuses'
 import { isPriority } from '../features/tickets/data/ticketPriorities'
-import {
-  getNextTicketId,
-  parseTicketId,
-} from '../features/tickets/utils/tickets'
-import { loadTickets, saveTickets } from './ticketStorage'
+import { parseTicketId } from '../features/tickets/utils/tickets'
+import { loadTicketDb, saveTicketDb } from './ticketStorage'
 import { API_URL } from '../config'
 import { validateTicket } from '../features/tickets/utils/validateTicket'
 import type {
@@ -45,19 +42,30 @@ type TicketOrError = Ticket | ApiError
 type TicketParams = { id: string }
 
 // The "database": the tickets saved in the browser, or the mock tickets the
-// first time. Saved again after every change, so they survive a refresh.
-let tickets: Ticket[] = loadTickets(initialTickets)
+// first time, and the id the next new ticket gets. Saved again after every
+// change, so they survive a refresh.
+let { tickets, nextId } = loadTicketDb(initialTickets)
 
 function setTickets(nextTickets: Ticket[]) {
   tickets = nextTickets
-  saveTickets(tickets)
+  saveTicketDb({ tickets, nextId })
+}
+
+// Hands out the next id and moves the counter on. Ids only go up, so one is
+// never given out twice, even after its ticket is deleted.
+function takeNextId(): number {
+  const id = nextId
+  nextId += 1
+  return id
 }
 
 // Back to the starting tickets, as if the app had never been used. Tests
 // call this between tests (after clearing localStorage), so a ticket one test
 // creates or deletes is not still there in the next.
 export function resetTickets() {
-  tickets = loadTickets(initialTickets)
+  const db = loadTicketDb(initialTickets)
+  tickets = db.tickets
+  nextId = db.nextId
 }
 
 function notFound(param: string) {
@@ -173,7 +181,7 @@ export const handlers = [
       }
       const now = new Date().toISOString()
       const ticket: Ticket = {
-        id: getNextTicketId(tickets),
+        id: takeNextId(),
         ...values,
         status: FIRST_STATUS,
         createdAt: now,
