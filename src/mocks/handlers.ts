@@ -1,6 +1,8 @@
 import { delay } from 'msw'
 import type { DefaultBodyType, PathParams } from 'msw'
 import { http, HttpResponse } from 'msw/http'
+import projects from '../features/projects/data/projects'
+import type { Project } from '../features/projects/types'
 import initialTickets from '../features/tickets/data/tickets'
 import {
   FIRST_STATUS,
@@ -40,6 +42,8 @@ import type {
 // changes, the mocks still catch them.
 const TICKETS_URL = `${API_URL}/tickets`
 const TICKET_URL = `${TICKETS_URL}/:id`
+const PROJECTS_URL = `${API_URL}/projects`
+const PROJECT_URL = `${PROJECTS_URL}/:id`
 
 // How long every answer takes, so the app's loading state can be seen. No
 // wait in tests: the loading state still shows on the first render, and the
@@ -61,8 +65,8 @@ const DEFAULT_PAGE_SIZE = 20
 // What a handler can answer with: a ticket, or an error.
 type TicketOrError = Ticket | ApiErrorBody
 
-// The :id in TICKET_URL. Like every URL parameter it is text.
-type TicketParams = { id: string }
+// The :id in TICKET_URL or PROJECT_URL. Like every URL parameter it is text.
+type IdParams = { id: string }
 
 // What is wrong with a request: a message, and one message per field when
 // the problem is in particular fields.
@@ -283,6 +287,12 @@ function readTicketFilters(
   return filters
 }
 
+// A record id from the URL, or null if it is not a whole number, which the
+// contract treats the same as an id that does not exist.
+function parseId(text: string): number | null {
+  return /^\d+$/.test(text) ? Number(text) : null
+}
+
 // parseNewTicket and parseUpdate give back either the values or a Problem.
 // Only a Problem has a message.
 function isProblem(value: object): value is Problem {
@@ -312,7 +322,7 @@ export const handlers = [
   // One ticket, or 404.
   // The type arguments are the URL parameters, the request body and the
   // response body.
-  http.get<TicketParams, never, TicketOrError>(
+  http.get<IdParams, never, TicketOrError>(
     TICKET_URL,
     async ({ params }) => {
       await delay(RESPONSE_DELAY_MS)
@@ -353,7 +363,7 @@ export const handlers = [
   // Changes some of one ticket's fields. 404 if there is no such ticket
   // (checked first), 400 if the changes are not valid, otherwise the whole
   // updated ticket.
-  http.patch<TicketParams, DefaultBodyType, TicketOrError>(
+  http.patch<IdParams, DefaultBodyType, TicketOrError>(
     TICKET_URL,
     async ({ params, request }) => {
       await delay(RESPONSE_DELAY_MS)
@@ -381,7 +391,7 @@ export const handlers = [
 
   // Removes one ticket for good. 404 if there is no such ticket, otherwise
   // 204 No Content: it worked, and there is nothing left to send back.
-  http.delete<TicketParams>(TICKET_URL, async ({ params }) => {
+  http.delete<IdParams>(TICKET_URL, async ({ params }) => {
     await delay(RESPONSE_DELAY_MS)
     const id = parseTicketId(params.id)
     const existing = tickets.find((item) => item.id === id)
@@ -391,4 +401,36 @@ export const handlers = [
     setTickets(tickets.filter((item) => item.id !== existing.id))
     return new HttpResponse(null, { status: 204 })
   }),
+
+  // One page of projects. Read only: projects never change.
+  http.get<PathParams, never, PagedResponse<Project> | ApiErrorBody>(
+    PROJECTS_URL,
+    async ({ request }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const query = new URL(request.url).searchParams
+      const fields: Record<string, string> = {}
+      const { page, size } = readPaging(query, fields)
+      if (Object.keys(fields).length > 0) {
+        return validationError({ message: CHECK_QUERY, fields })
+      }
+      return HttpResponse.json<PagedResponse<Project>>(
+        toPage(projects, page, size),
+      )
+    },
+  ),
+
+  // One project, or 404.
+  http.get<IdParams, never, Project | ApiErrorBody>(
+    PROJECT_URL,
+    async ({ params }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const id = parseId(params.id)
+      const project = projects.find((item) => item.id === id)
+      return project
+        ? HttpResponse.json<Project>(project)
+        : errorResponse(404, 'NOT_FOUND', {
+            message: `There is no project with the id "${params.id}".`,
+          })
+    },
+  ),
 ]
