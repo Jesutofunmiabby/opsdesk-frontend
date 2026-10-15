@@ -35,7 +35,9 @@
 
   /* Forms. Errors share the HIGH priority red so "something is wrong" reads
      the same everywhere. Focus rings use the solid brand blue. */
-  --input-border: #cbd3e1;
+  /* At least 3:1 against both white and the page background, so the edge of
+     every field can be seen (WCAG 1.4.11). The old #cbd3e1 was 1.5:1. */
+  --input-border: #858fa3;
   --error: #b3261e;
   /* Hover for red buttons, such as Delete. */
   --error-hover: #96201a;

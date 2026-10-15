@@ -1,23 +1,19 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Provider } from 'react-redux'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { store } from '../store/store'
+import { Route, Routes } from 'react-router-dom'
+import { renderWithProviders } from '../test/renderWithProviders'
 import Layout from './Layout'
 
 // The layout with a stand-in page, so the test does not depend on any real
 // page or the tickets API.
 function renderLayout() {
-  render(
-    <Provider store={store}>
-      <MemoryRouter initialEntries={['/test']}>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="test" element={<button type="button">In page</button>} />
-          </Route>
-        </Routes>
-      </MemoryRouter>
-    </Provider>,
+  renderWithProviders(
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="test" element={<button type="button">In page</button>} />
+      </Route>
+    </Routes>,
+    { route: '/test' },
   )
 }
 

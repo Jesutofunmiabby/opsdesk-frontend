@@ -14,8 +14,13 @@
   margin-bottom: 12px;
 }
 
+/* An h3, one level below the page title. Headings below h2 get no shared
+   styles, so the margin, line height and colour h2 gave it are set here. */
 .column__title {
+  margin: 0;
   font-size: 13px;
+  line-height: 120%;
+  color: var(--text-strong);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.7px;
