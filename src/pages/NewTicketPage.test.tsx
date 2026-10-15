@@ -1,20 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
-import { store } from '../store/store'
+import { renderWithProviders } from '../test/renderWithProviders'
 import NewTicketPage from './NewTicketPage'
 
 // The real create page, store and form together. Submitting an empty form is
 // stopped by the form's own checks, so no request is sent.
 function renderNewTicketPage() {
-  render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <NewTicketPage />
-      </MemoryRouter>
-    </Provider>,
-  )
+  renderWithProviders(<NewTicketPage />)
 }
 
 describe('New ticket page', () => {
