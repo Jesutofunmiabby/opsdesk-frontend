@@ -44,6 +44,12 @@ function TicketBoard({ tickets }: TicketBoardProps) {
         id: ticket.id,
         changes: { status: nextStatus },
       }).unwrap()
+      dispatch(
+        addNotification({
+          message: `Ticket #${ticket.id} moved to ${STATUS_LABELS[nextStatus]}`,
+          type: 'success',
+        }),
+      )
     } catch {
       setMovesFrom((current) => {
         const next = { ...current }
