@@ -21,7 +21,8 @@ function TicketList() {
   // Local state: only the list and its controls use these.
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<StatusFilter>(ALL_STATUSES)
-  const [page, setPage] = useState(1)
+  // Counts from 0, like the API. Pagination shows it to people as page + 1.
+  const [page, setPage] = useState(0)
   const searchRef = useRef<HTMLInputElement>(null)
 
   // The box updates on every key press; the search sent waits for a pause.
@@ -41,16 +42,16 @@ function TicketList() {
 
   const filtersOn = query.trim() !== '' || status !== ALL_STATUSES
 
-  // A new search or filter starts again from page 1, where the first matches
+  // A new search or filter starts again from the first page, where the first matches
   // are. Done here, when the choice changes, rather than in an effect.
   function handleQueryChange(nextQuery: string) {
     setQuery(nextQuery)
-    setPage(1)
+    setPage(0)
   }
 
   function handleStatusChange(nextStatus: StatusFilter) {
     setStatus(nextStatus)
-    setPage(1)
+    setPage(0)
   }
 
   // Back to every ticket. The Clear filters button disappears once the list
@@ -58,7 +59,7 @@ function TicketList() {
   function handleClearFilters() {
     setQuery('')
     setStatus(ALL_STATUSES)
-    setPage(1)
+    setPage(0)
     searchRef.current?.focus()
   }
 

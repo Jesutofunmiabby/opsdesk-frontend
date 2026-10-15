@@ -93,14 +93,14 @@ describe('API contract: errors', () => {
   })
 
   it('answers out-of-range list parameters with field messages', async () => {
-    const response = await api('/tickets?status=DONE&size=500&page=0')
+    const response = await api('/tickets?status=DONE&size=500&page=-1')
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: 'VALIDATION_ERROR',
       message: 'Check the query parameters.',
       fields: {
-        page: 'page must be a whole number of 1 or more.',
+        page: 'page must be a whole number of 0 or more.',
         size: 'size must be a whole number from 1 to 100.',
         status: 'Choose a status: OPEN, IN_PROGRESS, RESOLVED or CLOSED.',
       },
@@ -118,7 +118,7 @@ describe('API contract: tickets', () => {
       ['items', 'page', 'size', 'totalItems', 'totalPages'].sort(),
     )
     expect(body).toMatchObject({
-      page: 1,
+      page: 0,
       size: 2,
       totalItems: 3,
       totalPages: 2,
@@ -130,10 +130,20 @@ describe('API contract: tickets', () => {
     }
   })
 
+  it('counts pages from 0, starting at page 0', async () => {
+    const first = await (await api('/tickets?size=10')).json()
+    const second = await (await api('/tickets?size=10&page=1')).json()
+
+    expect(first.page).toBe(0)
+    expect(first.items[0].id).toBe(1)
+    expect(second.page).toBe(1)
+    expect(second.items[0].id).toBe(11)
+  })
+
   it('gives the last page when asked for one past the end', async () => {
     const body = await (await api('/tickets?size=10&page=9')).json()
 
-    expect(body).toMatchObject({ page: 3, totalPages: 3, totalItems: 25 })
+    expect(body).toMatchObject({ page: 2, totalPages: 3, totalItems: 25 })
     expect(body.items).toHaveLength(5)
   })
 
@@ -209,7 +219,7 @@ describe('API contract: projects', () => {
     const body = await (await api('/projects?size=1')).json()
 
     expect(body).toMatchObject({
-      page: 1,
+      page: 0,
       size: 1,
       totalItems: 6,
       totalPages: 6,

@@ -56,7 +56,7 @@ const NOT_AN_OBJECT = 'The request body must be a JSON object.'
 const PRIORITY_MESSAGE = 'Choose a priority: LOW, MEDIUM or HIGH.'
 const STATUS_MESSAGE = 'Choose a status: OPEN, IN_PROGRESS, RESOLVED or CLOSED.'
 const CHECK_QUERY = 'Check the query parameters.'
-const PAGE_MESSAGE = 'page must be a whole number of 1 or more.'
+const PAGE_MESSAGE = 'page must be a whole number of 0 or more.'
 const SIZE_MESSAGE = `size must be a whole number from 1 to ${MAX_PAGE_SIZE}.`
 
 // The page size when the request does not give one.
@@ -229,19 +229,20 @@ function readWholeNumber(raw: string | null, fallback: number): number | null {
 // The page and size asked for, checked against the contract's rules. Any
 // problem is added to fields, keyed by the parameter's name.
 function readPaging(query: URLSearchParams, fields: Record<string, string>) {
-  const page = readWholeNumber(query.get('page'), 1)
+  const page = readWholeNumber(query.get('page'), 0)
   const size = readWholeNumber(query.get('size'), DEFAULT_PAGE_SIZE)
-  if (page === null || page < 1) {
+  if (page === null) {
     fields.page = PAGE_MESSAGE
   }
   if (size === null || size < 1 || size > MAX_PAGE_SIZE) {
     fields.size = SIZE_MESSAGE
   }
-  return { page: page ?? 1, size: size ?? DEFAULT_PAGE_SIZE }
+  return { page: page ?? 0, size: size ?? DEFAULT_PAGE_SIZE }
 }
 
 // One page of a list in the contract's shape, oldest (lowest id) first. A
-// page past the end gives the last page, and says so in page.
+// page past the end gives the last page, and says so in page. Pages count
+// from 0, as in the contract.
 function toPage<T extends { id: number }>(
   items: T[],
   page: number,

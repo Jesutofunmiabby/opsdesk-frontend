@@ -9,7 +9,8 @@ import type { TicketFilters } from '../features/tickets/utils/ticketList'
 import type { PagedResponse } from './apiTypes'
 
 // What getTickets is called with: which page, how big, and any filters.
-// Anything left out uses the API's default (page 1, 20 a page, no filter).
+// Anything left out uses the API's default (page 0, the
+// first, 20 a page, no filter).
 export interface TicketListParams extends TicketFilters {
   page?: number
   size?: number

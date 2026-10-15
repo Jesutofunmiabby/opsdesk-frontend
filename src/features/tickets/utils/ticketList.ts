@@ -40,13 +40,13 @@ export function filterTickets(
 // any kind of list.
 export interface Page<T> {
   items: T[]
-  // The page actually shown, counting from 1.
+  // The page actually shown, counting from 0, as the API does.
   page: number
-  // Always at least 1, so an empty list still reads "Page 1 of 1".
+  // Always at least 1, so an empty list still has one page: page 0.
   totalPages: number
 }
 
-// The items on the given page. A page number that is too high or too low is
+// The items on the given page, counting from 0. A page number that is too high or too low is
 // moved to the nearest real page, so the list never shows an empty page just
 // because it got shorter.
 export function paginate<T>(
@@ -55,8 +55,8 @@ export function paginate<T>(
   pageSize: number,
 ): Page<T> {
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize))
-  const current = Math.min(Math.max(page, 1), totalPages)
-  const start = (current - 1) * pageSize
+  const current = Math.min(Math.max(page, 0), totalPages - 1)
+  const start = current * pageSize
   return {
     items: items.slice(start, start + pageSize),
     page: current,

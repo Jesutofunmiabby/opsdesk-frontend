@@ -23,9 +23,10 @@ export interface ApiErrorBody {
 // One page of any list (see "Lists and pages" in the contract).
 export interface PagedResponse<T> {
   items: T[]
+  // Counting from 0: the first page is page 0.
   page: number
   size: number
   totalItems: number
-  // At least 1, so an empty list is page 1 of 1.
+  // At least 1, so an empty list still has one page: page 0.
   totalPages: number
 }

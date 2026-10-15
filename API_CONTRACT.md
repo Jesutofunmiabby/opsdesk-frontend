@@ -94,10 +94,10 @@ Every list endpoint returns one page at a time, in the same shape.
 
 | Parameter | Type | Default | Rules |
 |-----------|------|---------|-------|
-| `page` | whole number | `1` | 1 or more. |
+| `page` | whole number | `0` | 0 or more. Pages count from 0, so the first page is page 0. |
 | `size` | whole number | `20` | 1 to 100: how many items on a page. |
 
-A value that breaks these rules (`page=0`, `size=500`, `size=abc`) gets
+A value that breaks these rules (`page=-1`, `size=500`, `size=abc`) gets
 `400 VALIDATION_ERROR` with a message under `fields.page` or `fields.size`.
 
 **Response**
@@ -105,7 +105,7 @@ A value that breaks these rules (`page=0`, `size=500`, `size=abc`) gets
 ```json
 {
   "items": [],
-  "page": 1,
+  "page": 0,
   "size": 20,
   "totalItems": 0,
   "totalPages": 1
@@ -115,14 +115,14 @@ A value that breaks these rules (`page=0`, `size=500`, `size=abc`) gets
 | Field | Type | What it is |
 |-------|------|------------|
 | `items` | array | The items on this page, oldest first (ascending id). |
-| `page` | number | The page these items are from. |
+| `page` | number | The page these items are from, counting from 0. |
 | `size` | number | The page size used. |
 | `totalItems` | number | How many items match, across all pages. |
-| `totalPages` | number | How many pages there are. Always at least 1, so an empty list is page 1 of 1. |
+| `totalPages` | number | How many pages there are. Always at least 1, so an empty list still has one page: page 0. |
 
 A `page` past the last page is not an error: the last page comes back, and
-`page` in the response says which page that is. (Asking for page 9 of 3 gives
-page 3.)
+`page` in the response says which page that is. (With 3 pages, numbered 0 to
+2, asking for page 9 gives page 2.)
 
 ## Tickets
 
@@ -203,7 +203,7 @@ Takes the [page parameters](#lists-and-pages), plus filters. Filters combine:
       "updatedAt": "2026-09-12T09:00:00.000Z"
     }
   ],
-  "page": 1,
+  "page": 0,
   "size": 2,
   "totalItems": 3,
   "totalPages": 2
@@ -225,7 +225,7 @@ Takes the [page parameters](#lists-and-pages), plus filters. Filters combine:
 }
 ```
 
-The page messages are `page must be a whole number of 1 or more.` and
+The page messages are `page must be a whole number of 0 or more.` and
 `size must be a whole number from 1 to 100.`
 
 ### Get one ticket
@@ -398,7 +398,7 @@ Takes the [page parameters](#lists-and-pages) only.
       "dueDate": "2026-10-23"
     }
   ],
-  "page": 1,
+  "page": 0,
   "size": 1,
   "totalItems": 6,
   "totalPages": 6

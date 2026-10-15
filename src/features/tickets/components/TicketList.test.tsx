@@ -12,6 +12,9 @@ import TicketList from './TicketList'
 const OPEN_TICKET = 'Laptop will not connect to the office Wi-Fi'
 const IN_PROGRESS_TICKET = 'Payroll export fails with a timeout error'
 
+// The first ticket on the list's second page (ids 11 to 20).
+const SECOND_PAGE_TICKET = 'Printer on the third floor jams on every job'
+
 // The list on its own, talking to the mock API, once its first page is in.
 async function renderTicketList() {
   renderWithProviders(<TicketList />)
@@ -28,6 +31,25 @@ describe('TicketList', () => {
     expect(
       await screen.findByRole('link', { name: IN_PROGRESS_TICKET }),
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: OPEN_TICKET }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('shows pages to people counting from 1', async () => {
+    const user = userEvent.setup()
+    await renderTicketList()
+
+    // The API's page 0 is shown as page 1.
+    expect(screen.getByText('Page 1 of 3')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(
+      await screen.findByRole('link', { name: SECOND_PAGE_TICKET }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Page 2 of 3')).toBeInTheDocument()
     expect(
       screen.queryByRole('link', { name: OPEN_TICKET }),
     ).not.toBeInTheDocument()
@@ -67,7 +89,7 @@ describe('TicketList', () => {
       http.get(`${API_URL}/tickets`, () =>
         HttpResponse.json<PagedResponse<Ticket>>({
           items: [],
-          page: 1,
+          page: 0,
           size: 10,
           totalItems: 0,
           totalPages: 1,
