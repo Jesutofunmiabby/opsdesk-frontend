@@ -119,14 +119,15 @@ test, named `*.test.ts` or `*.test.tsx`.
 
 There is no real tickets backend yet. Until there is, ticket data comes from a
 mock API built with [MSW](https://mswjs.io) (Mock Service Worker), in
-`src/mocks/`. It catches the app's requests to `/api/tickets` in the browser
-and answers them as a real server would, after a short delay so the loading
-states can be seen. Changes are kept in the browser's localStorage, so they
+`src/mocks/`. It catches the app's requests to `/api/v1` in the browser and
+answers them exactly as [API_CONTRACT.md](API_CONTRACT.md) says the real
+backend will, after a short delay so the loading states can be seen. Changes are kept in the browser's localStorage, so they
 survive a refresh; remove the `opsdesk.tickets` entry (or clear the site's
 data) to go back to the 25 starting tickets.
 
-The app itself only ever talks to `/api/tickets` through RTK Query, so when
-the real backend exists, the mock can be removed without changing any page.
+The app itself only ever talks to `/api/v1` through RTK Query, so when the
+real backend exists and follows the contract, the mock can be removed without
+changing any page.
 The mock only starts under `npm run dev`; a production build (`npm run
 preview`) has no tickets API yet, so the ticket pages show their error state.
 

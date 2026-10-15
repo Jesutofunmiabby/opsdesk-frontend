@@ -44,8 +44,9 @@ describe('Tickets page', () => {
 
     await user.type(screen.getByLabelText('Search by title'), 'no such ticket')
 
+    // The search goes to the API once typing pauses, so wait for the answer.
     expect(
-      screen.getByText('No tickets match your filters.'),
+      await screen.findByText('No tickets match your filters.'),
     ).toBeInTheDocument()
     expect(
       screen.queryByRole('link', { name: FIRST_TICKET }),
@@ -54,7 +55,9 @@ describe('Tickets page', () => {
     await user.click(screen.getByRole('button', { name: 'Clear filters' }))
 
     expect(screen.getByLabelText('Search by title')).toHaveValue('')
-    expect(screen.getByRole('link', { name: FIRST_TICKET })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('link', { name: FIRST_TICKET }),
+    ).toBeInTheDocument()
     expect(
       screen.queryByText('No tickets match your filters.'),
     ).not.toBeInTheDocument()
@@ -66,7 +69,10 @@ describe('Tickets page', () => {
     // Error. setupTests puts the normal handler back afterwards.
     server.use(
       http.get(`${API_URL}/tickets`, () =>
-        HttpResponse.json({ message: 'Server error' }, { status: 500 }),
+        HttpResponse.json(
+          { error: 'INTERNAL_ERROR', message: 'Something went wrong.' },
+          { status: 500 },
+        ),
       ),
     )
     renderTicketsPage()

@@ -1,25 +1,6 @@
 import { STATUS_ORDER } from '../data/ticketStatuses'
 import type { Ticket, TicketStatus } from '../types'
 
-// How many tickets sit in each status. Every status appears in the result,
-// including the ones with no tickets, so a dashboard card can show 0 rather
-// than undefined.
-export function countTicketsByStatus(
-  tickets: Ticket[],
-): Record<TicketStatus, number> {
-  // Written out in full so TypeScript can check that no status is missing.
-  const counts: Record<TicketStatus, number> = {
-    OPEN: 0,
-    IN_PROGRESS: 0,
-    RESOLVED: 0,
-    CLOSED: 0,
-  }
-  tickets.forEach((ticket) => {
-    counts[ticket.status] += 1
-  })
-  return counts
-}
-
 // The status after this one on the board, or null for the last status, which
 // has nowhere further to go.
 export function getNextStatus(status: TicketStatus): TicketStatus | null {
@@ -27,8 +8,9 @@ export function getNextStatus(status: TicketStatus): TicketStatus | null {
   return nextIndex < STATUS_ORDER.length ? STATUS_ORDER[nextIndex] : null
 }
 
-// One more than the highest id in use, so a new ticket never reuses an id,
-// even after tickets in the middle of the list are gone. 1 for an empty list.
+// One more than the highest id in the list. 1 for an empty list. The mock
+// API uses it only for its starting next id; after that it counts up on its
+// own, because this alone would give a deleted newest ticket's id again.
 export function getNextTicketId(tickets: Ticket[]): number {
   return tickets.reduce((highest, ticket) => Math.max(highest, ticket.id), 0) + 1
 }

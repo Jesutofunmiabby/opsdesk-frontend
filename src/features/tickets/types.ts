@@ -13,6 +13,10 @@ export interface Ticket {
   description: string
   priority: Priority
   status: TicketStatus
+  // When it was created and last changed, as ISO 8601 strings in UTC, such
+  // as '2026-09-04T10:00:00.000Z'. Both are set by the API, never the form.
+  createdAt: string
+  updatedAt: string
 }
 
 // The parts of a ticket someone fills in on the create and edit forms. The id

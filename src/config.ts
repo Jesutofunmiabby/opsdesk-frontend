@@ -4,7 +4,7 @@
 
 // Used when VITE_API_URL is not set, such as a fresh copy of the repo with no
 // .env file yet.
-const FALLBACK_API_URL = '/api'
+const FALLBACK_API_URL = '/api/v1'
 
 function readApiUrl(): string {
   let value = import.meta.env.VITE_API_URL
@@ -14,13 +14,14 @@ function readApiUrl(): string {
     )
     value = FALLBACK_API_URL
   }
-  // A path such as "/api" becomes a full address on the page's own server,
-  // such as "http://localhost:5173/api"; a full address stays as it is.
+  // A path such as "/api/v1" becomes a full address on the page's own
+  // server, such as "http://localhost:5173/api/v1"; a full address stays as
+  // it is.
   // Browsers do this for every request anyway, but the tests run in Node,
   // whose fetch only accepts full addresses.
   const url = new URL(value, window.location.origin).href
-  // "/api/" and "/api" mean the same; without the slash, joining it to
-  // "/tickets" cannot make "/api//tickets".
+  // "/api/v1/" and "/api/v1" mean the same; without the slash, joining it
+  // to "/tickets" cannot make "/api/v1//tickets".
   return url.replace(/\/+$/, '')
 }
 

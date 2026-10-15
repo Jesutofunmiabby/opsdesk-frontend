@@ -3,11 +3,10 @@ import {
   STATUS_ORDER,
   STATUS_LABELS,
 } from '../features/tickets/data/ticketStatuses'
-import { countTicketsByStatus } from '../features/tickets/utils/tickets'
 import { getDepartments } from '../features/employees/utils/employees'
 import { useUsers } from '../features/users/hooks/useUsers'
 import StatCard from '../components/StatCard'
-import { useGetTicketsQuery } from '../store/ticketsApi'
+import { useTicketCounts } from '../features/tickets/hooks/useTicketCounts'
 import type { StatCardState } from '../components/StatCard'
 import './DashboardPage.css'
 
@@ -16,19 +15,18 @@ const employeeCount = employees.length
 const departmentCount = getDepartments(employees).length
 
 function DashboardPage() {
-  // The same cached query as the tickets page: opening the dashboard after
-  // the board uses the tickets already loaded, and a ticket moved on the
-  // board refreshes these counts too.
+  // How many tickets are in each status, counted by the API. Moving a ticket
+  // on the board refreshes these too, because every change to a ticket
+  // refreshes every ticket list.
   const {
-    data: tickets = [],
+    counts: ticketCounts,
     isLoading: ticketsLoading,
     isError: ticketsError,
     refetch: refetchTickets,
-  } = useGetTicketsQuery()
-  const ticketCounts = countTicketsByStatus(tickets)
+  } = useTicketCounts()
   const ticketsState: StatCardState = ticketsLoading
     ? 'loading'
-    : ticketsError
+    : ticketsError || !ticketCounts
       ? 'error'
       : 'ready'
 
@@ -47,7 +45,7 @@ function DashboardPage() {
           <StatCard
             key={status}
             label={STATUS_LABELS[status]}
-            value={ticketCounts[status]}
+            value={ticketCounts?.[status]}
             state={ticketsState}
             onRetry={refetchTickets}
           />
