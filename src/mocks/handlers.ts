@@ -28,8 +28,10 @@ import type {
 const TICKETS_URL = `${API_URL}/tickets`
 const TICKET_URL = `${TICKETS_URL}/:id`
 
-// How long every answer takes, so the app's loading state can be seen.
-const RESPONSE_DELAY_MS = 500
+// How long every answer takes, so the app's loading state can be seen. No
+// wait in tests: the loading state still shows on the first render, and the
+// tests run faster.
+const RESPONSE_DELAY_MS = import.meta.env.MODE === 'test' ? 0 : 500
 
 // The body of every error response.
 interface ApiError {
@@ -49,6 +51,13 @@ let tickets: Ticket[] = loadTickets(initialTickets)
 function setTickets(nextTickets: Ticket[]) {
   tickets = nextTickets
   saveTickets(tickets)
+}
+
+// Back to the starting tickets, as if the app had never been used. Tests
+// call this between tests (after clearing localStorage), so a ticket one test
+// creates or deletes is not still there in the next.
+export function resetTickets() {
+  tickets = loadTickets(initialTickets)
 }
 
 function notFound(param: string) {
