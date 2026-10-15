@@ -32,7 +32,7 @@ describe('Tickets page', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: SECOND_TICKET })).toBeInTheDocument()
     expect(
-      screen.getByRole('heading', { name: /open/i, level: 2 }),
+      screen.getByRole('heading', { name: /open/i, level: 3 }),
     ).toBeInTheDocument()
     expect(screen.queryByText('Loading tickets…')).not.toBeInTheDocument()
   })

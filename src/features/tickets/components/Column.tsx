@@ -16,7 +16,7 @@ function Column({ label, tickets, onMove, isMoving }: ColumnProps) {
   return (
     <section className="column">
       <header className="column__header">
-        <h2 className="column__title">{label}</h2>
+        <h3 className="column__title">{label}</h3>
         {/* Only the number shows; the hidden word means a screen reader
             says "3 tickets" rather than a bare "3". */}
         <span className="column__count">
