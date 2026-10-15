@@ -12,6 +12,7 @@ import {
   parseTicketId,
 } from '../features/tickets/utils/tickets'
 import { loadTickets, saveTickets } from './ticketStorage'
+import { API_URL } from '../config'
 import { validateTicket } from '../features/tickets/utils/validateTicket'
 import type {
   Ticket,
@@ -21,6 +22,11 @@ import type {
 
 // A pretend tickets API. MSW catches the app's requests to /api/tickets and
 // answers them here, in the browser, as a real server would.
+
+// Built from the same API_URL as the app's requests, so if VITE_API_URL
+// changes, the mocks still catch them.
+const TICKETS_URL = `${API_URL}/tickets`
+const TICKET_URL = `${TICKETS_URL}/:id`
 
 // How long every answer takes, so the app's loading state can be seen.
 const RESPONSE_DELAY_MS = 500
@@ -33,7 +39,7 @@ interface ApiError {
 // What a handler can answer with: a ticket, or an error.
 type TicketOrError = Ticket | ApiError
 
-// The :id in /api/tickets/:id. Like every URL parameter it is text.
+// The :id in TICKET_URL. Like every URL parameter it is text.
 type TicketParams = { id: string }
 
 // The "database": the tickets saved in the browser, or the mock tickets the
@@ -126,7 +132,7 @@ function parseUpdate(body: unknown): TicketUpdate | string {
 
 export const handlers = [
   // Every ticket.
-  http.get('/api/tickets', async () => {
+  http.get(TICKETS_URL, async () => {
     await delay(RESPONSE_DELAY_MS)
     return HttpResponse.json<Ticket[]>(tickets)
   }),
@@ -135,7 +141,7 @@ export const handlers = [
   // The type arguments are the URL parameters, the request body and the
   // response body.
   http.get<TicketParams, never, TicketOrError>(
-    '/api/tickets/:id',
+    TICKET_URL,
     async ({ params }) => {
       await delay(RESPONSE_DELAY_MS)
       const id = parseTicketId(params.id)
@@ -147,7 +153,7 @@ export const handlers = [
   // A new ticket. The server chooses its id and starting status, and answers
   // 201 Created with the whole ticket.
   http.post<PathParams, DefaultBodyType, TicketOrError>(
-    '/api/tickets',
+    TICKETS_URL,
     async ({ request }) => {
       await delay(RESPONSE_DELAY_MS)
       // json() fails on a body that is not JSON at all; that is a 400 too.
@@ -169,7 +175,7 @@ export const handlers = [
   // Changes some of one ticket's fields. 404 if there is no such ticket, 400
   // if the changes are not valid, otherwise the updated ticket.
   http.patch<TicketParams, DefaultBodyType, TicketOrError>(
-    '/api/tickets/:id',
+    TICKET_URL,
     async ({ params, request }) => {
       await delay(RESPONSE_DELAY_MS)
       const id = parseTicketId(params.id)

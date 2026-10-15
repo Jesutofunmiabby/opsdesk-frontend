@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { API_URL } from '../config'
 import type {
   Ticket,
   TicketFormValues,
@@ -18,7 +19,8 @@ interface UpdateTicketArgs {
 export const ticketsApi = createApi({
   // Where the cache sits in the store: state.ticketsApi.
   reducerPath: 'ticketsApi',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
+  // VITE_API_URL from .env, or "/api" if it is not set.
+  baseQuery: fetchBaseQuery({ baseUrl: API_URL }),
 
   // Labels for cached data. Queries say which tickets they hold
   // (providesTags); mutations say which they changed (invalidatesTags), and
