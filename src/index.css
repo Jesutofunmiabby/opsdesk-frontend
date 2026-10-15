@@ -44,6 +44,11 @@
   --success-soft: #e3f4e8;
   --error-soft: #fde3e1;
 
+  /* Loading skeletons: a soft blue-grey block with a lighter band that
+     sweeps across it. */
+  --skeleton: #e6ebf3;
+  --skeleton-shine: #f4f6fa;
+
   /* Shape and depth */
   --radius: 12px;
   --radius-sm: 8px;
