@@ -634,7 +634,7 @@ characters `<img src=x ...>`. The protection is lost only when code goes
 around React, which is why these are not allowed:
 
 - `dangerouslySetInnerHTML`, which puts a string in as real HTML (banned in
-  `CLAUDE.md`).
+  this project).
 - Setting `innerHTML` or similar on elements directly.
 - Links whose whole address comes from data, which could be `javascript:...`.
 
