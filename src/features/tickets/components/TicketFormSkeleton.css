@@ -1,0 +1,13 @@
+/* Spacing that matches the real back link, heading and fields. */
+.ticket-form-skeleton__back {
+  margin-bottom: 18px;
+}
+
+.ticket-form-skeleton__heading {
+  margin-bottom: 20px;
+}
+
+.ticket-form-skeleton__field {
+  display: grid;
+  gap: 8px;
+}

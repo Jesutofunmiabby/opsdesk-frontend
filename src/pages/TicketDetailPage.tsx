@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTicketFromUrl } from '../features/tickets/hooks/useTicketFromUrl'
 import TicketDetails from '../features/tickets/components/TicketDetails'
 import TicketNotFound from '../features/tickets/components/TicketNotFound'
-import LoadingMessage from '../components/LoadingMessage'
+import TicketDetailSkeleton from '../features/tickets/components/TicketDetailSkeleton'
 import RequestError from '../components/RequestError'
 import './TicketDetailPage.css'
 
@@ -15,7 +15,7 @@ function TicketDetailPage() {
     return <TicketNotFound id={id} />
   }
   if (isLoading) {
-    return <LoadingMessage text="Loading ticket…" />
+    return <TicketDetailSkeleton />
   }
   // After the checks above, no ticket means the request failed.
   if (isError || !ticket) {
