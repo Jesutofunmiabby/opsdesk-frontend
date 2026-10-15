@@ -28,7 +28,8 @@ interface UpdateTicketArgs {
 export const ticketsApi = createApi({
   // Where the cache sits in the store: state.ticketsApi.
   reducerPath: 'ticketsApi',
-  // VITE_API_URL from .env, or "/api" if it is not set.
+  // VITE_API_URL from .env, or "/api/v1" if it is not set. Every path below
+  // is added to it, so '/tickets' is /api/v1/tickets.
   baseQuery: fetchBaseQuery({ baseUrl: API_URL }),
 
   // Labels for cached data. Queries say which tickets they hold
