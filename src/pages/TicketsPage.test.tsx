@@ -66,7 +66,10 @@ describe('Tickets page', () => {
     // Error. setupTests puts the normal handler back afterwards.
     server.use(
       http.get(`${API_URL}/tickets`, () =>
-        HttpResponse.json({ message: 'Server error' }, { status: 500 }),
+        HttpResponse.json(
+          { error: 'INTERNAL_ERROR', message: 'Something went wrong.' },
+          { status: 500 },
+        ),
       ),
     )
     renderTicketsPage()
