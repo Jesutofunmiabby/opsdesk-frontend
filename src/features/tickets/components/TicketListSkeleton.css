@@ -1,0 +1,10 @@
+/* The real table sizes its columns from the text in them. The shapes have
+   no text, so the short columns get fixed widths and Title takes the rest,
+   as it does once the tickets arrive. */
+.ticket-list-skeleton__status {
+  width: 164px;
+}
+
+.ticket-list-skeleton__priority {
+  width: 154px;
+}

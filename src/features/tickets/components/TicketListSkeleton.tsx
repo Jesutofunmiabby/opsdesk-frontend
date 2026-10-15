@@ -5,6 +5,7 @@ import './TicketListFilters.css'
 import './TicketList.css'
 import './TicketTable.css'
 import './Pagination.css'
+import './TicketListSkeleton.css'
 
 // Title widths for the placeholder rows, repeated down the table, so the
 // rows look like real titles of different lengths.
@@ -36,8 +37,8 @@ function TicketListSkeleton() {
             <tr>
               <th>ID</th>
               <th>Title</th>
-              <th>Status</th>
-              <th>Priority</th>
+              <th className="ticket-list-skeleton__status">Status</th>
+              <th className="ticket-list-skeleton__priority">Priority</th>
             </tr>
           </thead>
           <tbody>
