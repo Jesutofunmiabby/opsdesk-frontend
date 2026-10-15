@@ -7,16 +7,21 @@
 const FALLBACK_API_URL = '/api'
 
 function readApiUrl(): string {
-  const value = import.meta.env.VITE_API_URL
+  let value = import.meta.env.VITE_API_URL
   if (!value) {
     console.warn(
       `VITE_API_URL is not set, so the API is assumed to be at "${FALLBACK_API_URL}". Copy .env.example to .env to set it.`,
     )
-    return FALLBACK_API_URL
+    value = FALLBACK_API_URL
   }
+  // A path such as "/api" becomes a full address on the page's own server,
+  // such as "http://localhost:5173/api"; a full address stays as it is.
+  // Browsers do this for every request anyway, but the tests run in Node,
+  // whose fetch only accepts full addresses.
+  const url = new URL(value, window.location.origin).href
   // "/api/" and "/api" mean the same; without the slash, joining it to
   // "/tickets" cannot make "/api//tickets".
-  return value.replace(/\/+$/, '')
+  return url.replace(/\/+$/, '')
 }
 
 // Where the backend API lives. The app's requests and the mock API's
