@@ -2,25 +2,32 @@ import Skeleton from '../../../components/Skeleton'
 import SkeletonRegion from '../../../components/SkeletonRegion'
 import './UserList.css'
 import './UserCard.css'
+import './UserListSkeleton.css'
 
-// About two rows of cards on a wide screen.
-const PLACEHOLDER_COUNT = 8
+// The same number the users request asks for (limit=12 in useUsers).
+const PLACEHOLDER_COUNT = 12
 
 // The users list while it loads: a grid of cards with grey shapes for the
-// name, job, email and company, built from the list's own classes.
+// name, job, email and company. Each shape sits inside the real card's text
+// class, so every line takes the same height as the text that replaces it.
 function UserListSkeleton() {
   return (
     <SkeletonRegion label="Loading users…">
       <div className="user-list__grid">
         {Array.from({ length: PLACEHOLDER_COUNT }, (_, index) => (
           <div key={index} className="user-card">
-            <Skeleton width="65%" height={16} />
-            <Skeleton width="75%" height={13} />
-            <Skeleton width="90%" height={13} />
-            {/* The real company class, which pins it to the card's bottom. */}
-            <div className="user-card__company">
-              <Skeleton width="50%" height={12} />
-            </div>
+            <p className="user-card__name">
+              <Skeleton width="65%" className="user-list-skeleton__line" />
+            </p>
+            <p className="user-card__job">
+              <Skeleton width="75%" className="user-list-skeleton__line" />
+            </p>
+            <p className="user-card__email">
+              <Skeleton width="90%" className="user-list-skeleton__line" />
+            </p>
+            <p className="user-card__company">
+              <Skeleton width="50%" className="user-list-skeleton__line" />
+            </p>
           </div>
         ))}
       </div>
