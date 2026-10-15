@@ -1,0 +1,20 @@
+/* Spacing that matches the real panel's text, which the shapes do not get
+   from margins of their own. */
+.ticket-detail-skeleton__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.ticket-detail-skeleton__title {
+  margin: 10px 0 16px;
+}
+
+.ticket-detail-skeleton__description {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.ticket-detail-skeleton__value {
+  margin-top: 6px;
+}

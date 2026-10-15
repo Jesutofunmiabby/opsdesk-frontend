@@ -1,4 +1,5 @@
-/* Back link on the left, Edit on the right, lined up with the panel below. */
+/* Back link on the left, Edit and Delete on the right, lined up with the
+   panel below. */
 .ticket-detail-page__toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -7,6 +8,12 @@
   gap: 12px;
   max-width: 640px;
   margin-bottom: 14px;
+}
+
+.ticket-detail-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .ticket-detail-page__back {
@@ -34,6 +41,37 @@
 
 .ticket-detail-page__edit:hover {
   background: var(--blue-hover);
+}
+
+/* Outlined in red: it only opens the confirmation, where the solid red
+   button does the deleting. Its border makes it 2px taller than Edit, so
+   its padding is 1px less to match. */
+.ticket-detail-page__delete {
+  padding: 6px 17px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: inherit;
+  color: var(--error);
+  background: var(--surface);
+  border: 1px solid var(--error);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.ticket-detail-page__delete:hover:not(:disabled) {
+  background: var(--error-soft);
+}
+
+.ticket-detail-page__delete:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.ticket-detail-page__delete:focus-visible {
+  outline: 2px solid var(--error);
+  outline-offset: 2px;
 }
 
 .ticket-detail-page__back:focus-visible,

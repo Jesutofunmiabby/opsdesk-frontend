@@ -1,0 +1,6 @@
+/* The shapes borrow the real components' classes so they line up exactly.
+   Turning off the pointer stops those classes' hover effects, so nothing
+   looks clickable before it has loaded. */
+.skeleton-region {
+  pointer-events: none;
+}

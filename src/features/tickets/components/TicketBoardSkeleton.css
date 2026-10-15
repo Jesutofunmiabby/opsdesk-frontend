@@ -1,0 +1,6 @@
+/* Two lines standing in for a card's title, spaced like the real heading. */
+.ticket-board-skeleton__title {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}

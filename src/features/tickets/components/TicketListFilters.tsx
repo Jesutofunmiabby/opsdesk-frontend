@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent, Ref } from 'react'
 import {
   STATUS_LABELS,
   STATUS_ORDER,
@@ -13,6 +13,8 @@ interface TicketListFiltersProps {
   onQueryChange: (query: string) => void
   status: StatusFilter
   onStatusChange: (status: StatusFilter) => void
+  // Lets the list move focus to the search box, after Clear filters.
+  searchRef?: Ref<HTMLInputElement>
 }
 
 // The search box and status dropdown above the ticket list.
@@ -21,6 +23,7 @@ function TicketListFilters({
   onQueryChange,
   status,
   onStatusChange,
+  searchRef,
 }: TicketListFiltersProps) {
   // The dropdown hands back plain text; only pass on real choices.
   function handleStatusChange(event: ChangeEvent<HTMLSelectElement>) {
@@ -37,6 +40,7 @@ function TicketListFilters({
           Search by title
         </label>
         <input
+          ref={searchRef}
           id="ticket-search"
           className="ticket-list-filters__control"
           type="search"

@@ -63,6 +63,16 @@ export const ticketsApi = createApi({
       }),
       invalidatesTags: (_ticket, _error, { id }) => [{ type: 'Ticket', id }],
     }),
+
+    // Called with the ticket's id. The API answers 204 with no body, so
+    // there is nothing to return (void). Invalidating the ticket's tag
+    // refreshes the list, which provides a tag for each of its tickets, and
+    // drops the deleted ticket's own cached page, so going Back to it asks
+    // the API again and shows "not found" instead of the old copy.
+    deleteTicket: build.mutation<void, number>({
+      query: (id) => ({ url: `/tickets/${id}`, method: 'DELETE' }),
+      invalidatesTags: (_result, _error, id) => [{ type: 'Ticket', id }],
+    }),
   }),
 })
 
@@ -85,4 +95,5 @@ export const {
   useGetTicketQuery,
   useCreateTicketMutation,
   useUpdateTicketMutation,
+  useDeleteTicketMutation,
 } = ticketsApi

@@ -1,0 +1,6 @@
+/* Sits inside a line of text like a word, so the line keeps the height the
+   real text will have, instead of shrinking to the shape. */
+.user-list-skeleton__line {
+  display: inline-block;
+  vertical-align: middle;
+}

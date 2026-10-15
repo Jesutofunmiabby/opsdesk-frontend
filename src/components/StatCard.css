@@ -25,6 +25,10 @@
   color: var(--blue);
 }
 
+.stat-card__loading {
+  margin-top: auto;
+}
+
 .stat-card__pending {
   display: flex;
   flex-wrap: wrap;

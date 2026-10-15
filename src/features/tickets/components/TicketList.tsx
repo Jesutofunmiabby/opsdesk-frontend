@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import EmptyState from '../../../components/EmptyState'
 import type { Ticket } from '../types'
 import {
   ALL_STATUSES,
@@ -21,6 +22,7 @@ function TicketList({ tickets }: TicketListProps) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<StatusFilter>(ALL_STATUSES)
   const [page, setPage] = useState(1)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   // Worked out from the tickets and the choices above, so the list is always
   // in step with them. useMemo keeps the last result and only filters again
@@ -45,6 +47,34 @@ function TicketList({ tickets }: TicketListProps) {
     setPage(1)
   }
 
+  // Back to every ticket. The Clear filters button disappears once the list
+  // fills up again, so focus moves to the search box rather than being lost.
+  function handleClearFilters() {
+    setQuery('')
+    setStatus(ALL_STATUSES)
+    setPage(1)
+    searchRef.current?.focus()
+  }
+
+  function renderEmpty() {
+    if (tickets.length === 0) {
+      return (
+        <EmptyState
+          title="No tickets yet."
+          text="Tickets people raise will be listed here."
+          action={{ label: 'New ticket', to: '/tickets/new' }}
+        />
+      )
+    }
+    return (
+      <EmptyState
+        title="No tickets match your filters."
+        text="Try a different search or status, or clear them to see every ticket."
+        action={{ label: 'Clear filters', onClick: handleClearFilters }}
+      />
+    )
+  }
+
   return (
     <div>
       <TicketListFilters
@@ -52,6 +82,7 @@ function TicketList({ tickets }: TicketListProps) {
         onQueryChange={handleQueryChange}
         status={status}
         onStatusChange={handleStatusChange}
+        searchRef={searchRef}
       />
 
       {matches.length > 0 ? (
@@ -67,7 +98,7 @@ function TicketList({ tickets }: TicketListProps) {
           />
         </>
       ) : (
-        <p className="ticket-list__empty">No tickets match</p>
+        renderEmpty()
       )}
     </div>
   )

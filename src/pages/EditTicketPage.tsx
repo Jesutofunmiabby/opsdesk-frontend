@@ -3,7 +3,7 @@ import { useTicketFromUrl } from '../features/tickets/hooks/useTicketFromUrl'
 import type { TicketFormValues } from '../features/tickets/types'
 import TicketForm from '../features/tickets/components/TicketForm'
 import TicketNotFound from '../features/tickets/components/TicketNotFound'
-import LoadingMessage from '../components/LoadingMessage'
+import TicketFormSkeleton from '../features/tickets/components/TicketFormSkeleton'
 import RequestError from '../components/RequestError'
 import { useAppDispatch } from '../store/hooks'
 import { useUpdateTicketMutation } from '../store/ticketsApi'
@@ -22,7 +22,7 @@ function EditTicketPage() {
     return <TicketNotFound id={id} />
   }
   if (isLoading) {
-    return <LoadingMessage text="Loading ticket…" />
+    return <TicketFormSkeleton />
   }
   // After the checks above, no ticket means the request failed.
   if (isError || !ticket) {

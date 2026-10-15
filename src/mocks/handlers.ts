@@ -200,4 +200,17 @@ export const handlers = [
       return HttpResponse.json<Ticket>(updated)
     },
   ),
+
+  // Removes one ticket for good. 404 if there is no such ticket, otherwise
+  // 204 No Content: it worked, and there is nothing left to send back.
+  http.delete<TicketParams>(TICKET_URL, async ({ params }) => {
+    await delay(RESPONSE_DELAY_MS)
+    const id = parseTicketId(params.id)
+    const existing = tickets.find((item) => item.id === id)
+    if (!existing) {
+      return notFound(params.id)
+    }
+    setTickets(tickets.filter((item) => item.id !== existing.id))
+    return new HttpResponse(null, { status: 204 })
+  }),
 ]
