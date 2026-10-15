@@ -1,47 +1,44 @@
+import EmptyState from '../../../components/EmptyState'
+import RequestError from '../../../components/RequestError'
 import { useUsers } from '../hooks/useUsers'
 import UserCard from './UserCard'
+import UserListSkeleton from './UserListSkeleton'
 import './UserList.css'
 
-// The users from the API, with a message while they load, if there are none,
-// or if the request fails.
+// The users from the API, with placeholder cards while they load, a message
+// if there are none, and a Retry if the request fails.
 function UserList() {
   const { data: users, status, retry } = useUsers()
 
+  if (status === 'loading') {
+    return <UserListSkeleton />
+  }
+  if (status === 'error') {
+    return (
+      <RequestError
+        message="Sorry, we could not load the users."
+        onRetry={retry}
+      />
+    )
+  }
+  if (status === 'empty') {
+    return (
+      <EmptyState
+        title="No users yet."
+        text="When people are added to OpsDesk they will show up here."
+        action={{ label: 'Check again', onClick: retry }}
+      />
+    )
+  }
+
   return (
-    <div>
-      {status === 'loading' && (
-        <p className="user-list__message">Loading users…</p>
-      )}
-
-      {status === 'empty' && (
-        <p className="user-list__message">No users to show just yet.</p>
-      )}
-
-      {status === 'error' && (
-        <div className="user-list__error">
-          <p className="user-list__message">
-            Sorry, we could not load the users.
-          </p>
-          <button
-            type="button"
-            className="user-list__retry"
-            onClick={retry}
-          >
-            Retry
-          </button>
-        </div>
-      )}
-
-      {status === 'success' && (
-        <ul className="user-list__grid">
-          {users.map((user) => (
-            <li key={user.id}>
-              <UserCard user={user} />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <ul className="user-list__grid">
+      {users.map((user) => (
+        <li key={user.id}>
+          <UserCard user={user} />
+        </li>
+      ))}
+    </ul>
   )
 }
 
