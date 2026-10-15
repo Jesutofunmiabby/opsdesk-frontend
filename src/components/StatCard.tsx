@@ -1,3 +1,4 @@
+import Skeleton from './Skeleton'
 import './StatCard.css'
 
 // What the card is showing: its number, or what is happening instead.
@@ -27,8 +28,14 @@ function StatCard({
 
       {state === 'ready' && <span className="stat-card__value">{value}</span>}
 
+      {/* A shimmer the size of the number, so the card does not change
+          shape when it arrives. The hidden text tells screen readers why
+          there is no number yet. */}
       {state === 'loading' && (
-        <span className="stat-card__pending">Loading…</span>
+        <span className="stat-card__loading">
+          <span className="visually-hidden">Loading…</span>
+          <Skeleton width={56} height={30} />
+        </span>
       )}
 
       {state === 'error' && (
