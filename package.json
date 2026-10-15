@@ -9,6 +9,7 @@
     "typecheck": "tsc -b",
     "lint": "oxlint",
     "preview": "vite preview",
+    "preview:mock": "tsc -b && vite build --mode mock --outDir dist-mock && vite preview --outDir dist-mock",
     "test": "vitest"
   },
   "dependencies": {
