@@ -1,9 +1,10 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import TicketBoard from '../features/tickets/components/TicketBoard'
+import TicketBoardSkeleton from '../features/tickets/components/TicketBoardSkeleton'
 import TicketList from '../features/tickets/components/TicketList'
+import TicketListSkeleton from '../features/tickets/components/TicketListSkeleton'
 import TicketViewToggle from '../features/tickets/components/TicketViewToggle'
 import type { TicketView } from '../features/tickets/types'
-import LoadingMessage from '../components/LoadingMessage'
 import RequestError from '../components/RequestError'
 import { useGetTicketsQuery } from '../store/ticketsApi'
 import './TicketsPage.css'
@@ -30,8 +31,10 @@ function TicketsPage() {
   }
 
   function renderTickets() {
+    // A placeholder shaped like the view that is about to appear, so the
+    // page does not jump when the tickets arrive.
     if (isLoading) {
-      return <LoadingMessage text="Loading tickets…" />
+      return view === 'list' ? <TicketListSkeleton /> : <TicketBoardSkeleton />
     }
     if (isError) {
       return (
