@@ -355,7 +355,8 @@ export const handlers = [
       setTickets([...tickets, ticket])
       return HttpResponse.json<Ticket>(ticket, {
         status: 201,
-        headers: { Location: `${TICKETS_URL}/${ticket.id}` },
+        // A path, as in the contract: /api/v1/tickets/26.
+        headers: { Location: `${new URL(TICKETS_URL).pathname}/${ticket.id}` },
       })
     },
   ),

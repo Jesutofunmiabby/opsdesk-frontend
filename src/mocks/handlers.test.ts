@@ -159,7 +159,7 @@ describe('API contract: tickets', () => {
     expect(response.status).toBe(201)
     const ticket = await response.json()
     expect(response.headers.get('Location')).toBe(
-      `${API_URL}/tickets/${ticket.id}`,
+      `/api/v1/tickets/${ticket.id}`,
     )
     expect(ticket).toMatchObject({
       id: 26,
