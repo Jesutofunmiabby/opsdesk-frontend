@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+# Left over from the old mock demo build.
 dist-mock
 dist-ssr
 *.local
@@ -28,5 +29,3 @@ dist-ssr
 .env
 .env.*
 !.env.example
-# Only turns the mock API on, for npm run preview:mock. No secrets.
-!.env.mock
