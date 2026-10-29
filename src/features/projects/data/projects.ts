@@ -1,8 +1,9 @@
 import type { Project } from '../types'
 
-// Mock internal IT projects for the Projects page.
-// No backend yet. The Project type checks every entry. dueDate is an ISO date
-// string (YYYY-MM-DD) so it sorts and parses reliably.
+// Mock internal IT projects, served by the mock API in src/mocks/handlers.ts
+// during the automated tests. The app itself reads projects from the backend.
+// The Project type checks every entry. dueDate is an ISO date string
+// (YYYY-MM-DD) so it sorts and parses reliably.
 const projects: Project[] = [
   {
     id: 1,

@@ -30,3 +30,17 @@ export interface PagedResponse<T> {
   // At least 1, so an empty list still has one page: page 0.
   totalPages: number
 }
+
+// Checks that a response body is a page with an items list. Where it returns
+// true, TypeScript treats the body as a page. It checks the outer shape only
+// and trusts the API for the fields of each item.
+export function isPagedResponse(
+  body: unknown,
+): body is PagedResponse<unknown> {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    'items' in body &&
+    Array.isArray(body.items)
+  )
+}
