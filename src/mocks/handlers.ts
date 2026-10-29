@@ -16,6 +16,8 @@ import {
 } from '../features/tickets/utils/ticketList'
 import type { TicketFilters } from '../features/tickets/utils/ticketList'
 import { parseTicketId } from '../features/tickets/utils/tickets'
+import users from '../features/users/data/users'
+import type { User } from '../features/users/types'
 import {
   descriptionError,
   titleError,
@@ -33,10 +35,10 @@ import type {
   PagedResponse,
 } from '../store/apiTypes'
 
-// A pretend API that follows API_CONTRACT.md exactly. MSW catches the app's
-// requests and answers them here, in the browser (or in Node during tests),
-// as the real backend will. If this file and the contract disagree, the
-// contract is right and this file is fixed.
+// A pretend API that follows API_CONTRACT.md exactly, for the automated
+// tests. MSW catches the app's requests in Node and answers them here, as the
+// real backend does, so the tests need no backend running. If this file and
+// the contract disagree, the contract is right and this file is fixed.
 
 // Built from the same API_URL as the app's requests, so if VITE_API_URL
 // changes, the mocks still catch them.
@@ -44,11 +46,11 @@ const TICKETS_URL = `${API_URL}/tickets`
 const TICKET_URL = `${TICKETS_URL}/:id`
 const PROJECTS_URL = `${API_URL}/projects`
 const PROJECT_URL = `${PROJECTS_URL}/:id`
+const USERS_URL = `${API_URL}/users`
 
-// How long every answer takes, so the app's loading state can be seen. No
-// wait in tests: the loading state still shows on the first render, and the
-// tests run faster.
-const RESPONSE_DELAY_MS = import.meta.env.MODE === 'test' ? 0 : 500
+// How long every answer takes. None: the loading state still shows on the
+// first render, and the tests run faster.
+const RESPONSE_DELAY_MS = 0
 
 // Messages from the contract that the form's own checks do not give.
 const CHECK_FIELDS = 'Check the highlighted fields.'
@@ -433,6 +435,21 @@ export const handlers = [
         : errorResponse(404, 'NOT_FOUND', {
             message: `There is no project with the id "${params.id}".`,
           })
+    },
+  ),
+
+  // One page of users. Read only in version 1.
+  http.get<PathParams, never, PagedResponse<User> | ApiErrorBody>(
+    USERS_URL,
+    async ({ request }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const query = new URL(request.url).searchParams
+      const fields: Record<string, string> = {}
+      const { page, size } = readPaging(query, fields)
+      if (Object.keys(fields).length > 0) {
+        return validationError({ message: CHECK_QUERY, fields })
+      }
+      return HttpResponse.json<PagedResponse<User>>(toPage(users, page, size))
     },
   ),
 ]

@@ -7,9 +7,9 @@ one set of navigation, with a dashboard summarising them.
 
 This repository is the frontend, version 1.0. It was built as an internship
 project with React, TypeScript and plain CSS. There is no UI framework, so the
-underlying React ideas stay visible. The tickets backend does not exist yet: a
-mock API in the browser stands in for it, following the same
-[API contract](API_CONTRACT.md) the real backend will be built against.
+underlying React ideas stay visible. Its data comes from the Spring Boot
+backend, [opsdesk-backend](https://github.com/Jesutofunmiabby/opsdesk-backend),
+and both follow the same [API contract](API_CONTRACT.md).
 
 ## Contents
 
@@ -55,8 +55,9 @@ mock API in the browser stands in for it, following the same
 - **Error boundary.** If a page crashes, a friendly message with a Reload
   button replaces just that page, and the header and sidebar keep working.
 - **Projects, Teams and Users.** Internal IT projects with their owner, status
-  and due date. A searchable employee directory with a details panel. User
-  accounts loaded from the public DummyJSON API.
+  and due date, from the backend. A searchable employee directory with a
+  details panel. User accounts with their job title and role, from the
+  backend.
 - **Collapsible sidebar.** It folds down to a narrow bar of letters.
 - **Routing.** Every page has its own URL, so Refresh, Back, Forward and
   bookmarks all work. An unknown address shows a Not Found page.
@@ -70,7 +71,7 @@ mock API in the browser stands in for it, following the same
 | Routing | [React Router](https://reactrouter.com) |
 | Shared UI state | [Redux Toolkit](https://redux-toolkit.js.org) (`uiSlice`) |
 | Server data | RTK Query (`ticketsApi`), part of Redux Toolkit |
-| Mock API | [MSW](https://mswjs.io) (Mock Service Worker) |
+| Mock API for the tests | [MSW](https://mswjs.io) (Mock Service Worker) |
 | Tests | [Vitest](https://vitest.dev), [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/), user-event, jsdom |
 | Linting | [Oxlint](https://oxc.rs) |
 | Styling | Plain CSS, with every colour in variables in `src/index.css` |
@@ -80,6 +81,13 @@ mock API in the browser stands in for it, following the same
 You need [Node.js](https://nodejs.org), an LTS release. It was developed on
 version 22.
 
+The app needs the backend running. Start it first, as its
+[README](https://github.com/Jesutofunmiabby/opsdesk-backend#readme) explains:
+PostgreSQL with `docker start opsdesk-db`, then `./mvnw spring-boot:run` in
+the opsdesk-backend folder. It answers at <http://localhost:8080/api/v1>.
+
+Then, in this folder:
+
 ```bash
 git clone https://github.com/Jesutofunmiabby/opsdesk-frontend.git
 cd opsdesk-frontend
@@ -88,35 +96,30 @@ cp .env.example .env     # create your own settings file (see below)
 npm run dev              # start the dev server
 ```
 
-Then open <http://localhost:5173/>. Vite prints the address when it starts,
-and picks another port if 5173 is busy. Use `localhost` rather than
-`127.0.0.1`.
+Then open <http://localhost:5173/>. Vite prints the address when it starts.
+Use `localhost` rather than `127.0.0.1`, and keep port 5173: the backend only
+accepts requests from the app at `http://localhost:5173` (see CORS in
+[API_CONTRACT.md](API_CONTRACT.md)).
 
-In development the mock API answers every ticket request. It starts with 25
-tickets, and your changes are saved in your browser, so they survive a
-refresh.
+Every ticket, project and user comes from the backend and is saved in its
+PostgreSQL database, so changes survive a restart and are seen by everyone
+using that backend.
 
 ### All the commands
 
 | Command | What it does |
 |---------|--------------|
-| `npm run dev` | Starts the dev server, with the mock API. |
+| `npm run dev` | Starts the dev server. It talks to the backend at `VITE_API_URL`. |
 | `npm test` | Runs the tests and watches for changes. |
 | `npm test -- --run` | Runs the tests once and stops. |
 | `npm run typecheck` | Checks the TypeScript types. |
 | `npm run lint` | Checks the code with Oxlint. |
 | `npm run build` | Type checks, then makes the production build in `dist/`. |
-| `npm run preview` | Serves the production build from `dist/`. |
-| `npm run preview:mock` | Makes a demo build with the mock API in `dist-mock/` and serves it. |
+| `npm run preview` | Serves the production build from `dist/`, at <http://localhost:4173/>. |
 
-`npm run preview` shows the build exactly as it would ship. A real build has
-no mock API, and there is no tickets backend yet. So under `npm run preview`
-the ticket screens show their error state, and only Projects, Teams and Users
-have data.
-
-To click through a production build with data, use `npm run preview:mock`.
-It builds with `VITE_ENABLE_MOCKS=true` (from `.env.mock`) into its own
-`dist-mock/` folder, so the real `dist/` build is never affected.
+`npm run preview` shows the build exactly as it would ship. It runs on port
+4173, so the backend has to allow that address too: start the backend with
+`CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4173`.
 
 ## Environment variables
 
@@ -126,8 +129,7 @@ with an explanation: copy it to `.env` to start.
 
 | Variable | Default | What it does |
 |----------|---------|--------------|
-| `VITE_API_URL` | `/api/v1` | Where the tickets API lives, including the version. A path like `/api/v1` means "on the same server as the app". For a separate backend, use its full address, for example `https://api.example.com/api/v1`. |
-| `VITE_ENABLE_MOCKS` | `false` | `true` builds the mock API into the app. For demos and preview **only**: never set it to `true` for a real deployment. `npm run dev` always uses the mock API, whatever this says. |
+| `VITE_API_URL` | `http://localhost:8080/api/v1` | Where the backend API lives, including the version. The default is the backend running on your computer. For a deployed backend, use its address, for example `https://api.example.com/api/v1`. A path like `/api/v1` means "on the same server as the app". |
 
 Never put passwords, secret keys or tokens in `.env`. Every `VITE_` variable
 is built into the JavaScript sent to the browser, so anyone using the app can
@@ -142,12 +144,13 @@ with. After editing `.env`, restart `npm run dev`, or build again.
 npm test -- --run
 ```
 
-There are 48 tests in 10 files. They run in jsdom, a pretend browser, so no
-real browser is needed. Test files sit next to the code they test, named
-`*.test.ts` or `*.test.tsx`.
+There are 53 tests in 12 files. They run in jsdom, a pretend browser, so no
+real browser is needed, and no backend either. Test files sit next to the code
+they test, named `*.test.ts` or `*.test.tsx`.
 
-The tests talk to the same MSW mock API as the app, through `setupServer`, so
-they exercise the real requests. A single test can swap in a different answer
+The tests talk to an MSW mock API through `setupServer`. It catches the app's
+real requests inside Node and answers exactly as the contract says, so the
+tests are fast and give the same answers every time. A single test can swap in a different answer
 (an empty list, a server error) with `server.use(...)`. The
 `renderWithProviders` helper in `src/test/` gives every test a fresh Redux
 store and a router.
@@ -160,6 +163,8 @@ store and a router.
 | Deleting a ticket: Cancel and Escape keep it, confirming deletes it. A missing ticket, and a failed load | `src/pages/TicketDetailPage.test.tsx` |
 | The list's status filter, Clear filters, pages shown from 1, and its empty state | `src/features/tickets/components/TicketList.test.tsx` |
 | The list's filter helper | `src/features/tickets/utils/ticketList.test.ts` |
+| The Projects page: loading, the projects from the API, and a failed load | `src/features/projects/components/ProjectList.test.tsx` |
+| The Users page: the users from the API with their roles, an empty job title, and a failed load | `src/features/users/components/UserList.test.tsx` |
 | The ticket card's link | `src/features/tickets/components/TicketCard.test.tsx` |
 | The confirmation dialog | `src/components/ConfirmDialog.test.tsx` |
 | The error boundary catching a crash | `src/components/ErrorBoundary.test.tsx` |
@@ -179,9 +184,8 @@ flowchart LR
     RTKQ["RTK Query<br/>ticketsApi"]
   end
 
-  MSW["MSW mock API<br/>/api/v1/tickets, /api/v1/projects<br/>dev and preview:mock only"]
-  Backend["Java backend<br/>/api/v1, from Week 6"]
-  Dummy["DummyJSON users API<br/>dummyjson.com/users"]
+  Backend["Spring Boot backend<br/>opsdesk-backend<br/>localhost:8080/api/v1"]
+  DB[("PostgreSQL")]
 
   Pages -->|"put together"| Features
   Pages --> Shared
@@ -192,9 +196,9 @@ flowchart LR
   Pages -->|"query and mutation hooks"| RTKQ
   Features -->|"query and mutation hooks"| RTKQ
   RTKQ -->|"its cache lives in"| Store
-  RTKQ -->|"HTTP + JSON, as API_CONTRACT.md says"| MSW
-  RTKQ -.->|"same requests, later"| Backend
-  Features -->|"useUsers, with fetch"| Dummy
+  RTKQ -->|"tickets: HTTP + JSON, as API_CONTRACT.md says"| Backend
+  Features -->|"useProjects, useUsers, with fetch"| Backend
+  Backend --> DB
 ```
 
 How to read it:
@@ -209,12 +213,11 @@ How to read it:
 - **RTK Query (`ticketsApi`)** is the only way the app gets or changes
   tickets. It caches each answer, shares it between screens, and refreshes
   the right lists after a change. Its cache is kept inside the store.
-- **The MSW mock API** catches requests to `/api/v1` in the browser, during
-  `npm run dev` and in a `preview:mock` build. It answers as the real backend
-  will. When the Java backend arrives, `VITE_API_URL` points at it and the
-  mock is switched off. The pages do not change.
-- **DummyJSON** is a real public API that the Users page and the dashboard's
-  user count read from, until the backend has its own `GET /users`.
+- **The backend** answers every request at `VITE_API_URL` and keeps the data
+  in PostgreSQL. Projects and users are read with `useFetch`, through the
+  `useProjects` and `useUsers` hooks.
+- **The MSW mock API** (`src/mocks/`) is used only by the tests. It answers as
+  the backend does, so the tests need no backend running.
 
 ## The API
 
@@ -304,21 +307,20 @@ Fixes made while checking this:
 
 ```
 src/
-  main.tsx           entry point: starts the mock API if it is on, then
-                     renders the app inside the error boundary, the Redux
-                     store and the router
+  main.tsx           entry point: renders the app inside the error
+                     boundary, the Redux store and the router
   App.tsx            the app itself: its routes
   config.ts          reads VITE_API_URL
   index.css          theme: every colour and shape variable lives here
   store/             Redux: the store, uiSlice (sidebar and notifications),
                      ticketsApi (RTK Query) and the shared API types
-  mocks/             the MSW mock API, its contract tests and its
-                     localStorage saving
+  mocks/             the MSW mock API for the tests, and its contract
+                     tests
   features/
     tickets/         components/, hooks/, data/, utils/, types.ts
     employees/       components/, data/, utils/, types.ts
-    users/           components/, hooks/, types.ts
-    projects/        components/, data/, types.ts
+    users/           components/, hooks/, data/, types.ts
+    projects/        components/, hooks/, data/, types.ts
   components/        UI shared by several features: ErrorBoundary,
                      ConfirmDialog, EmptyState, RequestError, Skeleton,
                      Sidebar, Notifications, FormField, SkipLink, StatCard
@@ -345,51 +347,41 @@ Inside a feature:
 - **`hooks/`**: logic that *does* need React.
   - `useTicketFromUrl` reads the ticket id from the URL and loads that ticket.
   - `useTicketCounts` gets the dashboard's counts.
-  - `useUsers` loads the users from DummyJSON.
+  - `useProjects` and `useUsers` load the projects and users from the
+    backend.
 - **`components/`**: the feature's pieces, from a single card up to a whole
   board or list.
 - **`types.ts`**: the TypeScript types for the feature's data.
 
 ## Troubleshooting
 
-**The console says "Failed to fetch at passthrough (mockServiceWorker.js)" or
-"The FetchEvent … resulted in a network error response".** The mock API runs
-as a service worker, which sees every request the page makes and passes on
-the ones it does not answer, including the page itself. These messages mean
-it passed a request on and nothing answered, because the dev server was not
-running at that moment (or was restarting). Check that `npm run dev` is still
-running in its terminal, then reload. If it keeps happening while the server
-is clearly running, unregister the worker: DevTools, then Application, then
-Service workers, then Unregister. Reload, and the app registers a fresh one.
+**Every page says it could not load, with Retry.** The backend is not
+answering. Check that PostgreSQL is running (`docker ps` lists
+`opsdesk-db`) and that `./mvnw spring-boot:run` is still running in the
+opsdesk-backend folder, then press Retry.
+
+**The console says a request was "blocked by CORS policy".** The backend did
+not allow the address the app is running on. Open the app at
+<http://localhost:5173/>, not `127.0.0.1` or another port, or add that
+address to the backend's `CORS_ALLOWED_ORIGINS`.
+
+**The console still mentions `mockServiceWorker.js`.** An older version of the
+app registered a mock service worker in this browser. Remove it: DevTools,
+then Application, then Service workers, then Unregister, and reload.
 
 **I changed `.env` and nothing happened.** Vite reads `.env` only when it
 starts. Stop `npm run dev` with Ctrl+C and start it again. For a build, run
 the build again: a build keeps the values it was made with.
 
-**The tickets look wrong, old or empty.** Your changes are saved in the
-browser, and data saved by an older version can confuse a newer one. Clear
-the site's data: DevTools, then Application, then Storage, then **Clear site
-data**, then reload. This also removes the service worker. Or, to reset only
-the tickets, run `localStorage.removeItem('opsdesk.tickets')` in the Console
-and reload. Either way you get the 25 starting tickets back.
-
-**Under `npm run preview` the ticket pages say they could not load.** That is
-expected: a real build has no mock API, and there is no backend yet. Use
-`npm run preview:mock` to click through a build with data.
-
-**The Users page shows an error.** Users come from dummyjson.com, so this
-page needs an internet connection. Press Retry once you are back online.
+**Under `npm run preview` every page says it could not load.** The preview
+runs on port 4173, which the backend does not allow by default. Start the
+backend with `CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4173`.
 
 **The page will not load at `127.0.0.1:5173`.** Use
 <http://localhost:5173/> instead. The dev server listens on `localhost`.
 
 ## What's next
 
-- **Week 6: the Java backend.** A Spring Boot backend will be built to
-  [API_CONTRACT.md](API_CONTRACT.md). Then:
-  - `VITE_API_URL` points at it, and the mock API is switched off;
-  - the Users page moves from DummyJSON to the backend's `GET /users`;
-  - the Projects page reads from `GET /projects`.
 - **Week 8: login.** Register and log in, using the auth endpoints already
   described in the contract, so each request says who is asking.
 

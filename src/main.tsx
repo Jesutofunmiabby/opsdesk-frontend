@@ -14,45 +14,20 @@ if (!rootElement) {
   throw new Error('index.html is missing the <div id="root"> element')
 }
 
-// There is no real tickets API yet, so in development the mock one answers
-// instead. A build made with VITE_ENABLE_MOCKS=true (npm run preview:mock)
-// has it too, for demos. It must be running before the app renders, or the
-// first request for tickets would go out before anything could answer it.
-// The import is inside the check, so a normal build leaves the mocks out.
-async function startMockApi() {
-  if (!import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS !== 'true') {
-    return
-  }
-  const { worker } = await import('./mocks/browser')
-  // bypass: requests with no mock, such as the users API, go to the network
-  // as normal, without a warning.
-  await worker.start({ onUnhandledFrame: 'bypass' })
-}
-
 // BrowserRouter keeps the page in step with the address bar, so every page
 // has a real URL that works with Back, Forward, refresh and bookmarks.
 // Provider makes the Redux store available to every component inside it.
 // The outer ErrorBoundary is the last safety net: pages have their own inside
 // the layout, so this one only shows if the layout or the app around it
 // crashes, instead of leaving a blank white page.
-function renderApp(container: HTMLElement) {
-  createRoot(container).render(
-    <StrictMode>
-      <ErrorBoundary>
-        <Provider store={store}>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </Provider>
-      </ErrorBoundary>
-    </StrictMode>,
-  )
-}
-
-// If the mock API fails to start, the app still renders; its ticket requests
-// then fail and the pages show their error states rather than a blank page.
-startMockApi()
-  .catch((error: unknown) => {
-    console.error('The mock API could not start.', error)
-  })
-  .then(() => renderApp(rootElement))
+createRoot(rootElement).render(
+  <StrictMode>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </Provider>
+    </ErrorBoundary>
+  </StrictMode>,
+)

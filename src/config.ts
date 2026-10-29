@@ -3,8 +3,8 @@
 // anyone using the app can read them: never put a secret in one.
 
 // Used when VITE_API_URL is not set, such as a fresh copy of the repo with no
-// .env file yet.
-const FALLBACK_API_URL = '/api/v1'
+// .env file yet: the backend running on this computer.
+const FALLBACK_API_URL = 'http://localhost:8080/api/v1'
 
 function readApiUrl(): string {
   let value = import.meta.env.VITE_API_URL
@@ -25,6 +25,6 @@ function readApiUrl(): string {
   return url.replace(/\/+$/, '')
 }
 
-// Where the backend API lives. The app's requests and the mock API's
-// handlers both build their URLs from this, so they always agree.
+// Where the backend API lives. The app's requests and the tests' mock API
+// both build their URLs from this, so they always agree.
 export const API_URL = readApiUrl()

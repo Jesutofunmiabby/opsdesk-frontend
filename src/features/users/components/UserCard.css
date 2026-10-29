@@ -50,8 +50,8 @@
   border-radius: 2px;
 }
 
-/* Company name sits at the bottom of the card, as a soft blue tag. */
-.user-card__company {
+/* The role sits at the bottom of the card, as a soft blue tag. */
+.user-card__role {
   margin-top: auto;
   padding-top: 12px;
   font-size: 12px;

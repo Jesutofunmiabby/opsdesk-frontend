@@ -1,18 +1,15 @@
-// One user from the dummyjson.com users API. The API sends many more fields;
-// only the ones the app uses are listed here.
+// What a user can do. Only these two words are allowed.
+export type UserRole = 'AGENT' | 'ADMIN'
+
+// One OpsDesk user, as GET /users sends it (see "The User object" in
+// API_CONTRACT.md).
 export interface User {
   id: number
-  firstName: string
-  lastName: string
+  name: string
   email: string
-  company: {
-    name: string
-    // The person's job title at the company.
-    title: string
-  }
-}
-
-// The shape of the API's answer: the list is inside a users field.
-export interface UsersResponse {
-  users: User[]
+  // May be empty.
+  jobTitle: string
+  role: UserRole
+  // When the account was created, as an ISO 8601 string in UTC.
+  createdAt: string
 }
