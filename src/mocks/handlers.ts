@@ -16,6 +16,8 @@ import {
 } from '../features/tickets/utils/ticketList'
 import type { TicketFilters } from '../features/tickets/utils/ticketList'
 import { parseTicketId } from '../features/tickets/utils/tickets'
+import users from '../features/users/data/users'
+import type { User } from '../features/users/types'
 import {
   descriptionError,
   titleError,
@@ -44,6 +46,7 @@ const TICKETS_URL = `${API_URL}/tickets`
 const TICKET_URL = `${TICKETS_URL}/:id`
 const PROJECTS_URL = `${API_URL}/projects`
 const PROJECT_URL = `${PROJECTS_URL}/:id`
+const USERS_URL = `${API_URL}/users`
 
 // How long every answer takes. None: the loading state still shows on the
 // first render, and the tests run faster.
@@ -432,6 +435,21 @@ export const handlers = [
         : errorResponse(404, 'NOT_FOUND', {
             message: `There is no project with the id "${params.id}".`,
           })
+    },
+  ),
+
+  // One page of users. Read only in version 1.
+  http.get<PathParams, never, PagedResponse<User> | ApiErrorBody>(
+    USERS_URL,
+    async ({ request }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const query = new URL(request.url).searchParams
+      const fields: Record<string, string> = {}
+      const { page, size } = readPaging(query, fields)
+      if (Object.keys(fields).length > 0) {
+        return validationError({ message: CHECK_QUERY, fields })
+      }
+      return HttpResponse.json<PagedResponse<User>>(toPage(users, page, size))
     },
   ),
 ]
