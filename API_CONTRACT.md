@@ -83,6 +83,7 @@ Each code always goes with the same HTTP status:
 | 401 | `UNAUTHENTICATED` | No token, an expired or invalid token (from Week 8), or a wrong email or password at login. |
 | 403 | `FORBIDDEN` | Signed in, but not allowed to do this. Reserved: no endpoint in version 1 returns it. |
 | 404 | `NOT_FOUND` | There is nothing at this id. |
+| 405 | `METHOD_NOT_ALLOWED` | The address exists but does not accept this HTTP method, such as `PUT /tickets/4` (updates use `PATCH`). |
 | 409 | `CONFLICT` | The request clashes with what is already there, such as registering an email address that is taken. |
 | 500 | `INTERNAL_ERROR` | Something went wrong on the server. The message never includes internal details such as stack traces. |
 
@@ -425,10 +426,7 @@ Takes the [page parameters](#lists-and-pages) only.
 
 ## Users
 
-> **Not served by the mock API yet.** The Users page still reads people from
-> DummyJSON (`https://dummyjson.com/users`), whose shape is different. When
-> the real backend arrives in Week 6, the page moves to `GET /users` below,
-> and `UserCard` is updated to the User object's fields.
+The Users page and the dashboard's Users count read `GET /users` below.
 
 ### The User object
 
@@ -570,21 +568,23 @@ addresses have accounts.
 
 ## What the mock API covers
 
-| Endpoint | In the mock (`src/mocks/handlers.ts`) | Used by the app |
-|----------|---------------------------------------|-----------------|
-| `GET /tickets` | Yes | Board, list, dashboard |
-| `GET /tickets/{id}` | Yes | Ticket and edit pages |
-| `POST /tickets` | Yes | New ticket |
-| `PATCH /tickets/{id}` | Yes | Edit, and Move on the board |
-| `DELETE /tickets/{id}` | Yes | Delete on the ticket page |
-| `GET /projects` | Yes | Not yet: the Projects page still uses local data |
-| `GET /projects/{id}` | Yes | Not yet |
-| `GET /users` | No: DummyJSON for now | Users page and dashboard, from DummyJSON |
-| `POST /auth/register` | No: Week 8 | Not yet |
-| `POST /auth/login` | No: Week 8 | Not yet |
+The app talks to the real backend (opsdesk-backend). The mock API in
+`src/mocks/handlers.ts` is only for the automated tests (`npm test`), so they
+run without a backend. It must answer exactly as this contract says, and its
+contract tests in `src/mocks/handlers.test.ts` check that.
 
-The mock keeps its data in the browser's localStorage, so changes survive a
-refresh. Its answers take half a second, so loading states can be seen.
+| Endpoint | In the backend | In the mock (tests) | Used by the app |
+|----------|----------------|---------------------|-----------------|
+| `GET /tickets` | Yes | Yes | Board, list, dashboard |
+| `GET /tickets/{id}` | Yes | Yes | Ticket and edit pages |
+| `POST /tickets` | Yes | Yes | New ticket |
+| `PATCH /tickets/{id}` | Yes | Yes | Edit, and Move on the board |
+| `DELETE /tickets/{id}` | Yes | Yes | Delete on the ticket page |
+| `GET /projects` | Yes | Yes | Projects page |
+| `GET /projects/{id}` | Yes | Yes | Not yet |
+| `GET /users` | Yes | Yes | Users page and dashboard |
+| `POST /auth/register` | No: Week 8 | No | Not yet |
+| `POST /auth/login` | No: Week 8 | No | Not yet |
 
 ## Security
 
@@ -676,8 +676,10 @@ For requests with JSON bodies or an `Authorization` header, the browser first
 asks with an `OPTIONS` request (a "preflight") and only sends the real
 request if the answer allows it.
 
-There is no CORS problem in development, because the mock API runs inside the
-page itself. The real backend will need it if it runs on a different origin.
+In development the app (`http://localhost:5173`) and the backend
+(`http://localhost:8080`) are different origins, because their ports differ.
+The backend's `CorsConfig` allows the app's origin, set by
+`CORS_ALLOWED_ORIGINS` (default `http://localhost:5173`).
 
 The fix belongs on the backend because CORS protects the **server's** data:
 it is the server's decision which websites may read its answers, and it says

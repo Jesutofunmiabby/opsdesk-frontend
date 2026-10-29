@@ -8,6 +8,7 @@ export type ApiErrorCode =
   | 'UNAUTHENTICATED' // 401
   | 'FORBIDDEN' // 403
   | 'NOT_FOUND' // 404
+  | 'METHOD_NOT_ALLOWED' // 405
   | 'CONFLICT' // 409
   | 'INTERNAL_ERROR' // 500
 
