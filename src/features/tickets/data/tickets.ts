@@ -1,4 +1,13 @@
-import type { Ticket } from '../types'
+import type { Ticket, TicketPeople } from '../types'
+
+// The mock API has no users, so its tickets are assigned to nobody and were
+// raised by nobody.
+export const NO_PEOPLE: TicketPeople = {
+  assigneeId: null,
+  assigneeName: null,
+  createdById: null,
+  createdByName: null,
+}
 
 // Mock IT support tickets for the board.
 // No backend yet — this is the starting data for the mock API in
@@ -6,7 +15,7 @@ import type { Ticket } from '../types'
 // checks every entry: a typo in a priority or status, or a missing field, is
 // an error. One ticket was raised each day from 1 September 2026; those no
 // longer OPEN were last changed a day and five hours after they were raised.
-const tickets: Ticket[] = [
+const startingTickets: Omit<Ticket, keyof TicketPeople>[] = [
   {
     id: 1,
     title: 'Laptop will not connect to the office Wi-Fi',
@@ -258,5 +267,10 @@ const tickets: Ticket[] = [
     updatedAt: '2026-09-25T09:00:00.000Z',
   },
 ]
+
+const tickets: Ticket[] = startingTickets.map((ticket) => ({
+  ...ticket,
+  ...NO_PEOPLE,
+}))
 
 export default tickets
