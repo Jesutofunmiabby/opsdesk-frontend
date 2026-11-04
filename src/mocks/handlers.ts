@@ -267,9 +267,9 @@ function readTicketFilters(
   fields: Record<string, string>,
 ): TicketFilters {
   const filters: TicketFilters = {}
-  const search = query.get('search')?.trim()
-  if (search) {
-    filters.search = search
+  const q = query.get('q')?.trim()
+  if (q) {
+    filters.q = q
   }
   const status = query.get('status')
   if (status !== null) {
@@ -303,7 +303,7 @@ function isProblem(value: object): value is Problem {
 }
 
 export const handlers = [
-  // One page of tickets, narrowed by any of status, priority and search.
+  // One page of tickets, narrowed by any of status, priority and q.
   http.get<PathParams, never, PagedResponse<Ticket> | ApiErrorBody>(
     TICKETS_URL,
     async ({ request }) => {

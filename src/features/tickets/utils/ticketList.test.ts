@@ -29,12 +29,12 @@ const tickets: Ticket[] = [
 
 describe('filterTickets', () => {
   it('finds tickets whose title contains the search, ignoring case and spaces', () => {
-    const ids = filterTickets(tickets, { search: '  vpn ' }).map((t) => t.id)
+    const ids = filterTickets(tickets, { q: '  vpn ' }).map((t) => t.id)
     expect(ids).toEqual([1, 3])
   })
 
   it('applies the search and the status filter together', () => {
-    const ids = filterTickets(tickets, { search: 'vpn', status: 'CLOSED' }).map(
+    const ids = filterTickets(tickets, { q: 'vpn', status: 'CLOSED' }).map(
       (t) => t.id,
     )
     expect(ids).toEqual([3])

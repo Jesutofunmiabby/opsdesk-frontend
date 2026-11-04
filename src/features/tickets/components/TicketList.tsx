@@ -36,7 +36,7 @@ function TicketList() {
       page,
       size: TICKETS_PER_PAGE,
       status: status === ALL_STATUSES ? undefined : status,
-      search: search || undefined,
+      q: search || undefined,
     },
   )
 

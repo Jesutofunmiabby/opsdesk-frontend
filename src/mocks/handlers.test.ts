@@ -148,7 +148,7 @@ describe('API contract: tickets', () => {
   })
 
   it('searches titles, ignoring capitals', async () => {
-    const body = await (await api('/tickets?search=%20VPN%20')).json()
+    const body = await (await api('/tickets?q=%20VPN%20')).json()
 
     expect(body.totalItems).toBeGreaterThan(0)
     for (const ticket of body.items) {

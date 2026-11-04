@@ -15,19 +15,20 @@ export const MAX_PAGE_SIZE = 100
 // What the ticket list can be narrowed by: the filters of GET /tickets in
 // API_CONTRACT.md. Each one left out matches every ticket.
 export interface TicketFilters {
-  search?: string
+  // Text the title must contain. Sent to the API as q.
+  q?: string
   status?: TicketStatus
   priority?: Priority
 }
 
-// Tickets whose title contains the search (ignoring capitals and spaces at
-// either end), with the given status and priority. All filters apply
+// Tickets whose title contains q (ignoring capitals and spaces at either
+// end), with the given status and priority. All filters apply
 // together. The mock API uses this to answer GET /tickets.
 export function filterTickets(
   tickets: Ticket[],
-  { search = '', status, priority }: TicketFilters,
+  { q = '', status, priority }: TicketFilters,
 ): Ticket[] {
-  const text = search.trim().toLowerCase()
+  const text = q.trim().toLowerCase()
   return tickets.filter(
     (ticket) =>
       ticket.title.toLowerCase().includes(text) &&
