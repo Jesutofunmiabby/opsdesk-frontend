@@ -148,12 +148,65 @@ describe('API contract: tickets', () => {
   })
 
   it('searches titles, ignoring capitals', async () => {
-    const body = await (await api('/tickets?search=%20VPN%20')).json()
+    const body = await (await api('/tickets?q=%20VPN%20')).json()
 
     expect(body.totalItems).toBeGreaterThan(0)
     for (const ticket of body.items) {
       expect(ticket.title.toLowerCase()).toContain('vpn')
     }
+  })
+
+  it('no longer reads the old search parameter', async () => {
+    const body = await (await api('/tickets?search=VPN')).json()
+
+    expect(body.totalItems).toBe(25)
+  })
+
+  it('sorts by a field, newest first with desc', async () => {
+    const body = await (await api('/tickets?sort=createdAt,desc&size=5')).json()
+
+    const times: string[] = body.items.map((t: { createdAt: string }) => t.createdAt)
+    expect(times).toEqual([...times].sort().reverse())
+    expect(body.items[0].id).toBe(25)
+  })
+
+  it('sorts by title, ascending when no direction is given', async () => {
+    const body = await (await api('/tickets?sort=title&size=100')).json()
+
+    const titles: string[] = body.items.map((t: { title: string }) => t.title)
+    expect(titles).toEqual([...titles].sort((a, b) => a.localeCompare(b)))
+  })
+
+  it('filters by assigneeId', async () => {
+    // The mock's tickets are assigned to nobody.
+    const body = await (await api('/tickets?assigneeId=3')).json()
+
+    expect(body).toMatchObject({ items: [], totalItems: 0, totalPages: 1 })
+  })
+
+  it('answers a bad sort or assigneeId with field messages', async () => {
+    const response = await api('/tickets?sort=priority,up&assigneeId=abc')
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({
+      error: 'VALIDATION_ERROR',
+      message: 'Check the query parameters.',
+      fields: {
+        sort: 'sort must be id, title, createdAt, updatedAt, optionally followed by ,asc or ,desc.',
+        assigneeId: 'assigneeId must be a whole number.',
+      },
+    })
+  })
+
+  it('gives every ticket its assignee and creator fields', async () => {
+    const ticket = await (await api('/tickets/1')).json()
+
+    expect(ticket).toMatchObject({
+      assigneeId: null,
+      assigneeName: null,
+      createdById: null,
+      createdByName: null,
+    })
   })
 
   it('creates a ticket with 201, a Location header and ISO times', async () => {

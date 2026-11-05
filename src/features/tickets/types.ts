@@ -17,7 +17,20 @@ export interface Ticket {
   // as '2026-09-04T10:00:00.000Z'. Both are set by the API, never the form.
   createdAt: string
   updatedAt: string
+  // Who the ticket is assigned to and who raised it, as a user id and name.
+  // null when it is assigned to nobody, or was raised before logins existed.
+  assigneeId: number | null
+  assigneeName: string | null
+  createdById: number | null
+  createdByName: string | null
 }
+
+// The four fields that say who a ticket belongs to. The server sets them;
+// the forms never do.
+export type TicketPeople = Pick<
+  Ticket,
+  'assigneeId' | 'assigneeName' | 'createdById' | 'createdByName'
+>
 
 // The parts of a ticket someone fills in on the create and edit forms. The id
 // and status are set by the app, so they are not part of the form.

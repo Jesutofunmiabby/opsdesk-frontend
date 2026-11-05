@@ -7,8 +7,9 @@ import type { Ticket } from '../features/tickets/types'
 const STORAGE_KEY = 'opsdesk.tickets'
 
 // Checks every field of one saved ticket, since anything could be in storage:
-// an older format (such as tickets saved before they had dates), a
-// half-written value, or something edited by hand.
+// an older format (such as tickets saved before they had dates or the
+// assignee and creator fields), a half-written value, or something edited by
+// hand.
 function isTicket(value: unknown): value is Ticket {
   return (
     typeof value === 'object' &&
@@ -27,8 +28,24 @@ function isTicket(value: unknown): value is Ticket {
     'createdAt' in value &&
     typeof value.createdAt === 'string' &&
     'updatedAt' in value &&
-    typeof value.updatedAt === 'string'
+    typeof value.updatedAt === 'string' &&
+    'assigneeId' in value &&
+    isIdOrNull(value.assigneeId) &&
+    'assigneeName' in value &&
+    isTextOrNull(value.assigneeName) &&
+    'createdById' in value &&
+    isIdOrNull(value.createdById) &&
+    'createdByName' in value &&
+    isTextOrNull(value.createdByName)
   )
+}
+
+function isIdOrNull(value: unknown): value is number | null {
+  return value === null || Number.isInteger(value)
+}
+
+function isTextOrNull(value: unknown): value is string | null {
+  return value === null || typeof value === 'string'
 }
 
 // A list of valid tickets with no id used twice.

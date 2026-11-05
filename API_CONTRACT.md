@@ -16,6 +16,7 @@ Version: 1
 - [Projects](#projects)
 - [Users](#users)
 - [Auth](#auth)
+- [Who can do what](#who-can-do-what)
 - [What the mock API covers](#what-the-mock-api-covers)
 - [Security](#security)
 
@@ -51,9 +52,10 @@ Length limits count characters after trimming.
 **Unknown fields.** Fields in a request body that this contract does not list
 are ignored. Sending `id` or `createdAt` cannot change them.
 
-**Auth.** Until Week 8, no endpoint needs a token. From Week 8, every endpoint
-except those under `/auth` needs an `Authorization: Bearer <token>` header,
-and answers `401` without a valid one. See [Auth](#auth).
+**Auth.** Every endpoint except `POST /auth/register` and `POST /auth/login`
+needs an `Authorization: Bearer <token>` header, and answers `401` without a
+valid one. See [Auth](#auth). What each role may do is in
+[Who can do what](#who-can-do-what).
 
 ## Errors
 
@@ -80,12 +82,23 @@ Each code always goes with the same HTTP status:
 | Status | `error` | When |
 |--------|---------|------|
 | 400 | `VALIDATION_ERROR` | The request is not valid: a body that is not a JSON object, a missing or wrong field, or a query parameter out of range. |
-| 401 | `UNAUTHENTICATED` | No token, an expired or invalid token (from Week 8), or a wrong email or password at login. |
-| 403 | `FORBIDDEN` | Signed in, but not allowed to do this. Reserved: no endpoint in version 1 returns it. |
+| 401 | `UNAUTHENTICATED` | No token, an expired or invalid token, or a wrong email or password at login. |
+| 403 | `FORBIDDEN` | Signed in, but this user may not do this, such as an AGENT deleting a ticket. See [Who can do what](#who-can-do-what). |
 | 404 | `NOT_FOUND` | There is nothing at this id. |
 | 405 | `METHOD_NOT_ALLOWED` | The address exists but does not accept this HTTP method, such as `PUT /tickets/4` (updates use `PATCH`). |
 | 409 | `CONFLICT` | The request clashes with what is already there, such as registering an email address that is taken. |
 | 500 | `INTERNAL_ERROR` | Something went wrong on the server. The message never includes internal details such as stack traces. |
+
+A missing, expired or invalid token, and an action the user may not do,
+always get these:
+
+```json
+{ "error": "UNAUTHENTICATED", "message": "Log in to continue." }
+```
+
+```json
+{ "error": "FORBIDDEN", "message": "You are not allowed to do this." }
+```
 
 ## Lists and pages
 
@@ -115,7 +128,7 @@ A value that breaks these rules (`page=-1`, `size=500`, `size=abc`) gets
 
 | Field | Type | What it is |
 |-------|------|------------|
-| `items` | array | The items on this page, oldest first (ascending id). |
+| `items` | array | The items on this page, oldest first (ascending id), unless the list takes `sort` and it is sent. |
 | `page` | number | The page these items are from, counting from 0. |
 | `size` | number | The page size used. |
 | `totalItems` | number | How many items match, across all pages. |
@@ -137,7 +150,11 @@ A `page` past the last page is not an error: the last page comes back, and
   "priority": "HIGH",
   "status": "IN_PROGRESS",
   "createdAt": "2026-09-04T09:00:00.000Z",
-  "updatedAt": "2026-09-05T14:00:00.000Z"
+  "updatedAt": "2026-09-05T14:00:00.000Z",
+  "assigneeId": 9,
+  "assigneeName": "Thabo Molefe",
+  "createdById": 12,
+  "createdByName": "Lerato Kgosi"
 }
 ```
 
@@ -150,6 +167,10 @@ A `page` past the last page is not an error: the last page comes back, and
 | `status` | string | `OPEN`, `IN_PROGRESS`, `RESOLVED` or `CLOSED`. A new ticket is always `OPEN`. |
 | `createdAt` | string | When it was created. Set by the server, never changes. |
 | `updatedAt` | string | When it last changed. Set by the server. Equal to `createdAt` until the first change. |
+| `assigneeId` | number or null | The user working on it, or `null` if nobody is assigned. Set with [Assign a ticket](#assign-a-ticket). |
+| `assigneeName` | string or null | That user's name, or `null`. |
+| `createdById` | number or null | The user who created it, from their login. `null` for tickets created before logins existed. |
+| `createdByName` | string or null | That user's name, or `null`. |
 
 **Field messages.** When a ticket field breaks a rule, `fields` holds these
 messages, the same ones the form shows:
@@ -168,15 +189,18 @@ messages, the same ones the form shows:
 
 `GET /tickets`
 
-Takes the [page parameters](#lists-and-pages), plus filters. Filters combine:
-`status=OPEN&priority=HIGH` means open **and** high priority.
+Takes the [page parameters](#lists-and-pages), plus filters and a sort order.
+Filters combine: `status=OPEN&priority=HIGH` means open **and** high priority.
+A USER only ever gets the tickets they created, whatever the filters say.
 
 | Parameter | Type | Rules |
 |-----------|------|-------|
 | `page`, `size` | whole numbers | As in [Lists and pages](#lists-and-pages). |
 | `status` | string | Optional. One of the four statuses. |
 | `priority` | string | Optional. One of the three priorities. |
-| `search` | string | Optional. Tickets whose title contains this text, ignoring capitals and spaces at either end. Empty means no search. |
+| `assigneeId` | whole number | Optional. Only tickets assigned to the user with this id. |
+| `q` | string | Optional. Tickets whose title contains this text, ignoring capitals and spaces at either end. Empty means no search. |
+| `sort` | string | Optional. `id`, `title`, `createdAt` or `updatedAt`, optionally followed by `,asc` or `,desc`, such as `sort=createdAt,desc`. Without a direction it is `asc`. Left out, the list is oldest first. Tickets that tie are in id order. |
 
 **200 OK**
 
@@ -192,7 +216,11 @@ Takes the [page parameters](#lists-and-pages), plus filters. Filters combine:
       "priority": "HIGH",
       "status": "OPEN",
       "createdAt": "2026-09-01T09:00:00.000Z",
-      "updatedAt": "2026-09-01T09:00:00.000Z"
+      "updatedAt": "2026-09-01T09:00:00.000Z",
+      "assigneeId": null,
+      "assigneeName": null,
+      "createdById": 7,
+      "createdByName": "Amara Okafor"
     },
     {
       "id": 12,
@@ -201,7 +229,11 @@ Takes the [page parameters](#lists-and-pages), plus filters. Filters combine:
       "priority": "HIGH",
       "status": "OPEN",
       "createdAt": "2026-09-12T09:00:00.000Z",
-      "updatedAt": "2026-09-12T09:00:00.000Z"
+      "updatedAt": "2026-09-12T09:00:00.000Z",
+      "assigneeId": null,
+      "assigneeName": null,
+      "createdById": 7,
+      "createdByName": "Amara Okafor"
     }
   ],
   "page": 0,
@@ -227,7 +259,9 @@ Takes the [page parameters](#lists-and-pages), plus filters. Filters combine:
 ```
 
 The page messages are `page must be a whole number of 0 or more.` and
-`size must be a whole number from 1 to 100.`
+`size must be a whole number from 1 to 100.` The others are
+`assigneeId must be a whole number.` and
+`sort must be id, title, createdAt, updatedAt, optionally followed by ,asc or ,desc.`
 
 ### Get one ticket
 
@@ -248,6 +282,9 @@ The page messages are `page must be a whole number of 0 or more.` and
 }
 ```
 
+A USER gets this 404 for a ticket someone else created, the same as for a
+ticket that does not exist, so it does not reveal which ids are in use.
+
 ### Create a ticket
 
 `POST /tickets`
@@ -259,7 +296,8 @@ The page messages are `page must be a whole number of 0 or more.` and
 | `priority` | string | Yes | `LOW`, `MEDIUM` or `HIGH`. |
 
 The server chooses the `id`, sets `status` to `OPEN`, and sets `createdAt`
-and `updatedAt` to now.
+and `updatedAt` to now. The creator (`createdById`) is the logged-in user and
+cannot be sent in the body. Every role can create tickets.
 
 ```json
 {
@@ -280,7 +318,11 @@ and `updatedAt` to now.
   "priority": "MEDIUM",
   "status": "OPEN",
   "createdAt": "2026-10-15T09:30:00.000Z",
-  "updatedAt": "2026-10-15T09:30:00.000Z"
+  "updatedAt": "2026-10-15T09:30:00.000Z",
+  "assigneeId": null,
+  "assigneeName": null,
+  "createdById": 7,
+  "createdByName": "Amara Okafor"
 }
 ```
 
@@ -343,16 +385,61 @@ create), the body is not a JSON object, or it has none of the four fields:
 **404 Not Found**: as for [Get one ticket](#get-one-ticket). The 404 is
 checked first, so a missing ticket is 404 even if the body is also wrong.
 
+**403 Forbidden**: the user can see the ticket but may not change it: an
+AGENT whose ticket it is not assigned to, or a USER whose own ticket is no
+longer `OPEN`. The 403 is checked after the 404 and before the body.
+
+Who may edit: ADMIN and MANAGER any ticket; AGENT only tickets assigned to
+them; USER only their own, while it is `OPEN`.
+
+### Assign a ticket
+
+`PATCH /tickets/{id}/assignee`
+
+ADMIN and MANAGER only.
+
+| Body field | Type | Required | Rules |
+|------------|------|----------|-------|
+| `assigneeId` | number or null | No | The id of a user who is an ADMIN, MANAGER or AGENT. `null`, or left out, unassigns the ticket. |
+
+```json
+{ "assigneeId": 9 }
+```
+
+**200 OK**: the whole updated [Ticket object](#the-ticket-object), with
+`assigneeId` and `assigneeName` set and `updatedAt` set to now.
+
+**400 Bad Request**: there is no user with that id, or the user is a USER.
+
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "Check the highlighted fields.",
+  "fields": {
+    "assigneeId": "Choose a user who is an ADMIN, MANAGER or AGENT."
+  }
+}
+```
+
+**403 Forbidden**: the caller is an AGENT or a USER. This is checked first,
+before the 404.
+
+**404 Not Found**: as for [Get one ticket](#get-one-ticket).
+
 ### Delete a ticket
 
 `DELETE /tickets/{id}`
 
 No body. Deleting is permanent. The id is never given to another ticket.
+ADMIN only.
 
 **204 No Content**: deleted. No body.
 
 **404 Not Found**: as for [Get one ticket](#get-one-ticket), including when
 the ticket was already deleted.
+
+**403 Forbidden**: the caller is not an ADMIN. This is checked first, before
+the 404.
 
 ## Projects
 
@@ -447,7 +534,7 @@ The Users page and the dashboard's Users count read `GET /users` below.
 | `name` | string | 1 to 100 characters. |
 | `email` | string | A valid email address, unique across all users, ignoring capitals. |
 | `jobTitle` | string | May be empty. |
-| `role` | string | `AGENT` or `ADMIN`. A new user is `AGENT`. |
+| `role` | string | `ADMIN`, `MANAGER`, `AGENT` or `USER`. A new user from register is always `USER`. |
 | `createdAt` | string | When the account was created. |
 
 A user's password, or anything worked out from it, never appears in any
@@ -457,7 +544,8 @@ response.
 
 `GET /users`
 
-Takes the [page parameters](#lists-and-pages) only.
+Takes the [page parameters](#lists-and-pages) only. ADMIN and MANAGER only:
+an AGENT or USER gets `403`.
 
 **200 OK**: a page of [User objects](#the-user-object), in the
 [list shape](#lists-and-pages).
@@ -466,15 +554,15 @@ Takes the [page parameters](#lists-and-pages) only.
 
 ## Auth
 
-> **Arrives in Week 8.** These endpoints are agreed now so the backend can be
-> built to them, but the frontend does not call them yet and the mock API
-> does not serve them.
+The backend serves these endpoints. The frontend does not call them yet, and
+the mock API does not serve them.
 
 A successful register or login returns a **token**: a string the frontend
 sends back on every later request, in the header
 `Authorization: Bearer <token>`, to say who is asking. Tokens expire; after
 `expiresAt`, requests with that token get `401 UNAUTHENTICATED` and the person
-must log in again.
+must log in again. The token holds the user's id and role, so a change to
+someone's role applies only after they log in again.
 
 ### Register
 
@@ -494,7 +582,8 @@ must log in again.
 }
 ```
 
-**201 Created**: signed in as the new user.
+**201 Created**: signed in as the new user. The role is always `USER`: a
+`role` sent in the body is ignored.
 
 ```json
 {
@@ -505,7 +594,7 @@ must log in again.
     "name": "Amara Okafor",
     "email": "amara.okafor@example.com",
     "jobTitle": "",
-    "role": "AGENT",
+    "role": "USER",
     "createdAt": "2026-10-15T09:30:00.000Z"
   }
 }
@@ -566,6 +655,37 @@ addresses have accounts.
 }
 ```
 
+### The logged-in user
+
+`GET /auth/me`
+
+**200 OK**: the [User object](#the-user-object) of the user the token belongs
+to.
+
+**401 Unauthorized**: no token, an expired or invalid one, or the account no
+longer exists.
+
+## Who can do what
+
+Every user has one role. The role comes from the token, never from the
+request body.
+
+| Action | ADMIN | MANAGER | AGENT | USER |
+|--------|-------|---------|-------|------|
+| View tickets | all | all | all | own only |
+| Create ticket | yes | yes | yes | yes |
+| Edit ticket | any | any | assigned | own, if OPEN |
+| Assign ticket | yes | yes | no | no |
+| Delete ticket | yes | no | no | no |
+| List users | yes | yes | no | no |
+
+- "Assigned" means the ticket's `assigneeId` is the AGENT's id. "Own" means
+  its `createdById` is the USER's id.
+- Not logged in, or a bad token: `401 UNAUTHENTICATED`.
+- Logged in but not allowed: `403 FORBIDDEN`.
+- A USER asking for someone else's ticket gets `404 NOT_FOUND`, the same as
+  for a ticket that does not exist.
+
 ## What the mock API covers
 
 The app talks to the real backend (opsdesk-backend). The mock API in
@@ -583,8 +703,14 @@ contract tests in `src/mocks/handlers.test.ts` check that.
 | `GET /projects` | Yes | Yes | Projects page |
 | `GET /projects/{id}` | Yes | Yes | Not yet |
 | `GET /users` | Yes | Yes | Users page and dashboard |
-| `POST /auth/register` | No: Week 8 | No | Not yet |
-| `POST /auth/login` | No: Week 8 | No | Not yet |
+| `PATCH /tickets/{id}/assignee` | Yes | No | Not yet |
+| `POST /auth/register` | Yes | No | Not yet |
+| `POST /auth/login` | Yes | No | Not yet |
+| `GET /auth/me` | Yes | No | Not yet |
+
+The mock API does not check tokens or roles: it answers every request as an
+ADMIN would be answered. Its tickets have no assignee or creator, so those
+four fields are `null`.
 
 ## Security
 

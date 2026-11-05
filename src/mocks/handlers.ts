@@ -3,7 +3,7 @@ import type { DefaultBodyType, PathParams } from 'msw'
 import { http, HttpResponse } from 'msw/http'
 import projects from '../features/projects/data/projects'
 import type { Project } from '../features/projects/types'
-import initialTickets from '../features/tickets/data/tickets'
+import initialTickets, { NO_PEOPLE } from '../features/tickets/data/tickets'
 import {
   FIRST_STATUS,
   isTicketStatus,
@@ -11,10 +11,18 @@ import {
 import { isPriority } from '../features/tickets/data/ticketPriorities'
 import {
   MAX_PAGE_SIZE,
+  TICKET_SORT_FIELDS,
   filterTickets,
+  isSortDirection,
+  isTicketSortField,
   paginate,
+  sortTickets,
 } from '../features/tickets/utils/ticketList'
-import type { TicketFilters } from '../features/tickets/utils/ticketList'
+import type {
+  SortDirection,
+  TicketFilters,
+  TicketSortField,
+} from '../features/tickets/utils/ticketList'
 import { parseTicketId } from '../features/tickets/utils/tickets'
 import users from '../features/users/data/users'
 import type { User } from '../features/users/types'
@@ -60,6 +68,8 @@ const STATUS_MESSAGE = 'Choose a status: OPEN, IN_PROGRESS, RESOLVED or CLOSED.'
 const CHECK_QUERY = 'Check the query parameters.'
 const PAGE_MESSAGE = 'page must be a whole number of 0 or more.'
 const SIZE_MESSAGE = `size must be a whole number from 1 to ${MAX_PAGE_SIZE}.`
+const ASSIGNEE_MESSAGE = 'assigneeId must be a whole number.'
+const SORT_MESSAGE = `sort must be ${TICKET_SORT_FIELDS.join(', ')}, optionally followed by ,asc or ,desc.`
 
 // The page size when the request does not give one.
 const DEFAULT_PAGE_SIZE = 20
@@ -242,16 +252,20 @@ function readPaging(query: URLSearchParams, fields: Record<string, string>) {
   return { page: page ?? 0, size: size ?? DEFAULT_PAGE_SIZE }
 }
 
-// One page of a list in the contract's shape, oldest (lowest id) first. A
-// page past the end gives the last page, and says so in page. Pages count
-// from 0, as in the contract.
+// One page of a list in the contract's shape, oldest (lowest id) first.
 function toPage<T extends { id: number }>(
   items: T[],
   page: number,
   size: number,
 ): PagedResponse<T> {
-  const sorted = [...items].sort((a, b) => a.id - b.id)
-  const shown = paginate(sorted, page, size)
+  return pageOf([...items].sort((a, b) => a.id - b.id), page, size)
+}
+
+// One page of items that are already in order, in the contract's shape. A
+// page past the end gives the last page, and says so in page. Pages count
+// from 0, as in the contract.
+function pageOf<T>(items: T[], page: number, size: number): PagedResponse<T> {
+  const shown = paginate(items, page, size)
   return {
     items: shown.items,
     page: shown.page,
@@ -267,9 +281,9 @@ function readTicketFilters(
   fields: Record<string, string>,
 ): TicketFilters {
   const filters: TicketFilters = {}
-  const search = query.get('search')?.trim()
-  if (search) {
-    filters.search = search
+  const q = query.get('q')?.trim()
+  if (q) {
+    filters.q = q
   }
   const status = query.get('status')
   if (status !== null) {
@@ -287,7 +301,34 @@ function readTicketFilters(
       fields.priority = PRIORITY_MESSAGE
     }
   }
+  const assigneeId = query.get('assigneeId')
+  if (assigneeId !== null) {
+    if (/^\d+$/.test(assigneeId)) {
+      filters.assigneeId = Number(assigneeId)
+    } else {
+      fields.assigneeId = ASSIGNEE_MESSAGE
+    }
+  }
   return filters
+}
+
+// The order for GET /tickets, checked: sort=field, or field,asc or
+// field,desc. Left out, or wrong (which is added to fields), it is oldest
+// first.
+function readTicketSort(
+  query: URLSearchParams,
+  fields: Record<string, string>,
+): { field: TicketSortField; direction: SortDirection } {
+  const text = query.get('sort')
+  if (text === null) {
+    return { field: 'id', direction: 'asc' }
+  }
+  const [field, direction = 'asc', ...extra] = text.split(',')
+  if (extra.length === 0 && isTicketSortField(field) && isSortDirection(direction)) {
+    return { field, direction }
+  }
+  fields.sort = SORT_MESSAGE
+  return { field: 'id', direction: 'asc' }
 }
 
 // A record id from the URL, or null if it is not a whole number, which the
@@ -303,7 +344,8 @@ function isProblem(value: object): value is Problem {
 }
 
 export const handlers = [
-  // One page of tickets, narrowed by any of status, priority and search.
+  // One page of tickets, narrowed by any of status, priority, assigneeId and
+  // q, in the order sort asks for.
   http.get<PathParams, never, PagedResponse<Ticket> | ApiErrorBody>(
     TICKETS_URL,
     async ({ request }) => {
@@ -312,12 +354,13 @@ export const handlers = [
       const fields: Record<string, string> = {}
       const { page, size } = readPaging(query, fields)
       const filters = readTicketFilters(query, fields)
+      const sort = readTicketSort(query, fields)
       if (Object.keys(fields).length > 0) {
         return validationError({ message: CHECK_QUERY, fields })
       }
       const matches = filterTickets(tickets, filters)
       return HttpResponse.json<PagedResponse<Ticket>>(
-        toPage(matches, page, size),
+        pageOf(sortTickets(matches, sort.field, sort.direction), page, size),
       )
     },
   ),
@@ -354,6 +397,7 @@ export const handlers = [
         status: FIRST_STATUS,
         createdAt: now,
         updatedAt: now,
+        ...NO_PEOPLE,
       }
       setTickets([...tickets, ticket])
       return HttpResponse.json<Ticket>(ticket, {

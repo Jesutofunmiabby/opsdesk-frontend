@@ -5,15 +5,19 @@ import type {
   TicketFormValues,
   TicketUpdate,
 } from '../features/tickets/types'
-import type { TicketFilters } from '../features/tickets/utils/ticketList'
+import type {
+  TicketFilters,
+  TicketSort,
+} from '../features/tickets/utils/ticketList'
 import type { PagedResponse } from './apiTypes'
 
-// What getTickets is called with: which page, how big, and any filters.
-// Anything left out uses the API's default (page 0, the
-// first, 20 a page, no filter).
+// What getTickets is called with: which page, how big, any filters, and the
+// order. Anything left out uses the API's default (page 0, the first, 20 a
+// page, no filter, oldest first).
 export interface TicketListParams extends TicketFilters {
   page?: number
   size?: number
+  sort?: TicketSort
 }
 
 // What updateTicket is called with: which ticket, and what to change.

@@ -1,5 +1,5 @@
 import type { Ticket } from '../types'
-import { filterTickets } from './ticketList'
+import { filterTickets, sortTickets } from './ticketList'
 
 // Just the fields the filter looks at matter; the rest are filler.
 function makeTicket(
@@ -16,6 +16,10 @@ function makeTicket(
     priority,
     createdAt: '2026-09-01T09:00:00.000Z',
     updatedAt: '2026-09-01T09:00:00.000Z',
+    assigneeId: null,
+    assigneeName: null,
+    createdById: null,
+    createdByName: null,
   }
 }
 
@@ -27,14 +31,27 @@ const tickets: Ticket[] = [
   makeTicket(4, 'Monitor flickering', 'CLOSED', 'HIGH'),
 ]
 
+describe('sortTickets', () => {
+  it('puts tickets in order by a field, breaking ties by id', () => {
+    const tied = [
+      makeTicket(3, 'Same title', 'OPEN'),
+      makeTicket(1, 'Same title', 'OPEN'),
+      makeTicket(2, 'A first', 'OPEN'),
+    ]
+
+    expect(sortTickets(tied, 'title', 'asc').map((t) => t.id)).toEqual([2, 1, 3])
+    expect(sortTickets(tied, 'title', 'desc').map((t) => t.id)).toEqual([1, 3, 2])
+  })
+})
+
 describe('filterTickets', () => {
   it('finds tickets whose title contains the search, ignoring case and spaces', () => {
-    const ids = filterTickets(tickets, { search: '  vpn ' }).map((t) => t.id)
+    const ids = filterTickets(tickets, { q: '  vpn ' }).map((t) => t.id)
     expect(ids).toEqual([1, 3])
   })
 
   it('applies the search and the status filter together', () => {
-    const ids = filterTickets(tickets, { search: 'vpn', status: 'CLOSED' }).map(
+    const ids = filterTickets(tickets, { q: 'vpn', status: 'CLOSED' }).map(
       (t) => t.id,
     )
     expect(ids).toEqual([3])

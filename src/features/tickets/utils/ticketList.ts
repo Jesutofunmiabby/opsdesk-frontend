@@ -15,24 +15,63 @@ export const MAX_PAGE_SIZE = 100
 // What the ticket list can be narrowed by: the filters of GET /tickets in
 // API_CONTRACT.md. Each one left out matches every ticket.
 export interface TicketFilters {
-  search?: string
+  // Text the title must contain. Sent to the API as q.
+  q?: string
   status?: TicketStatus
   priority?: Priority
+  // Only tickets assigned to the user with this id.
+  assigneeId?: number
 }
 
-// Tickets whose title contains the search (ignoring capitals and spaces at
-// either end), with the given status and priority. All filters apply
+// What the list can be sorted by (the sort parameter of GET /tickets), and
+// which way round. priority and status are not here: the API stores them as
+// text, so they would sort alphabetically.
+export const TICKET_SORT_FIELDS = ['id', 'title', 'createdAt', 'updatedAt'] as const
+export type TicketSortField = (typeof TICKET_SORT_FIELDS)[number]
+export type SortDirection = 'asc' | 'desc'
+
+// The sort parameter: a field, optionally followed by ,asc or ,desc, such as
+// 'createdAt,desc'. Left out, the list is oldest first.
+export type TicketSort = TicketSortField | `${TicketSortField},${SortDirection}`
+
+export function isTicketSortField(text: string): text is TicketSortField {
+  return (TICKET_SORT_FIELDS as readonly string[]).includes(text)
+}
+
+export function isSortDirection(text: string): text is SortDirection {
+  return text === 'asc' || text === 'desc'
+}
+
+// The tickets in the given order. Tickets that tie are put in id order, as
+// the API does, so the same ticket never shows up on two pages. The mock API
+// uses this to answer GET /tickets.
+export function sortTickets(
+  tickets: Ticket[],
+  field: TicketSortField,
+  direction: SortDirection,
+): Ticket[] {
+  const sign = direction === 'asc' ? 1 : -1
+  return [...tickets].sort((a, b) => {
+    const order =
+      field === 'id' ? a.id - b.id : a[field].localeCompare(b[field])
+    return order !== 0 ? sign * order : a.id - b.id
+  })
+}
+
+// Tickets whose title contains q (ignoring capitals and spaces at either
+// end), with the given status, priority and assignee. All filters apply
 // together. The mock API uses this to answer GET /tickets.
 export function filterTickets(
   tickets: Ticket[],
-  { search = '', status, priority }: TicketFilters,
+  { q = '', status, priority, assigneeId }: TicketFilters,
 ): Ticket[] {
-  const text = search.trim().toLowerCase()
+  const text = q.trim().toLowerCase()
   return tickets.filter(
     (ticket) =>
       ticket.title.toLowerCase().includes(text) &&
       (status === undefined || ticket.status === status) &&
-      (priority === undefined || ticket.priority === priority),
+      (priority === undefined || ticket.priority === priority) &&
+      (assigneeId === undefined || ticket.assigneeId === assigneeId),
   )
 }
 
