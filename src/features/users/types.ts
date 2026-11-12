@@ -1,5 +1,6 @@
-// What a user can do. Only these two words are allowed.
-export type UserRole = 'AGENT' | 'ADMIN'
+// What a user can do (see "Who can do what" in API_CONTRACT.md). A new user
+// from register is always USER.
+export type UserRole = 'ADMIN' | 'MANAGER' | 'AGENT' | 'USER'
 
 // One OpsDesk user, as GET /users sends it (see "The User object" in
 // API_CONTRACT.md).

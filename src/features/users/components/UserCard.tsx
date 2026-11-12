@@ -1,9 +1,12 @@
 import type { User, UserRole } from '../types'
 import './UserCard.css'
 
-const ROLE_LABELS: Record<UserRole, string> = {
-  AGENT: 'Agent',
+// Exported so the header can name the signed-in user's role the same way.
+export const ROLE_LABELS: Record<UserRole, string> = {
   ADMIN: 'Admin',
+  MANAGER: 'Manager',
+  AGENT: 'Agent',
+  USER: 'User',
 }
 
 interface UserCardProps {
