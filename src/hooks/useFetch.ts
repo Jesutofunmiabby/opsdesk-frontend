@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { selectToken, sessionExpired } from '../store/authSlice'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
 
 // Where a request has got to. 'empty' means it worked but the list was empty.
 export type FetchStatus = 'loading' | 'success' | 'empty' | 'error'
@@ -19,6 +21,9 @@ export interface FetchResult<T> {
 // defined outside the calling component (or memoised), since a new function
 // on every render would restart the request.
 //
+// Like the RTK Query APIs, it sends the login token, and a 401 ends the
+// session, which sends the user to /login.
+//
 // Returns { data, status, retry }. retry() runs the request again.
 export function useFetch<T>(
   url: string,
@@ -29,6 +34,8 @@ export function useFetch<T>(
   // Bumped by retry(). It is a dependency of the effect, so changing it runs
   // the fetch again.
   const [attempt, setAttempt] = useState(0)
+  const token = useAppSelector(selectToken)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     // Set if this effect is cleaned up before the request finishes, so a late
@@ -38,7 +45,12 @@ export function useFetch<T>(
     async function load() {
       setStatus('loading')
       try {
-        const response = await fetch(url)
+        const response = await fetch(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
+        if (response.status === 401 && token !== null) {
+          dispatch(sessionExpired(token))
+        }
         // fetch only rejects on network failure, so a 404 or 500 arrives here
         // as a normal response and has to be turned into an error by hand.
         if (!response.ok) {
@@ -66,7 +78,7 @@ export function useFetch<T>(
     return () => {
       ignore = true
     }
-  }, [url, selectList, attempt])
+  }, [url, selectList, attempt, token, dispatch])
 
   function retry() {
     setAttempt((current) => current + 1)

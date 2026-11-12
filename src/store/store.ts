@@ -1,12 +1,14 @@
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
 import { saveToken } from '../features/auth/utils/tokenStorage'
+import { authApi } from './authApi'
 import authReducer from './authSlice'
 import { ticketsApi } from './ticketsApi'
 import uiReducer from './uiSlice'
 
 // Builds a Redux store. Each key is a slice of the state, handled by that
 // slice's reducer: state.ui comes from uiSlice, state.auth holds the login
-// token, and state.ticketsApi is RTK Query's cache of tickets from the API.
+// token, state.ticketsApi is RTK Query's cache of tickets from the API, and
+// state.authApi caches the signed-in user from GET /auth/me.
 // The app makes one store; tests make a new one each, so cached tickets,
 // tokens and notifications never leak between tests.
 export function makeStore() {
@@ -16,7 +18,7 @@ export function makeStore() {
   // Whenever the token changes (log in, log out, session expired), keep the
   // copy in localStorage in step. When it goes away, also empty the API
   // caches, so the next person to log in on this browser never sees the
-  // last person's tickets.
+  // last person's tickets or name.
   listeners.startListening({
     predicate: (_action, currentState, previousState) =>
       selectTokenOf(currentState) !== selectTokenOf(previousState),
@@ -25,6 +27,7 @@ export function makeStore() {
       saveToken(token)
       if (token === null) {
         api.dispatch(ticketsApi.util.resetApiState())
+        api.dispatch(authApi.util.resetApiState())
       }
     },
   })
@@ -34,6 +37,7 @@ export function makeStore() {
       ui: uiReducer,
       auth: authReducer,
       [ticketsApi.reducerPath]: ticketsApi.reducer,
+      [authApi.reducerPath]: authApi.reducer,
     },
     // RTK Query's middleware does the work behind the cache: it starts the
     // requests, removes cached data no component is using any more, and
@@ -42,7 +46,7 @@ export function makeStore() {
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
         .prepend(listeners.middleware)
-        .concat(ticketsApi.middleware),
+        .concat(ticketsApi.middleware, authApi.middleware),
   })
   return store
 }
