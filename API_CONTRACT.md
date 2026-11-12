@@ -699,21 +699,30 @@ contract tests in `src/mocks/handlers.test.ts` check that.
 | `GET /tickets/{id}` | Yes | Yes | Ticket and edit pages |
 | `POST /tickets` | Yes | Yes | New ticket |
 | `PATCH /tickets/{id}` | Yes | Yes | Edit, and Move on the board |
-| `DELETE /tickets/{id}` | Yes | Yes | Delete on the ticket page |
+| `DELETE /tickets/{id}` | Yes | Yes | Delete on the ticket page (ADMIN only) |
 | `GET /projects` | Yes | Yes | Projects page |
 | `GET /projects/{id}` | Yes | Yes | Not yet |
-| `GET /users` | Yes | Yes | Users page and dashboard |
-| `PATCH /tickets/{id}/assignee` | Yes | No | Not yet |
+| `GET /users` | Yes | Yes | Users page, dashboard and Assign (ADMIN and MANAGER only) |
+| `PATCH /tickets/{id}/assignee` | Yes | Yes | Assign on the ticket page (ADMIN and MANAGER only) |
 | `POST /auth/register` | Yes | Yes | Register page |
 | `POST /auth/login` | Yes | Yes | Login page |
 | `GET /auth/me` | Yes | Yes | Every signed-in page (name and role in the header) |
 
 The mock API's tokens are not real: they are `mock-token-` followed by the
-user's id, and never expire. `GET /auth/me` reads the token; every other
-mock endpoint ignores tokens and roles, and answers every request as an
-ADMIN would be answered. The mock users have no passwords, so tests set one
-before logging in. Its tickets have no assignee or creator, so those four
-fields are `null`.
+user's id, and never expire. Like the backend, every mock endpoint except
+register and login needs a token (`401` without one), and follows
+[Who can do what](#who-can-do-what), in the order each endpoint's section
+gives. It uses the same rules as the app (`src/features/auth/utils/permissions.ts`).
+There is a mock user of every role. They have no passwords, so tests set one
+before logging in. The starting tickets have no assignee or creator, so
+those four fields are `null` until a ticket is assigned; tickets created in
+the mock get their creator from the token. A USER therefore starts with no
+tickets of their own.
+
+The app hides Delete, Assign and the Users page from roles that may not use
+them. That is only for convenience: hiding a button does not stop anyone
+sending the request, so the backend must always check, and the app shows
+any `403` as a friendly message.
 
 ## Security
 
