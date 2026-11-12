@@ -15,8 +15,10 @@ interface TicketFormProps {
   // What the boxes start with: empty for a new ticket, the ticket's current
   // values when editing.
   initialValues: TicketFormValues
-  // Called with the checked, tidied values when the form is saved.
-  onSubmit: (values: TicketFormValues) => void
+  // Called with the checked, tidied values when the form is saved. If the
+  // API refuses some fields (a 400 with field messages), it hands those
+  // messages back, and the form shows each under its field.
+  onSubmit: (values: TicketFormValues) => Promise<TicketFormErrors | void>
   // The save button's text, such as "Create ticket".
   submitLabel: string
   // Where Cancel goes.
@@ -44,9 +46,27 @@ function TicketForm({
   // still filling in an empty form for the first time.
   const [triedToSubmit, setTriedToSubmit] = useState(false)
 
-  // Worked out from the current values on every render rather than stored, so
-  // once shown, each message disappears as soon as its field is fixed.
-  const errors: TicketFormErrors = triedToSubmit ? validateTicket(values) : {}
+  // Messages the API sent back for particular fields. Each one shows until
+  // its field is changed.
+  const [serverErrors, setServerErrors] = useState<TicketFormErrors>({})
+
+  // The form's own checks are worked out from the current values on every
+  // render rather than stored, so once shown, each message disappears as
+  // soon as its field is fixed. The API's messages are added on top.
+  const errors: TicketFormErrors = {
+    ...(triedToSubmit ? validateTicket(values) : {}),
+    ...serverErrors,
+  }
+
+  // Removed rather than set to undefined, which would hide the form's own
+  // message for the field when the two are merged above.
+  function clearServerError(name: TicketFormField) {
+    setServerErrors((current) => {
+      const next = { ...current }
+      delete next[name]
+      return next
+    })
+  }
 
   // For the title and description boxes, which accept any text.
   function handleTextChange(
@@ -55,6 +75,7 @@ function TicketForm({
     const { name, value } = event.target
     if (name === 'title' || name === 'description') {
       setValues((currentValues) => ({ ...currentValues, [name]: value }))
+      clearServerError(name)
     }
   }
 
@@ -63,30 +84,45 @@ function TicketForm({
     const { value } = event.target
     if (isPriority(value)) {
       setValues((currentValues) => ({ ...currentValues, priority: value }))
+      clearServerError('priority')
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  // Moves the cursor to the first field with a problem.
+  function focusFirstProblem(form: HTMLFormElement, problems: TicketFormErrors) {
+    const firstProblem = Object.keys(problems)[0]
+    if (!firstProblem) {
+      return false
+    }
+    const field = form.elements.namedItem(firstProblem)
+    if (field instanceof HTMLElement) {
+      field.focus()
+    }
+    return true
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     // Stop the browser's own form submit, which would reload the page.
     event.preventDefault()
+    // Kept before the await below: React does not keep the event after.
+    const form = event.currentTarget
     setTriedToSubmit(true)
+    setServerErrors({})
 
-    const submitErrors = validateTicket(values)
-    const firstProblem = Object.keys(submitErrors)[0]
-    if (firstProblem) {
-      // Nothing is saved. Move the cursor to the first field to fix.
-      const field = event.currentTarget.elements.namedItem(firstProblem)
-      if (field instanceof HTMLElement) {
-        field.focus()
-      }
+    // Nothing is sent while the form's own checks fail.
+    if (focusFirstProblem(form, validateTicket(values))) {
       return
     }
 
-    onSubmit({
+    const fieldErrors = await onSubmit({
       title: values.title.trim(),
       description: values.description.trim(),
       priority: values.priority,
     })
+    if (fieldErrors) {
+      setServerErrors(fieldErrors)
+      focusFirstProblem(form, fieldErrors)
+    }
   }
 
   // The attributes every control shares: its name and value, and whether to
@@ -126,7 +162,11 @@ function TicketForm({
         />
       </FormField>
 
-      <FormField id="ticket-priority" label="Priority">
+      <FormField
+        id="ticket-priority"
+        label="Priority"
+        error={errors.priority}
+      >
         <select onChange={handlePriorityChange} {...fieldProps('priority')}>
           {PRIORITY_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
