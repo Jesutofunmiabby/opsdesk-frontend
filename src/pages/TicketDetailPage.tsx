@@ -4,8 +4,11 @@ import { useTicketFromUrl } from '../features/tickets/hooks/useTicketFromUrl'
 import TicketDetails from '../features/tickets/components/TicketDetails'
 import TicketDetailSkeleton from '../features/tickets/components/TicketDetailSkeleton'
 import TicketNotFound from '../features/tickets/components/TicketNotFound'
+import AssignTicket from '../features/tickets/components/AssignTicket'
+import { usePermissions } from '../features/auth/hooks/usePermissions'
 import ConfirmDialog from '../components/ConfirmDialog'
 import RequestError from '../components/RequestError'
+import { useShowRequestError } from '../hooks/useShowRequestError'
 import { useAppDispatch } from '../store/hooks'
 import { useDeleteTicketMutation } from '../store/ticketsApi'
 import { addNotification } from '../store/uiSlice'
@@ -20,6 +23,10 @@ function TicketDetailPage() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const showRequestError = useShowRequestError()
+  // Delete is for ADMINs, Assign for ADMINs and MANAGERs. Hiding them is
+  // only a convenience: the API refuses anyone else with 403 regardless.
+  const { canDeleteTickets, canAssignTickets } = usePermissions()
 
   if (isNotFound) {
     return <TicketNotFound id={id} />
@@ -54,14 +61,13 @@ function TicketDetailPage() {
       )
       // The ticket has gone, so there is nothing left to show here.
       navigate('/tickets')
-    } catch {
+    } catch (error) {
       // Closing the dialog gives focus back to Delete, ready to try again.
+      // A 403 says the user may not delete; other errors say what failed.
       setConfirmOpen(false)
-      dispatch(
-        addNotification({
-          message: `Could not delete ticket #${ticketId}. Please try again.`,
-          type: 'error',
-        }),
+      showRequestError(
+        error,
+        `Could not delete ticket #${ticketId}. Please try again.`,
       )
     }
   }
@@ -79,17 +85,20 @@ function TicketDetailPage() {
           >
             Edit
           </Link>
-          <button
-            type="button"
-            className="ticket-detail-page__delete"
-            onClick={() => setConfirmOpen(true)}
-            disabled={isDeleting}
-          >
-            Delete
-          </button>
+          {canDeleteTickets && (
+            <button
+              type="button"
+              className="ticket-detail-page__delete"
+              onClick={() => setConfirmOpen(true)}
+              disabled={isDeleting}
+            >
+              Delete
+            </button>
+          )}
         </div>
       </div>
       <TicketDetails ticket={ticket} />
+      {canAssignTickets && <AssignTicket ticket={ticket} />}
 
       <ConfirmDialog
         open={confirmOpen}

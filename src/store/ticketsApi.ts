@@ -26,6 +26,13 @@ interface UpdateTicketArgs {
   changes: TicketUpdate
 }
 
+// What assignTicket is called with: which ticket, and who to give it to
+// (null for nobody).
+interface AssignTicketArgs {
+  id: number
+  assigneeId: number | null
+}
+
 // The tickets API. RTK Query makes the requests, keeps the answers in a
 // cache in the Redux store, and shares them with every component that asks,
 // so the board, list and dashboard use one copy instead of fetching their
@@ -99,6 +106,21 @@ export const ticketsApi = createApi({
         { type: 'Ticket', id: 'LIST' },
       ],
     }),
+
+    // Gives the ticket to a user, or to nobody with null (see "Assign a
+    // ticket" in API_CONTRACT.md). ADMIN and MANAGER only. Refreshes the
+    // ticket and every list, since lists can be filtered by assignee.
+    assignTicket: build.mutation<Ticket, AssignTicketArgs>({
+      query: ({ id, assigneeId }) => ({
+        url: `/tickets/${id}/assignee`,
+        method: 'PATCH',
+        body: { assigneeId },
+      }),
+      invalidatesTags: (_ticket, _error, { id }) => [
+        { type: 'Ticket', id },
+        { type: 'Ticket', id: 'LIST' },
+      ],
+    }),
   }),
 })
 
@@ -135,4 +157,5 @@ export const {
   useCreateTicketMutation,
   useUpdateTicketMutation,
   useDeleteTicketMutation,
+  useAssignTicketMutation,
 } = ticketsApi
