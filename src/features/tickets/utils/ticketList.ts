@@ -102,3 +102,26 @@ export function paginate<T>(
     totalPages,
   }
 }
+
+// The priority filter's "All priorities" choice.
+export const ALL_PRIORITIES = 'ALL'
+
+// What the priority filter can be set to: one priority, or all of them.
+export type PriorityFilter = Priority | typeof ALL_PRIORITIES
+
+// The orders the list offers, as the sort parameter the API is sent. The
+// first is the API's own default.
+export const SORT_OPTIONS: { value: TicketSort; label: string }[] = [
+  { value: 'id,asc', label: 'Oldest first' },
+  { value: 'createdAt,desc', label: 'Newest first' },
+  { value: 'updatedAt,desc', label: 'Recently updated' },
+  { value: 'title,asc', label: 'Title A to Z' },
+]
+
+export const DEFAULT_SORT: TicketSort = SORT_OPTIONS[0].value
+
+// A dropdown hands back plain text; this checks it is one of the orders
+// above.
+export function isSortOption(value: string): value is TicketSort {
+  return SORT_OPTIONS.some((option) => option.value === value)
+}
