@@ -1,4 +1,8 @@
-import type { TicketFormErrors, TicketFormValues } from '../types'
+import type {
+  TicketFormErrors,
+  TicketFormField,
+  TicketFormValues,
+} from '../types'
 
 // The limits in API_CONTRACT.md. The form and the mock API both check them
 // here, so they cannot disagree with each other or with the contract.
@@ -54,3 +58,11 @@ export function validateTicket(
   }
   return errors
 }
+
+// The fields on the ticket form, in the order they appear, for picking out
+// the API's messages about them.
+export const TICKET_FORM_FIELDS: readonly TicketFormField[] = [
+  'title',
+  'description',
+  'priority',
+]

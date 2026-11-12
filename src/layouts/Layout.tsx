@@ -8,6 +8,7 @@ import SkipLink from '../components/SkipLink'
 import SidebarToggle from '../components/SidebarToggle'
 import type { NavItem } from '../components/NavBar'
 import UserMenu from '../features/auth/components/UserMenu'
+import { usePermissions } from '../features/auth/hooks/usePermissions'
 import './Layout.css'
 
 // The navigation, and the order it appears in. Each path matches a route in
@@ -17,8 +18,10 @@ const NAV_LINKS: NavItem[] = [
   { to: '/tickets', label: 'Tickets' },
   { to: '/projects', label: 'Projects' },
   { to: '/teams', label: 'Teams' },
-  { to: '/users', label: 'Users' },
 ]
+
+// Added at the end, only for roles that may list users (ADMIN, MANAGER).
+const USERS_LINK: NavItem = { to: '/users', label: 'Users' }
 
 // The main area's id, so the skip link can jump to it.
 const MAIN_ID = 'main-content'
@@ -29,6 +32,8 @@ const MAIN_ID = 'main-content'
 // the corner. Outlet is where the router draws the page for the current URL.
 function Layout() {
   const { pathname } = useLocation()
+  const { canListUsers } = usePermissions()
+  const links = canListUsers ? [...NAV_LINKS, USERS_LINK] : NAV_LINKS
 
   return (
     <div className="layout">
@@ -41,7 +46,7 @@ function Layout() {
       </header>
 
       <div className="layout__body">
-        <Sidebar links={NAV_LINKS} />
+        <Sidebar links={links} />
         {/* tabIndex={-1} lets the skip link move focus here, without adding
             the main area itself to the Tab order. */}
         <main id={MAIN_ID} className="layout__content" tabIndex={-1}>

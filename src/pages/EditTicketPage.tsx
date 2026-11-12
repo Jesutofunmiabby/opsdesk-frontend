@@ -1,6 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useTicketFromUrl } from '../features/tickets/hooks/useTicketFromUrl'
-import type { TicketFormValues } from '../features/tickets/types'
+import type {
+  TicketFormErrors,
+  TicketFormValues,
+} from '../features/tickets/types'
+import { TICKET_FORM_FIELDS } from '../features/tickets/utils/validateTicket'
+import { useShowRequestError } from '../hooks/useShowRequestError'
+import { getFormFieldErrors } from '../utils/requestErrors'
 import TicketForm from '../features/tickets/components/TicketForm'
 import TicketNotFound from '../features/tickets/components/TicketNotFound'
 import TicketFormSkeleton from '../features/tickets/components/TicketFormSkeleton'
@@ -17,6 +23,7 @@ function EditTicketPage() {
   const [updateTicket, { isLoading: isSaving }] = useUpdateTicketMutation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const showRequestError = useShowRequestError()
 
   if (isNotFound) {
     return <TicketNotFound id={id} />
@@ -41,7 +48,9 @@ function EditTicketPage() {
 
   // Only called once the form's checks have passed. The mutation invalidates
   // this ticket's tag, so its page and the board show the new values.
-  async function handleSubmit(values: TicketFormValues) {
+  async function handleSubmit(
+    values: TicketFormValues,
+  ): Promise<TicketFormErrors | void> {
     try {
       await updateTicket({ id: ticketId, changes: values }).unwrap()
       dispatch(
@@ -51,13 +60,17 @@ function EditTicketPage() {
         }),
       )
       navigate(ticketPath)
-    } catch {
-      // The form stays as it was, so the changes are not lost.
-      dispatch(
-        addNotification({
-          message: `Could not save ticket #${ticketId}. Please try again.`,
-          type: 'error',
-        }),
+    } catch (error) {
+      // The form stays as it was, so the changes are not lost. Messages
+      // about its fields go back to it; anything else, such as a 403 for
+      // someone who may not edit this ticket, is a toast.
+      const fieldErrors = getFormFieldErrors(error, TICKET_FORM_FIELDS)
+      if (fieldErrors) {
+        return fieldErrors
+      }
+      showRequestError(
+        error,
+        `Could not save ticket #${ticketId}. Please try again.`,
       )
     }
   }

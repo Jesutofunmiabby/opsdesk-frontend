@@ -1,5 +1,5 @@
-/* Search and status side by side, stacking when there is no room. Matches the
-   employee directory's controls. */
+/* Search, status, priority and order side by side, wrapping when there is no
+   room. Matches the employee directory's controls. */
 .ticket-list-filters {
   display: flex;
   flex-wrap: wrap;

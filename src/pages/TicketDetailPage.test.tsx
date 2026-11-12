@@ -26,10 +26,13 @@ afterEach(() => {
   server.events.removeListener('request:start', recordMethod)
 })
 
-// The whole app at ticket #3's page, once the ticket has loaded.
+// The whole app at ticket #3's page, once the ticket has loaded and the
+// signed-in user's role is known. The tests are signed in as an ADMIN, so
+// Delete appears once GET /auth/me has answered.
 async function renderTicketPage() {
   renderWithProviders(<AppRoutes />, { route: '/tickets/3' })
   await screen.findByRole('heading', { name: TITLE })
+  await screen.findByRole('button', { name: 'Delete' })
 }
 
 // The Delete button on the page itself, which only opens the dialog. The

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { API_URL } from '../../../config'
@@ -106,5 +106,45 @@ describe('TicketList', () => {
     expect(
       screen.queryByRole('button', { name: 'Clear filters' }),
     ).not.toBeInTheDocument()
+  })
+
+  it('sends the priority and order chosen to the API, and shows what comes back', async () => {
+    const user = userEvent.setup()
+    // The query string of every list request, oldest first.
+    const sent: URLSearchParams[] = []
+    server.use(
+      http.get(`${API_URL}/tickets`, ({ request }) => {
+        sent.push(new URL(request.url).searchParams)
+        // Nothing returned: the normal mock handler answers it.
+        return undefined
+      }),
+    )
+    await renderTicketList()
+
+    await user.selectOptions(screen.getByLabelText('Priority'), 'HIGH')
+    await user.selectOptions(screen.getByLabelText('Order'), 'title,asc')
+
+    // The API did the work: the last request carried both choices, plus the
+    // page and size, and starts again from the first page.
+    await waitFor(() => {
+      const last = sent[sent.length - 1]
+      expect(last.get('priority')).toBe('HIGH')
+      expect(last.get('sort')).toBe('title,asc')
+      expect(last.get('page')).toBe('0')
+      expect(last.get('size')).toBe('10')
+    })
+
+    // Once that answer is on screen: only HIGH tickets, in title order.
+    await waitFor(() => {
+      const rows = screen.getAllByRole('row').slice(1)
+      expect(rows.length).toBeGreaterThan(1)
+      for (const row of rows) {
+        expect(row).toHaveTextContent('HIGH')
+      }
+      const titles = rows.map(
+        (row) => row.querySelector('a')?.textContent ?? '',
+      )
+      expect(titles).toEqual([...titles].sort((a, b) => a.localeCompare(b)))
+    })
   })
 })

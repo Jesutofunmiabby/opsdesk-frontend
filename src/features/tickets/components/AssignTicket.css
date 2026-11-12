@@ -1,0 +1,20 @@
+/* A small white panel under the ticket, the same width as it. */
+.assign-ticket {
+  max-width: 640px;
+  margin-top: 16px;
+  padding: 18px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.assign-ticket .form-field__control {
+  max-width: 320px;
+}
+
+.assign-ticket__note {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--error);
+}
