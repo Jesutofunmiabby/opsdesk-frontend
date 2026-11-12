@@ -4,7 +4,8 @@ import {
   STATUS_LABELS,
 } from '../features/tickets/data/ticketStatuses'
 import { getDepartments } from '../features/employees/utils/employees'
-import { useUsers } from '../features/users/hooks/useUsers'
+import { usePermissions } from '../features/auth/hooks/usePermissions'
+import UsersStatCard from '../features/users/components/UsersStatCard'
 import StatCard from '../components/StatCard'
 import { useTicketCounts } from '../features/tickets/hooks/useTicketCounts'
 import type { StatCardState } from '../components/StatCard'
@@ -30,10 +31,10 @@ function DashboardPage() {
       ? 'error'
       : 'ready'
 
-  // The users count comes from the API, so this card has its own states.
-  const { data: users, status, retry } = useUsers()
-  const usersState: StatCardState =
-    status === 'loading' || status === 'error' ? status : 'ready'
+  // Only ADMIN and MANAGER may list users, so only they get the Users card.
+  // For anyone else the API answers 403, and the card could only say it
+  // could not load.
+  const { canListUsers } = usePermissions()
 
   return (
     <section>
@@ -56,12 +57,7 @@ function DashboardPage() {
       <div className="dashboard-page__grid">
         <StatCard label="Employees" value={employeeCount} />
         <StatCard label="Departments" value={departmentCount} />
-        <StatCard
-          label="Users"
-          value={users.length}
-          state={usersState}
-          onRetry={retry}
-        />
+        {canListUsers && <UsersStatCard />}
       </div>
     </section>
   )

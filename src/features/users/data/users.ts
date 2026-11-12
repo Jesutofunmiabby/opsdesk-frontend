@@ -28,6 +28,22 @@ const users: User[] = [
     role: 'AGENT',
     createdAt: '2026-09-02T09:00:00.000Z',
   },
+  {
+    id: 4,
+    name: 'Lerato Kgosi',
+    email: 'lerato.kgosi@example.com',
+    jobTitle: 'Service Desk Manager',
+    role: 'MANAGER',
+    createdAt: '2026-09-03T09:00:00.000Z',
+  },
+  {
+    id: 5,
+    name: 'Sipho Ndlovu',
+    email: 'sipho.ndlovu@example.com',
+    jobTitle: 'Finance Analyst',
+    role: 'USER',
+    createdAt: '2026-09-03T09:00:00.000Z',
+  },
 ]
 
 export default users
