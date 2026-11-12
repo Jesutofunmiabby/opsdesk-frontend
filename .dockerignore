@@ -1,0 +1,17 @@
+# Files Docker never copies into the build. This keeps the build fast and
+# keeps local files and real settings out of the image.
+
+# Installed and built inside the image instead
+node_modules
+dist
+dist-mock
+
+# Hidden files: Git history, .env files with real values, editor settings
+.*
+
+# Documentation, notes and logs are not needed to build the app
+*.md
+docs
+*.log
+
+Dockerfile
