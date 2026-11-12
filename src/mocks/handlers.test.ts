@@ -1,16 +1,40 @@
 import { API_URL } from '../config'
-import { setMockPassword } from './handlers'
+import users from '../features/users/data/users'
+import type { User, UserRole } from '../features/users/types'
+import { mockTokenFor, setMockPassword } from './handlers'
 
 // Checks that the mock API answers exactly as API_CONTRACT.md says, by
 // sending it real requests, the way the app (and later the real backend's
 // own tests) would. If one of these fails, the mock and the contract
 // disagree, and the mock is what gets fixed.
 
-// Sends a request to the API. A body is sent as JSON.
-function api(path: string, method = 'GET', body?: unknown) {
+// The first mock user with this role.
+function mockUser(role: UserRole): User {
+  const user = users.find((item) => item.role === role)
+  if (!user) {
+    throw new Error(`There is no mock ${role}.`)
+  }
+  return user
+}
+
+// Sends a request to the API, signed in as the given user (an ADMIN unless
+// a test says otherwise), or with no token when given null. A body is sent
+// as JSON.
+function api(
+  path: string,
+  method = 'GET',
+  body?: unknown,
+  as: User | null = mockUser('ADMIN'),
+) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (as) {
+    headers.Authorization = `Bearer ${mockTokenFor(as)}`
+  }
   return fetch(`${API_URL}${path}`, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: body === undefined ? undefined : JSON.stringify(body),
   })
 }
@@ -433,6 +457,162 @@ describe('API contract: auth', () => {
     ]) {
       expect(response.status).toBe(401)
       expect(await response.json()).toEqual(expected)
+    }
+  })
+})
+
+describe('API contract: who can do what', () => {
+  const FORBIDDEN = {
+    error: 'FORBIDDEN',
+    message: 'You are not allowed to do this.',
+  }
+  const admin = mockUser('ADMIN')
+  const manager = mockUser('MANAGER')
+  const agent = mockUser('AGENT')
+  const user = mockUser('USER')
+
+  it('answers every ticket request with no token with 401', async () => {
+    const response = await api('/tickets', 'GET', undefined, null)
+
+    expect(response.status).toBe(401)
+    expect(await response.json()).toEqual({
+      error: 'UNAUTHENTICATED',
+      message: 'Log in to continue.',
+    })
+  })
+
+  it('refuses a USER deleting a ticket through the API, whatever the app shows', async () => {
+    const response = await api('/tickets/1', 'DELETE', undefined, user)
+
+    expect(response.status).toBe(403)
+    expect(await response.json()).toEqual(FORBIDDEN)
+    // Still there.
+    expect((await api('/tickets/1')).status).toBe(200)
+  })
+
+  it('lets only an ADMIN delete, checking the role before the 404', async () => {
+    expect((await api('/tickets/1', 'DELETE', undefined, manager)).status).toBe(
+      403,
+    )
+    expect((await api('/tickets/1', 'DELETE', undefined, agent)).status).toBe(
+      403,
+    )
+    // 403, not 404, for a ticket that does not exist.
+    expect((await api('/tickets/999', 'DELETE', undefined, user)).status).toBe(
+      403,
+    )
+    expect((await api('/tickets/1', 'DELETE', undefined, admin)).status).toBe(
+      204,
+    )
+  })
+
+  it('lets an ADMIN or MANAGER assign to anyone but a USER, and unassign', async () => {
+    const assigned = await api(
+      '/tickets/1/assignee',
+      'PATCH',
+      { assigneeId: agent.id },
+      manager,
+    )
+    expect(assigned.status).toBe(200)
+    expect(await assigned.json()).toMatchObject({
+      id: 1,
+      assigneeId: agent.id,
+      assigneeName: agent.name,
+    })
+
+    const toUser = await api(
+      '/tickets/1/assignee',
+      'PATCH',
+      { assigneeId: user.id },
+      admin,
+    )
+    expect(toUser.status).toBe(400)
+    expect(await toUser.json()).toEqual({
+      error: 'VALIDATION_ERROR',
+      message: 'Check the highlighted fields.',
+      fields: {
+        assigneeId: 'Choose a user who is an ADMIN, MANAGER or AGENT.',
+      },
+    })
+
+    const unassigned = await api(
+      '/tickets/1/assignee',
+      'PATCH',
+      { assigneeId: null },
+      admin,
+    )
+    expect(await unassigned.json()).toMatchObject({
+      assigneeId: null,
+      assigneeName: null,
+    })
+  })
+
+  it('refuses an AGENT or USER assigning, before the 404', async () => {
+    for (const caller of [agent, user]) {
+      const response = await api(
+        '/tickets/999/assignee',
+        'PATCH',
+        { assigneeId: agent.id },
+        caller,
+      )
+      expect(response.status).toBe(403)
+      expect(await response.json()).toEqual(FORBIDDEN)
+    }
+  })
+
+  it('lets an AGENT edit only the tickets assigned to them', async () => {
+    const change = { status: 'IN_PROGRESS' }
+    expect((await api('/tickets/1', 'PATCH', change, agent)).status).toBe(403)
+
+    await api('/tickets/1/assignee', 'PATCH', { assigneeId: agent.id })
+
+    expect((await api('/tickets/1', 'PATCH', change, agent)).status).toBe(200)
+  })
+
+  it('shows a USER only their own tickets, and lets them edit one while it is OPEN', async () => {
+    // None of the starting tickets are theirs.
+    const before = await (await api('/tickets', 'GET', undefined, user)).json()
+    expect(before.totalItems).toBe(0)
+    // Someone else's ticket looks the same as one that does not exist.
+    expect((await api('/tickets/1', 'GET', undefined, user)).status).toBe(404)
+
+    const created = await (
+      await api(
+        '/tickets',
+        'POST',
+        {
+          title: 'My mouse is broken',
+          description: 'It does not click.',
+          priority: 'LOW',
+        },
+        user,
+      )
+    ).json()
+    expect(created).toMatchObject({
+      createdById: user.id,
+      createdByName: user.name,
+    })
+    const after = await (await api('/tickets', 'GET', undefined, user)).json()
+    expect(after.items.map((ticket: { id: number }) => ticket.id)).toEqual([
+      created.id,
+    ])
+
+    const path = `/tickets/${created.id}`
+    expect(
+      (await api(path, 'PATCH', { status: 'RESOLVED' }, user)).status,
+    ).toBe(200)
+    // No longer OPEN, so no longer theirs to change.
+    expect(
+      (await api(path, 'PATCH', { title: 'Mouse fixed' }, user)).status,
+    ).toBe(403)
+  })
+
+  it('lets only an ADMIN or MANAGER list users', async () => {
+    expect((await api('/users', 'GET', undefined, manager)).status).toBe(200)
+    for (const caller of [agent, user]) {
+      const response = await api('/users', 'GET', undefined, caller)
+      expect(response.status).toBe(403)
+      expect(await response.json()).toEqual(FORBIDDEN)
     }
   })
 })

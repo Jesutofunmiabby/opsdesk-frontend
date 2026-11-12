@@ -3,7 +3,15 @@ import type { DefaultBodyType, PathParams } from 'msw'
 import { http, HttpResponse } from 'msw/http'
 import projects from '../features/projects/data/projects'
 import type { Project } from '../features/projects/types'
-import initialTickets, { NO_PEOPLE } from '../features/tickets/data/tickets'
+import initialTickets from '../features/tickets/data/tickets'
+import {
+  canAssignTickets,
+  canBeAssigned,
+  canDeleteTickets,
+  canEditTicket,
+  canListUsers,
+  canSeeTicket,
+} from '../features/auth/utils/permissions'
 import {
   FIRST_STATUS,
   isTicketStatus,
@@ -59,6 +67,7 @@ const TICKETS_URL = `${API_URL}/tickets`
 const TICKET_URL = `${TICKETS_URL}/:id`
 const PROJECTS_URL = `${API_URL}/projects`
 const PROJECT_URL = `${PROJECTS_URL}/:id`
+const ASSIGNEE_URL = `${TICKET_URL}/assignee`
 const USERS_URL = `${API_URL}/users`
 const REGISTER_URL = `${API_URL}/auth/register`
 const LOGIN_URL = `${API_URL}/auth/login`
@@ -81,6 +90,9 @@ const SORT_MESSAGE = `sort must be ${TICKET_SORT_FIELDS.join(', ')}, optionally 
 
 const WRONG_LOGIN = 'The email address or password is wrong.'
 const LOG_IN_TO_CONTINUE = 'Log in to continue.'
+const FORBIDDEN_MESSAGE = 'You are not allowed to do this.'
+const ASSIGNEE_FIELD_MESSAGE =
+  'Choose a user who is an ADMIN, MANAGER or AGENT.'
 const EMAIL_TAKEN = 'An account with this email address already exists.'
 
 // How long a mock token says it lasts, like the backend's default. The mock
@@ -230,6 +242,30 @@ function notFound(param: string) {
   return errorResponse(404, 'NOT_FOUND', {
     message: `There is no ticket with the id "${param}".`,
   })
+}
+
+// No token, or one that is not ours.
+function unauthenticated() {
+  return errorResponse(401, 'UNAUTHENTICATED', { message: LOG_IN_TO_CONTINUE })
+}
+
+// Signed in, but this role may not do this (see "Who can do what").
+function forbidden() {
+  return errorResponse(403, 'FORBIDDEN', { message: FORBIDDEN_MESSAGE })
+}
+
+// The tickets this user may see: all of them, except for a USER, who only
+// sees the ones they created.
+function visibleTickets(caller: User): Ticket[] {
+  return tickets.filter((ticket) => canSeeTicket(caller, ticket))
+}
+
+// The ticket with the id in the URL, if it exists and this user may see it.
+// A USER asking for someone else's ticket gets the same 404 as for one that
+// does not exist, so ids in use are not revealed.
+function findVisibleTicket(caller: User, idText: string): Ticket | undefined {
+  const id = parseTicketId(idText)
+  return visibleTickets(caller).find((item) => item.id === id)
 }
 
 function validationError(problem: Problem) {
@@ -446,12 +482,20 @@ function isProblem(value: object): value is Problem {
 }
 
 export const handlers = [
+  // Every handler below first checks the token: no token, or one that is
+  // not ours, gets 401. Then each applies "Who can do what" in the order the
+  // contract gives for that endpoint.
+
   // One page of tickets, narrowed by any of status, priority, assigneeId and
-  // q, in the order sort asks for.
+  // q, in the order sort asks for. A USER only gets their own.
   http.get<PathParams, never, PagedResponse<Ticket> | ApiErrorBody>(
     TICKETS_URL,
     async ({ request }) => {
       await delay(RESPONSE_DELAY_MS)
+      const caller = userFromRequest(request)
+      if (!caller) {
+        return unauthenticated()
+      }
       const query = new URL(request.url).searchParams
       const fields: Record<string, string> = {}
       const { page, size } = readPaging(query, fields)
@@ -460,7 +504,7 @@ export const handlers = [
       if (Object.keys(fields).length > 0) {
         return validationError({ message: CHECK_QUERY, fields })
       }
-      const matches = filterTickets(tickets, filters)
+      const matches = filterTickets(visibleTickets(caller), filters)
       return HttpResponse.json<PagedResponse<Ticket>>(
         pageOf(sortTickets(matches, sort.field, sort.direction), page, size),
       )
@@ -472,20 +516,28 @@ export const handlers = [
   // response body.
   http.get<IdParams, never, TicketOrError>(
     TICKET_URL,
-    async ({ params }) => {
+    async ({ params, request }) => {
       await delay(RESPONSE_DELAY_MS)
-      const id = parseTicketId(params.id)
-      const ticket = tickets.find((item) => item.id === id)
+      const caller = userFromRequest(request)
+      if (!caller) {
+        return unauthenticated()
+      }
+      const ticket = findVisibleTicket(caller, params.id)
       return ticket ? HttpResponse.json<Ticket>(ticket) : notFound(params.id)
     },
   ),
 
-  // A new ticket. The server chooses its id, starting status and times, and
-  // answers 201 Created with the whole ticket and where it now lives.
+  // A new ticket, from any role. The server chooses its id, starting status
+  // and times, and its creator is whoever is logged in. Answers 201 Created
+  // with the whole ticket and where it now lives.
   http.post<PathParams, DefaultBodyType, TicketOrError>(
     TICKETS_URL,
     async ({ request }) => {
       await delay(RESPONSE_DELAY_MS)
+      const caller = userFromRequest(request)
+      if (!caller) {
+        return unauthenticated()
+      }
       // json() fails on a body that is not JSON at all; that is a 400 too.
       const body: unknown = await request.json().catch(() => null)
       const values = parseNewTicket(body)
@@ -499,7 +551,10 @@ export const handlers = [
         status: FIRST_STATUS,
         createdAt: now,
         updatedAt: now,
-        ...NO_PEOPLE,
+        assigneeId: null,
+        assigneeName: null,
+        createdById: caller.id,
+        createdByName: caller.name,
       }
       setTickets([...tickets, ticket])
       return HttpResponse.json<Ticket>(ticket, {
@@ -511,16 +566,22 @@ export const handlers = [
   ),
 
   // Changes some of one ticket's fields. 404 if there is no such ticket
-  // (checked first), 400 if the changes are not valid, otherwise the whole
-  // updated ticket.
+  // (checked first), 403 if this user may not edit it, 400 if the changes
+  // are not valid, otherwise the whole updated ticket.
   http.patch<IdParams, DefaultBodyType, TicketOrError>(
     TICKET_URL,
     async ({ params, request }) => {
       await delay(RESPONSE_DELAY_MS)
-      const id = parseTicketId(params.id)
-      const existing = tickets.find((item) => item.id === id)
+      const caller = userFromRequest(request)
+      if (!caller) {
+        return unauthenticated()
+      }
+      const existing = findVisibleTicket(caller, params.id)
       if (!existing) {
         return notFound(params.id)
+      }
+      if (!canEditTicket(caller, existing)) {
+        return forbidden()
       }
       const body: unknown = await request.json().catch(() => null)
       const changes = parseUpdate(body)
@@ -539,12 +600,67 @@ export const handlers = [
     },
   ),
 
-  // Removes one ticket for good. 404 if there is no such ticket, otherwise
-  // 204 No Content: it worked, and there is nothing left to send back.
-  http.delete<IdParams>(TICKET_URL, async ({ params }) => {
+  // Gives a ticket to a user, or to nobody. ADMIN and MANAGER only, checked
+  // before the 404. The assignee must be an ADMIN, MANAGER or AGENT; null,
+  // or leaving assigneeId out, unassigns it.
+  http.patch<IdParams, DefaultBodyType, TicketOrError>(
+    ASSIGNEE_URL,
+    async ({ params, request }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const caller = userFromRequest(request)
+      if (!caller) {
+        return unauthenticated()
+      }
+      if (!canAssignTickets(caller.role)) {
+        return forbidden()
+      }
+      const existing = findVisibleTicket(caller, params.id)
+      if (!existing) {
+        return notFound(params.id)
+      }
+      const body: unknown = await request.json().catch(() => null)
+      if (!isRecord(body)) {
+        return validationError({ message: NOT_AN_OBJECT })
+      }
+      const wanted = body.assigneeId ?? null
+      const assignee =
+        wanted === null
+          ? null
+          : allUsers().find(
+              (user) => user.id === wanted && canBeAssigned(user.role),
+            )
+      if (assignee === undefined) {
+        return validationError({
+          message: CHECK_FIELDS,
+          fields: { assigneeId: ASSIGNEE_FIELD_MESSAGE },
+        })
+      }
+      const updated: Ticket = {
+        ...existing,
+        assigneeId: assignee?.id ?? null,
+        assigneeName: assignee?.name ?? null,
+        updatedAt: new Date().toISOString(),
+      }
+      setTickets(
+        tickets.map((item) => (item.id === existing.id ? updated : item)),
+      )
+      return HttpResponse.json<Ticket>(updated)
+    },
+  ),
+
+  // Removes one ticket for good. ADMIN only, checked before the 404. 404 if
+  // there is no such ticket, otherwise 204 No Content: it worked, and there
+  // is nothing left to send back.
+  http.delete<IdParams>(TICKET_URL, async ({ params, request }) => {
     await delay(RESPONSE_DELAY_MS)
-    const id = parseTicketId(params.id)
-    const existing = tickets.find((item) => item.id === id)
+    const caller = userFromRequest(request)
+    if (!caller) {
+      return unauthenticated()
+    }
+    if (!canDeleteTickets(caller.role)) {
+      return forbidden()
+    }
+    const existing = findVisibleTicket(caller, params.id)
     if (!existing) {
       return notFound(params.id)
     }
@@ -552,11 +668,14 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
-  // One page of projects. Read only: projects never change.
+  // One page of projects, for any role. Read only: projects never change.
   http.get<PathParams, never, PagedResponse<Project> | ApiErrorBody>(
     PROJECTS_URL,
     async ({ request }) => {
       await delay(RESPONSE_DELAY_MS)
+      if (!userFromRequest(request)) {
+        return unauthenticated()
+      }
       const query = new URL(request.url).searchParams
       const fields: Record<string, string> = {}
       const { page, size } = readPaging(query, fields)
@@ -572,8 +691,11 @@ export const handlers = [
   // One project, or 404.
   http.get<IdParams, never, Project | ApiErrorBody>(
     PROJECT_URL,
-    async ({ params }) => {
+    async ({ params, request }) => {
       await delay(RESPONSE_DELAY_MS)
+      if (!userFromRequest(request)) {
+        return unauthenticated()
+      }
       const id = parseId(params.id)
       const project = projects.find((item) => item.id === id)
       return project
@@ -584,11 +706,19 @@ export const handlers = [
     },
   ),
 
-  // One page of users, including anyone who has registered.
+  // One page of users, including anyone who has registered. ADMIN and
+  // MANAGER only.
   http.get<PathParams, never, PagedResponse<User> | ApiErrorBody>(
     USERS_URL,
     async ({ request }) => {
       await delay(RESPONSE_DELAY_MS)
+      const caller = userFromRequest(request)
+      if (!caller) {
+        return unauthenticated()
+      }
+      if (!canListUsers(caller.role)) {
+        return forbidden()
+      }
       const query = new URL(request.url).searchParams
       const fields: Record<string, string> = {}
       const { page, size } = readPaging(query, fields)
@@ -674,11 +804,7 @@ export const handlers = [
     async ({ request }) => {
       await delay(RESPONSE_DELAY_MS)
       const user = userFromRequest(request)
-      return user
-        ? HttpResponse.json<User>(user)
-        : errorResponse(401, 'UNAUTHENTICATED', {
-            message: LOG_IN_TO_CONTINUE,
-          })
+      return user ? HttpResponse.json<User>(user) : unauthenticated()
     },
   ),
 ]
