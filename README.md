@@ -1,5 +1,7 @@
 # OpsDesk
 
+[![CI](https://github.com/Jesutofunmiabby/opsdesk-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/Jesutofunmiabby/opsdesk-frontend/actions/workflows/ci.yml)
+
 OpsDesk is an internal operations dashboard for an IT support team. It brings
 together what a support team needs day to day: a board of support tickets, a
 staff directory, internal projects and a list of user accounts. They sit behind
@@ -58,6 +60,12 @@ and both follow the same [API contract](API_CONTRACT.md).
   and due date, from the backend. A searchable employee directory with a
   details panel. User accounts with their job title and role, from the
   backend.
+- **Accounts and roles.** Register and log in; every page except those two
+  needs a login, and the header shows who is signed in and their role. If the
+  login expires, the app returns to the login page with "Your session
+  expired". What each role sees follows the contract: only an ADMIN sees
+  Delete, an ADMIN or MANAGER can assign a ticket and open the Users page, and
+  a USER sees only their own tickets.
 - **Collapsible sidebar.** It folds down to a narrow bar of letters.
 - **Routing.** Every page has its own URL, so Refresh, Back, Forward and
   bookmarks all work. An unknown address shows a Not Found page.
@@ -161,7 +169,7 @@ with. After editing `.env`, restart `npm run dev`, or build again.
 npm test -- --run
 ```
 
-There are 53 tests in 12 files. They run in jsdom, a pretend browser, so no
+There are 103 tests in 17 files. They run in jsdom, a pretend browser, so no
 real browser is needed, and no backend either. Test files sit next to the code
 they test, named `*.test.ts` or `*.test.tsx`.
 
@@ -188,6 +196,24 @@ store and a router.
 | The skip link | `src/layouts/Layout.test.tsx` |
 
 Each test was checked by breaking the feature it covers and watching it fail.
+
+### On every push (CI)
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on GitHub Actions
+for every push to `main` and every pull request, on Node 22, with the npm
+download cache kept between runs:
+
+1. `npm ci` installs exactly the versions in `package-lock.json`.
+2. `npm run lint` checks the code with Oxlint.
+3. `npx vitest run` runs every test once.
+4. `npm run build` type-checks with `tsc` and builds the app.
+
+The badge at the top of this README shows the result for `main`. To run the
+same checks on your computer before pushing:
+
+```bash
+npm ci && npm run lint && npx vitest run && npm run build
+```
 
 ## Architecture
 
@@ -253,6 +279,13 @@ covers:
 
 If the mock API and the contract ever disagree, the mock API is wrong, and
 the contract tests in `src/mocks/handlers.test.ts` are there to catch that.
+
+While the backend runs, its Swagger page at
+<http://localhost:8080/swagger-ui.html> shows the same endpoints, generated
+from the backend's code, and lets you try them with a token (see the
+[backend README](https://github.com/Jesutofunmiabby/opsdesk-backend#api-documentation-swagger)).
+It is a view of what the code does; when it and the contract differ, the
+contract still wins.
 
 ## Screenshots
 
@@ -399,8 +432,10 @@ backend with `ALLOWED_ORIGIN=http://localhost:5173,http://localhost:4173`.
 
 ## What's next
 
-- **Week 8: login.** Register and log in, using the auth endpoints already
-  described in the contract, so each request says who is asking.
+- **Release 1.0.** Run the whole system with one command from
+  [opsdesk-system](https://github.com/Jesutofunmiabby/opsdesk-system).
+- **Safer token storage.** Move the login token from localStorage to an
+  `httpOnly` cookie (see "Security" in [API_CONTRACT.md](API_CONTRACT.md)).
 
 ## Project conventions
 
