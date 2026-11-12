@@ -121,6 +121,23 @@ using that backend.
 4173, so the backend has to allow that address too: start the backend with
 `ALLOWED_ORIGIN=http://localhost:5173,http://localhost:4173`.
 
+### In Docker
+
+The `Dockerfile` builds the app with Node, then serves the built files with
+nginx. `nginx.conf` sends `index.html` for any address that is not a file, so
+refreshing on a page such as `/tickets/12` still works. To start the app
+together with the backend and the database, use `docker compose up --build`
+in [opsdesk-system](https://github.com/Jesutofunmiabby/opsdesk-system); it
+is served at <http://localhost:3000>.
+
+`VITE_API_URL` is a build argument: Vite writes it into the JavaScript when
+the image is built, so changing it means building the image again.
+
+```bash
+docker build --build-arg VITE_API_URL=http://localhost:8080/api/v1 -t opsdesk-frontend .
+docker run -p 3000:80 opsdesk-frontend
+```
+
 ## Environment variables
 
 Settings live in a `.env` file in the project folder. Git ignores it, so each
