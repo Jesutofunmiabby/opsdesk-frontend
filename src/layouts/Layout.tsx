@@ -7,6 +7,7 @@ import Sidebar from '../components/Sidebar'
 import SkipLink from '../components/SkipLink'
 import SidebarToggle from '../components/SidebarToggle'
 import type { NavItem } from '../components/NavBar'
+import UserMenu from '../features/auth/components/UserMenu'
 import './Layout.css'
 
 // The navigation, and the order it appears in. Each path matches a route in
@@ -22,7 +23,8 @@ const NAV_LINKS: NavItem[] = [
 // The main area's id, so the skip link can jump to it.
 const MAIN_ID = 'main-content'
 
-// The frame every page shares: the blue header with the sidebar button, the
+// The frame every page shares: the blue header with the sidebar button and
+// the signed-in user's name and Log out, the
 // sidebar with the navigation, the content area, and the notifications in
 // the corner. Outlet is where the router draws the page for the current URL.
 function Layout() {
@@ -35,6 +37,7 @@ function Layout() {
       <header className="layout__header">
         <SidebarToggle />
         <h1 className="layout__title">OpsDesk</h1>
+        <UserMenu />
       </header>
 
       <div className="layout__body">
