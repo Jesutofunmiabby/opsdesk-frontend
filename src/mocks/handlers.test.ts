@@ -1,4 +1,5 @@
 import { API_URL } from '../config'
+import { setMockPassword } from './handlers'
 
 // Checks that the mock API answers exactly as API_CONTRACT.md says, by
 // sending it real requests, the way the app (and later the real backend's
@@ -295,5 +296,143 @@ describe('API contract: projects', () => {
       error: 'NOT_FOUND',
       message: 'There is no project with the id "99".',
     })
+  })
+})
+
+describe('API contract: auth', () => {
+  // A made-up password for these tests only.
+  const PASSWORD = 'a test password'
+
+  // GET /auth/me with the given Authorization header, if any.
+  function getMe(authorization?: string) {
+    return fetch(`${API_URL}/auth/me`, {
+      headers: authorization ? { Authorization: authorization } : {},
+    })
+  }
+
+  it('registers a USER, ignoring a role in the body, and signs them in', async () => {
+    const response = await api('/auth/register', 'POST', {
+      name: '  Ngozi Eze  ',
+      email: 'ngozi.eze@example.com',
+      password: PASSWORD,
+      role: 'ADMIN',
+    })
+
+    expect(response.status).toBe(201)
+    const body = await response.json()
+    expect(body).toEqual({
+      token: expect.any(String),
+      expiresAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T.*\.\d{3}Z$/),
+      user: {
+        id: expect.any(Number),
+        name: 'Ngozi Eze',
+        email: 'ngozi.eze@example.com',
+        jobTitle: '',
+        role: 'USER',
+        createdAt: expect.any(String),
+      },
+    })
+    // The password, or anything from it, is never sent back.
+    expect(JSON.stringify(body)).not.toContain(PASSWORD)
+
+    // The token it gave works for /auth/me.
+    const me = await getMe(`Bearer ${body.token}`)
+    expect(me.status).toBe(200)
+    expect(await me.json()).toEqual(body.user)
+  })
+
+  it('answers bad register fields with the contract messages', async () => {
+    const response = await api('/auth/register', 'POST', {
+      name: ' ',
+      email: 'not-an-email',
+      password: 'short',
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({
+      error: 'VALIDATION_ERROR',
+      message: 'Check the highlighted fields.',
+      fields: {
+        name: 'Enter your name.',
+        email: 'Enter a valid email address.',
+        password: 'The password must be at least 8 characters.',
+      },
+    })
+  })
+
+  it('answers a taken email, ignoring capitals, with 409 CONFLICT', async () => {
+    const response = await api('/auth/register', 'POST', {
+      name: 'Someone Else',
+      email: 'AMARA.OKAFOR@example.com',
+      password: PASSWORD,
+    })
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toEqual({
+      error: 'CONFLICT',
+      message: 'An account with this email address already exists.',
+    })
+  })
+
+  it('logs in with the right password and returns the user', async () => {
+    setMockPassword('amara.okafor@example.com', PASSWORD)
+
+    const response = await api('/auth/login', 'POST', {
+      email: 'amara.okafor@example.com',
+      password: PASSWORD,
+    })
+
+    expect(response.status).toBe(200)
+    const body = await response.json()
+    expect(body.user).toMatchObject({ id: 1, role: 'ADMIN' })
+    expect(typeof body.token).toBe('string')
+  })
+
+  it('gives the same 401 for a wrong password and an unknown email', async () => {
+    setMockPassword('amara.okafor@example.com', PASSWORD)
+    const expected = {
+      error: 'UNAUTHENTICATED',
+      message: 'The email address or password is wrong.',
+    }
+
+    const wrongPassword = await api('/auth/login', 'POST', {
+      email: 'amara.okafor@example.com',
+      password: 'not the password',
+    })
+    const unknownEmail = await api('/auth/login', 'POST', {
+      email: 'nobody@example.com',
+      password: PASSWORD,
+    })
+
+    expect(wrongPassword.status).toBe(401)
+    expect(await wrongPassword.json()).toEqual(expected)
+    expect(unknownEmail.status).toBe(401)
+    expect(await unknownEmail.json()).toEqual(expected)
+  })
+
+  it('answers missing login fields with 400', async () => {
+    const response = await api('/auth/login', 'POST', {})
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({
+      error: 'VALIDATION_ERROR',
+      message: 'Check the highlighted fields.',
+      fields: {
+        email: 'Enter your email address.',
+        password: 'Enter your password.',
+      },
+    })
+  })
+
+  it('answers /auth/me with no token or a bad one with 401', async () => {
+    const expected = { error: 'UNAUTHENTICATED', message: 'Log in to continue.' }
+
+    for (const response of [
+      await getMe(),
+      await getMe('Bearer not-a-real-token'),
+    ]) {
+      expect(response.status).toBe(401)
+      expect(await response.json()).toEqual(expected)
+    }
   })
 })

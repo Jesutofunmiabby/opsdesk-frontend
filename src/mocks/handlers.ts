@@ -31,6 +31,11 @@ import {
   titleError,
 } from '../features/tickets/utils/validateTicket'
 import { loadTicketDb, saveTicketDb } from './ticketStorage'
+import type { AuthResponse } from '../features/auth/types'
+import {
+  validateLogin,
+  validateRegister,
+} from '../features/auth/utils/validateAuth'
 import { API_URL } from '../config'
 import type {
   Ticket,
@@ -55,6 +60,9 @@ const TICKET_URL = `${TICKETS_URL}/:id`
 const PROJECTS_URL = `${API_URL}/projects`
 const PROJECT_URL = `${PROJECTS_URL}/:id`
 const USERS_URL = `${API_URL}/users`
+const REGISTER_URL = `${API_URL}/auth/register`
+const LOGIN_URL = `${API_URL}/auth/login`
+const ME_URL = `${API_URL}/auth/me`
 
 // How long every answer takes. None: the loading state still shows on the
 // first render, and the tests run faster.
@@ -70,6 +78,15 @@ const PAGE_MESSAGE = 'page must be a whole number of 0 or more.'
 const SIZE_MESSAGE = `size must be a whole number from 1 to ${MAX_PAGE_SIZE}.`
 const ASSIGNEE_MESSAGE = 'assigneeId must be a whole number.'
 const SORT_MESSAGE = `sort must be ${TICKET_SORT_FIELDS.join(', ')}, optionally followed by ,asc or ,desc.`
+
+const WRONG_LOGIN = 'The email address or password is wrong.'
+const LOG_IN_TO_CONTINUE = 'Log in to continue.'
+const EMAIL_TAKEN = 'An account with this email address already exists.'
+
+// How long a mock token says it lasts, like the backend's default. The mock
+// never actually expires one; tests that need a 401 swap in a handler that
+// sends one.
+const TOKEN_LIFETIME_MS = 24 * 60 * 60 * 1000
 
 // The page size when the request does not give one.
 const DEFAULT_PAGE_SIZE = 20
@@ -112,6 +129,91 @@ export function resetTickets() {
   const db = loadTicketDb(initialTickets)
   tickets = db.tickets
   nextId = db.nextId
+}
+
+// The accounts. Every mock user from data/users can be signed in as with
+// their token, but has no password, so none can log in until a test gives
+// them one with setMockPassword: passwords only ever appear in tests. People
+// who register are added to registeredUsers, with the password they chose.
+let registeredUsers: User[] = []
+let passwords = new Map<number, string>()
+
+function allUsers(): User[] {
+  return [...users, ...registeredUsers]
+}
+
+// Emails are matched ignoring capitals, as in the contract.
+function findUserByEmail(email: string): User | undefined {
+  const wanted = email.toLowerCase()
+  return allUsers().find((user) => user.email.toLowerCase() === wanted)
+}
+
+// The next id for a registered user, above every existing user's id.
+function nextUserId(): number {
+  return Math.max(0, ...allUsers().map((user) => user.id)) + 1
+}
+
+// For tests: lets them log in as one of the mock users with this password.
+export function setMockPassword(email: string, password: string) {
+  const user = findUserByEmail(email)
+  if (!user) {
+    throw new Error(`There is no mock user with the email "${email}".`)
+  }
+  passwords.set(user.id, password)
+}
+
+// Back to the mock users with no passwords and no one registered. Tests call
+// this between tests, like resetTickets.
+export function resetAccounts() {
+  registeredUsers = []
+  passwords = new Map()
+}
+
+// A mock token just names the user it belongs to. It is not a real token
+// and has no signature: it only has to differ from user to user.
+const TOKEN_PATTERN = /^Bearer mock-token-(\d+)$/
+
+export function mockTokenFor(user: User): string {
+  return `mock-token-${user.id}`
+}
+
+// The user a request's "Authorization: Bearer <token>" header belongs to, or
+// undefined if there is no header or the token is not one of ours.
+function userFromRequest(request: Request): User | undefined {
+  const match = TOKEN_PATTERN.exec(request.headers.get('Authorization') ?? '')
+  if (!match) {
+    return undefined
+  }
+  const id = Number(match[1])
+  return allUsers().find((user) => user.id === id)
+}
+
+// What register and login answer with: a token, when it expires, and who it
+// belongs to.
+function authResponse(user: User): AuthResponse {
+  return {
+    token: mockTokenFor(user),
+    expiresAt: new Date(Date.now() + TOKEN_LIFETIME_MS).toISOString(),
+    user,
+  }
+}
+
+// A password from a body. Unlike other text it is never trimmed, and
+// anything that is not text counts as empty.
+function asPassword(value: unknown): string {
+  return typeof value === 'string' ? value : ''
+}
+
+// The form checks give back only the fields with a problem, but typed as
+// possibly undefined; this keeps just the messages.
+function onlyMessages(errors: Record<string, string | undefined>) {
+  const fields: Record<string, string> = {}
+  for (const [name, message] of Object.entries(errors)) {
+    if (message) {
+      fields[name] = message
+    }
+  }
+  return fields
 }
 
 // Every error goes out in the one shape the contract sets. fields is left
@@ -482,7 +584,7 @@ export const handlers = [
     },
   ),
 
-  // One page of users. Read only in version 1.
+  // One page of users, including anyone who has registered.
   http.get<PathParams, never, PagedResponse<User> | ApiErrorBody>(
     USERS_URL,
     async ({ request }) => {
@@ -493,7 +595,90 @@ export const handlers = [
       if (Object.keys(fields).length > 0) {
         return validationError({ message: CHECK_QUERY, fields })
       }
-      return HttpResponse.json<PagedResponse<User>>(toPage(users, page, size))
+      return HttpResponse.json<PagedResponse<User>>(
+        toPage(allUsers(), page, size),
+      )
+    },
+  ),
+
+  // A new account, signed straight in. The role is always USER: a role in
+  // the body is ignored. 400 for a bad field, 409 for an email address that
+  // already has an account (ignoring capitals).
+  http.post<PathParams, DefaultBodyType, AuthResponse | ApiErrorBody>(
+    REGISTER_URL,
+    async ({ request }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const body: unknown = await request.json().catch(() => null)
+      if (!isRecord(body)) {
+        return validationError({ message: NOT_AN_OBJECT })
+      }
+      const values = {
+        name: asText(body.name),
+        email: asText(body.email),
+        password: asPassword(body.password),
+      }
+      const fields = onlyMessages(validateRegister(values))
+      if (Object.keys(fields).length > 0) {
+        return validationError({ message: CHECK_FIELDS, fields })
+      }
+      if (findUserByEmail(values.email)) {
+        return errorResponse(409, 'CONFLICT', { message: EMAIL_TAKEN })
+      }
+      const user: User = {
+        id: nextUserId(),
+        name: values.name,
+        email: values.email,
+        jobTitle: '',
+        role: 'USER',
+        createdAt: new Date().toISOString(),
+      }
+      registeredUsers = [...registeredUsers, user]
+      passwords.set(user.id, values.password)
+      return HttpResponse.json<AuthResponse>(authResponse(user), {
+        status: 201,
+      })
+    },
+  ),
+
+  // Signs in. 400 if a field is missing; 401 with the same message whether
+  // the email is unknown or the password is wrong, so it does not reveal
+  // which addresses have accounts.
+  http.post<PathParams, DefaultBodyType, AuthResponse | ApiErrorBody>(
+    LOGIN_URL,
+    async ({ request }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const body: unknown = await request.json().catch(() => null)
+      if (!isRecord(body)) {
+        return validationError({ message: NOT_AN_OBJECT })
+      }
+      const values = {
+        email: asText(body.email),
+        password: asPassword(body.password),
+      }
+      const fields = onlyMessages(validateLogin(values))
+      if (Object.keys(fields).length > 0) {
+        return validationError({ message: CHECK_FIELDS, fields })
+      }
+      const user = findUserByEmail(values.email)
+      const password = user ? passwords.get(user.id) : undefined
+      if (!user || password === undefined || password !== values.password) {
+        return errorResponse(401, 'UNAUTHENTICATED', { message: WRONG_LOGIN })
+      }
+      return HttpResponse.json<AuthResponse>(authResponse(user))
+    },
+  ),
+
+  // Who the token belongs to, or 401 for no token or one that is not ours.
+  http.get<PathParams, never, User | ApiErrorBody>(
+    ME_URL,
+    async ({ request }) => {
+      await delay(RESPONSE_DELAY_MS)
+      const user = userFromRequest(request)
+      return user
+        ? HttpResponse.json<User>(user)
+        : errorResponse(401, 'UNAUTHENTICATED', {
+            message: LOG_IN_TO_CONTINUE,
+          })
     },
   ),
 ]
