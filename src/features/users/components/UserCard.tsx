@@ -1,13 +1,6 @@
-import type { User, UserRole } from '../types'
+import { ROLE_LABELS } from '../data/roleLabels'
+import type { User } from '../types'
 import './UserCard.css'
-
-// Exported so the header can name the signed-in user's role the same way.
-export const ROLE_LABELS: Record<UserRole, string> = {
-  ADMIN: 'Admin',
-  MANAGER: 'Manager',
-  AGENT: 'Agent',
-  USER: 'User',
-}
 
 interface UserCardProps {
   user: User

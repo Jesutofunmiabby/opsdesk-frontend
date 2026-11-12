@@ -45,3 +45,25 @@ export function isPagedResponse(
     Array.isArray(body.items)
   )
 }
+
+// Checks that a value is an error body in the contract's shape.
+export function isApiErrorBody(value: unknown): value is ApiErrorBody {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'error' in value &&
+    typeof value.error === 'string' &&
+    'message' in value &&
+    typeof value.message === 'string'
+  )
+}
+
+// The contract's error body from a failed RTK Query request, or null if the
+// request failed without one, such as when the server could not be reached.
+// An HTTP error from RTK Query has the body as its data.
+export function getApiErrorBody(error: unknown): ApiErrorBody | null {
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    return isApiErrorBody(error.data) ? error.data : null
+  }
+  return null
+}

@@ -1,0 +1,38 @@
+/* Shared by the login and register forms, which look the same. */
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-form__hint {
+  font-size: 13px;
+}
+
+.auth-form__submit {
+  width: 100%;
+  padding: 11px 18px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-on-blue);
+  background: var(--blue);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.auth-form__submit:hover:not(:disabled) {
+  background: var(--blue-hover);
+}
+
+.auth-form__submit:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* While the request is on its way, so it cannot be sent twice. */
+.auth-form__submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
