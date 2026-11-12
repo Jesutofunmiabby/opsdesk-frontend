@@ -1,10 +1,6 @@
-import type { User, UserRole } from '../types'
+import { ROLE_LABELS } from '../data/roleLabels'
+import type { User } from '../types'
 import './UserCard.css'
-
-const ROLE_LABELS: Record<UserRole, string> = {
-  AGENT: 'Agent',
-  ADMIN: 'Admin',
-}
 
 interface UserCardProps {
   user: User

@@ -554,8 +554,8 @@ an AGENT or USER gets `403`.
 
 ## Auth
 
-The backend serves these endpoints. The frontend does not call them yet, and
-the mock API does not serve them.
+The backend and the mock API serve these endpoints, and the frontend's login
+and register pages use them.
 
 A successful register or login returns a **token**: a string the frontend
 sends back on every later request, in the header
@@ -704,13 +704,16 @@ contract tests in `src/mocks/handlers.test.ts` check that.
 | `GET /projects/{id}` | Yes | Yes | Not yet |
 | `GET /users` | Yes | Yes | Users page and dashboard |
 | `PATCH /tickets/{id}/assignee` | Yes | No | Not yet |
-| `POST /auth/register` | Yes | No | Not yet |
-| `POST /auth/login` | Yes | No | Not yet |
-| `GET /auth/me` | Yes | No | Not yet |
+| `POST /auth/register` | Yes | Yes | Register page |
+| `POST /auth/login` | Yes | Yes | Login page |
+| `GET /auth/me` | Yes | Yes | Every signed-in page (name and role in the header) |
 
-The mock API does not check tokens or roles: it answers every request as an
-ADMIN would be answered. Its tickets have no assignee or creator, so those
-four fields are `null`.
+The mock API's tokens are not real: they are `mock-token-` followed by the
+user's id, and never expire. `GET /auth/me` reads the token; every other
+mock endpoint ignores tokens and roles, and answers every request as an
+ADMIN would be answered. The mock users have no passwords, so tests set one
+before logging in. Its tickets have no assignee or creator, so those four
+fields are `null`.
 
 ## Security
 
@@ -777,7 +780,13 @@ can read the token and send it to themselves. With it they can act as that
 person from any computer until the token expires. localStorage also keeps the
 token after the browser is closed.
 
-Safer choices for Week 8:
+**What the app does now.** The token is kept in the Redux store, with a copy
+in localStorage (`opsdesk.token`) so a refresh does not sign people out. This
+is a deliberate, known trade-off for this version: it keeps the contract's
+token-in-the-response design, and the risk is kept down by the XSS rules
+above. Logging out, or any `401`, removes the copy.
+
+Safer choices for a later version:
 
 1. **An `httpOnly` cookie set by the backend** (the strongest). JavaScript
    cannot read an `httpOnly` cookie at all, so XSS cannot steal it; the

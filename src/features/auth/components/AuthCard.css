@@ -1,0 +1,83 @@
+/* The whole screen, with the card centred in it. The blue band across the
+   top echoes the app's header. */
+.auth-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 72px 16px 48px;
+  background: linear-gradient(var(--blue) 0 180px, var(--page-bg) 180px);
+}
+
+.auth-card__inner {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-card__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-on-blue);
+}
+
+/* A white square with a blue letter, like the sidebar's letters reversed. */
+.auth-card__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  color: var(--blue);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.auth-card__panel {
+  display: grid;
+  gap: 20px;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+}
+
+.auth-card__title {
+  font-size: 22px;
+}
+
+.auth-card__footer {
+  margin-top: 18px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-card__footer a {
+  font-weight: 600;
+  color: var(--blue);
+}
+
+.auth-card__footer a:hover {
+  color: var(--blue-hover);
+}
+
+.auth-card__footer a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding-top: 40px;
+  }
+
+  .auth-card__panel {
+    padding: 22px 18px;
+  }
+}

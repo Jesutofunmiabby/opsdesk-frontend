@@ -1,0 +1,21 @@
+.form-alert {
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-left-width: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.form-alert--error {
+  color: var(--error);
+  background: var(--error-soft);
+  border-color: var(--error);
+}
+
+.form-alert--info {
+  color: var(--blue);
+  background: var(--blue-soft);
+  border-color: var(--blue-soft-border);
+  border-left-color: var(--blue);
+}

@@ -8,6 +8,9 @@ import TicketDetailPage from '../pages/TicketDetailPage'
 import EditTicketPage from '../pages/EditTicketPage'
 import TeamsPage from '../pages/TeamsPage'
 import NotFoundPage from '../pages/NotFoundPage'
+import LoginPage from '../pages/LoginPage'
+import RegisterPage from '../pages/RegisterPage'
+import ProtectedRoute from './ProtectedRoute'
 
 // Loaded only when first visited: each becomes its own file in the build, so
 // the code for these pages is not downloaded until someone opens them. While
@@ -15,22 +18,28 @@ import NotFoundPage from '../pages/NotFoundPage'
 const ProjectsPage = lazy(() => import('../pages/ProjectsPage'))
 const UsersPage = lazy(() => import('../pages/UsersPage'))
 
-// Every URL the app answers to. The routes are nested inside Layout, so each
-// page is drawn inside the shared header and content area (at its Outlet).
+// Every URL the app answers to. Login and register are open to everyone.
+// Everything else is inside ProtectedRoute, so only signed-in users reach
+// it, and inside Layout, so each page is drawn inside the shared header and
+// content area (at its Outlet).
 function AppRoutes() {
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="tickets" element={<TicketsPage />} />
-        <Route path="tickets/new" element={<NewTicketPage />} />
-        <Route path="tickets/:id" element={<TicketDetailPage />} />
-        <Route path="tickets/:id/edit" element={<EditTicketPage />} />
-        <Route path="projects" element={<ProjectsPage />} />
-        <Route path="teams" element={<TeamsPage />} />
-        <Route path="users" element={<UsersPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+      <Route path="login" element={<LoginPage />} />
+      <Route path="register" element={<RegisterPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="tickets" element={<TicketsPage />} />
+          <Route path="tickets/new" element={<NewTicketPage />} />
+          <Route path="tickets/:id" element={<TicketDetailPage />} />
+          <Route path="tickets/:id/edit" element={<EditTicketPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
+          <Route path="teams" element={<TeamsPage />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
       </Route>
     </Routes>
   )

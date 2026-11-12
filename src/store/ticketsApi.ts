@@ -1,5 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { API_URL } from '../config'
+import { createApi } from '@reduxjs/toolkit/query/react'
 import type {
   Ticket,
   TicketFormValues,
@@ -10,6 +9,7 @@ import type {
   TicketSort,
 } from '../features/tickets/utils/ticketList'
 import type { PagedResponse } from './apiTypes'
+import { baseQueryWithAuth } from './baseQuery'
 
 // What getTickets is called with: which page, how big, any filters, and the
 // order. Anything left out uses the API's default (page 0, the first, 20 a
@@ -33,9 +33,10 @@ interface UpdateTicketArgs {
 export const ticketsApi = createApi({
   // Where the cache sits in the store: state.ticketsApi.
   reducerPath: 'ticketsApi',
-  // VITE_API_URL from .env, or "/api/v1" if it is not set. Every path below
-  // is added to it, so '/tickets' is /api/v1/tickets.
-  baseQuery: fetchBaseQuery({ baseUrl: API_URL }),
+  // Shared with the other APIs: sends the login token, and ends the session
+  // on a 401. Every path below is added to VITE_API_URL, so '/tickets' is
+  // /api/v1/tickets.
+  baseQuery: baseQueryWithAuth,
 
   // Labels for cached data. Queries say which tickets they hold
   // (providesTags); mutations say which they changed (invalidatesTags), and

@@ -1,0 +1,58 @@
+/* Pushed to the far right of the blue header. */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.user-menu__who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-on-blue);
+}
+
+.user-menu__name {
+  font-weight: 600;
+}
+
+.user-menu__role {
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  background: var(--on-blue-soft);
+  border-radius: 999px;
+}
+
+.user-menu__logout {
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blue);
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.user-menu__logout:hover {
+  background: var(--blue-soft);
+}
+
+.user-menu__logout:focus-visible {
+  outline: 2px solid var(--text-on-blue);
+  outline-offset: 2px;
+}
+
+/* On a phone, the name gives way so the button always fits. */
+@media (max-width: 640px) {
+  .user-menu__who {
+    display: none;
+  }
+}
