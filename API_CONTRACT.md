@@ -823,7 +823,7 @@ request if the answer allows it.
 In development the app (`http://localhost:5173`) and the backend
 (`http://localhost:8080`) are different origins, because their ports differ.
 The backend's `CorsConfig` allows the app's origin, set by
-`CORS_ALLOWED_ORIGINS` (default `http://localhost:5173`).
+`ALLOWED_ORIGIN` (default `http://localhost:5173`).
 
 The fix belongs on the backend because CORS protects the **server's** data:
 it is the server's decision which websites may read its answers, and it says

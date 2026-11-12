@@ -119,7 +119,7 @@ using that backend.
 
 `npm run preview` shows the build exactly as it would ship. It runs on port
 4173, so the backend has to allow that address too: start the backend with
-`CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4173`.
+`ALLOWED_ORIGIN=http://localhost:5173,http://localhost:4173`.
 
 ## Environment variables
 
@@ -363,7 +363,7 @@ opsdesk-backend folder, then press Retry.
 **The console says a request was "blocked by CORS policy".** The backend did
 not allow the address the app is running on. Open the app at
 <http://localhost:5173/>, not `127.0.0.1` or another port, or add that
-address to the backend's `CORS_ALLOWED_ORIGINS`.
+address to the backend's `ALLOWED_ORIGIN`.
 
 **The console still mentions `mockServiceWorker.js`.** An older version of the
 app registered a mock service worker in this browser. Remove it: DevTools,
@@ -375,7 +375,7 @@ the build again: a build keeps the values it was made with.
 
 **Under `npm run preview` every page says it could not load.** The preview
 runs on port 4173, which the backend does not allow by default. Start the
-backend with `CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4173`.
+backend with `ALLOWED_ORIGIN=http://localhost:5173,http://localhost:4173`.
 
 **The page will not load at `127.0.0.1:5173`.** Use
 <http://localhost:5173/> instead. The dev server listens on `localhost`.
