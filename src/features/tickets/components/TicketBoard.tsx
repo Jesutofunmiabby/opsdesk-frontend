@@ -6,6 +6,7 @@ import { useUpdateTicketMutation } from '../../../store/ticketsApi'
 import { useAppDispatch } from '../../../store/hooks'
 import { addNotification } from '../../../store/uiSlice'
 import EmptyState from '../../../components/EmptyState'
+import { useShowRequestError } from '../../../hooks/useShowRequestError'
 import Column from './Column'
 import './TicketBoard.css'
 
@@ -17,6 +18,7 @@ interface TicketBoardProps {
 function TicketBoard({ tickets }: TicketBoardProps) {
   const [updateTicket] = useUpdateTicketMutation()
   const dispatch = useAppDispatch()
+  const showRequestError = useShowRequestError()
 
   // The status each ticket was in when its move started. A ticket counts as
   // moving until the refreshed list shows it in another status, so its button
@@ -50,17 +52,17 @@ function TicketBoard({ tickets }: TicketBoardProps) {
           type: 'success',
         }),
       )
-    } catch {
+    } catch (error) {
       setMovesFrom((current) => {
         const next = { ...current }
         delete next[ticket.id]
         return next
       })
-      dispatch(
-        addNotification({
-          message: `Could not move ticket #${ticket.id}. Please try again.`,
-          type: 'error',
-        }),
+      // A 403 (such as an AGENT moving a ticket that is not theirs) says
+      // they may not; other errors say what failed.
+      showRequestError(
+        error,
+        `Could not move ticket #${ticket.id}. Please try again.`,
       )
     }
   }
