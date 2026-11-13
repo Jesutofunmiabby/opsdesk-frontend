@@ -432,10 +432,20 @@ backend with `ALLOWED_ORIGIN=http://localhost:5173,http://localhost:4173`.
 
 ## What's next
 
-- **Release 1.0.** Run the whole system with one command from
-  [opsdesk-system](https://github.com/Jesutofunmiabby/opsdesk-system).
+Release 1.0 is done. This app is
+[v1.1.0](https://github.com/Jesutofunmiabby/opsdesk-frontend/releases/tag/v1.1.0),
+part of OpsDesk v1.0, and the whole system runs with one command from
+[opsdesk-system](https://github.com/Jesutofunmiabby/opsdesk-system). Ideas for
+a later version:
+
 - **Safer token storage.** Move the login token from localStorage to an
   `httpOnly` cookie (see "Security" in [API_CONTRACT.md](API_CONTRACT.md)).
+  This needs the backend and the contract to change too.
+- **Teams from the backend.** The staff directory on the Teams page still uses
+  a fixed list built into the app (`src/features/employees/data/`). It would
+  need a new endpoint in the backend and the contract.
+- **A page for each project.** The API already answers `GET /projects/{id}`,
+  but the app does not use it yet.
 
 ## Project conventions
 
